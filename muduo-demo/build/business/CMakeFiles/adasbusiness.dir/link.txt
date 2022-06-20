@@ -1,0 +1,2 @@
+/usr/bin/ar qc libadasbusiness.a CMakeFiles/adasbusiness.dir/source/AdasTcpClient.cpp.o CMakeFiles/adasbusiness.dir/source/AdasTcpServer.cpp.o
+/usr/bin/ranlib libadasbusiness.a

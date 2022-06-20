@@ -1,0 +1,1 @@
+/usr/bin/c++  -std=c++11 -rdynamic CMakeFiles/demo.dir/ft/demo.cpp.o -o demo   -L/home/allen/Downloads/demo/ThirdParty/gtest/lib  -L/home/allen/Downloads/demo/ThirdParty/muduo/lib  -Wl,-rpath,/home/allen/Downloads/demo/ThirdParty/gtest/lib:/home/allen/Downloads/demo/ThirdParty/muduo/lib -Wl,-Bstatic -lmuduo_base -lmuduo_net -Wl,-Bdynamic -lpthread business/libadasbusiness.a 
