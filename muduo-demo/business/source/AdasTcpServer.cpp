@@ -1,6 +1,9 @@
 #include "AdasTcpServer.h"
 #include <functional>
+#include <algorithm>
 
+using namespace muduo;
+using namespace muduo::net;
 using namespace std::placeholders;
 
 AdasTcpServer::AdasTcpServer(EventLoop* loop, const InetAddress& listenAddr)
@@ -10,6 +13,7 @@ AdasTcpServer::AdasTcpServer(EventLoop* loop, const InetAddress& listenAddr)
         std::bind(&AdasTcpServer::onConnection, this, _1));
   server_.setMessageCallback(
       std::bind(&AdasTcpServer::onMessage, this, _1, _2, _3));
+      loop->runEvery(1.0, std::bind(&AdasTcpServer::periodCb, this));
 }
 
 void AdasTcpServer::start()
@@ -44,4 +48,16 @@ void AdasTcpServer::onMessage(const muduo::net::TcpConnectionPtr& conn,
             << "data received at " << time.toString();
     LOG_INFO << msg;
 
+}
+
+void AdasTcpServer::periodCb()
+{
+    auto cb = [this](TcpConnectionPtr conn)
+    {
+        if (conn->connected())
+        {
+            conn->send("Timely Hello!");
+        }
+    };
+    std::for_each(connections_.begin(), connections_.end(), cb);
 }

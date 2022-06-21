@@ -1,6 +1,0 @@
-/home/allen/Downloads/demo/build/CMakeFiles/demo.dir
-/home/allen/Downloads/demo/build/CMakeFiles/edit_cache.dir
-/home/allen/Downloads/demo/build/CMakeFiles/rebuild_cache.dir
-/home/allen/Downloads/demo/build/business/CMakeFiles/adasbusiness.dir
-/home/allen/Downloads/demo/build/business/CMakeFiles/edit_cache.dir
-/home/allen/Downloads/demo/build/business/CMakeFiles/rebuild_cache.dir

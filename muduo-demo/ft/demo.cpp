@@ -2,6 +2,9 @@
 #include "AdasTcpClient.h"
 #include "AdasTcpServer.h"
 
+using namespace muduo;
+using namespace muduo::net;
+
 int main(int argc, char* argv[])
 {
   LOG_INFO << "pid = " << getpid();
