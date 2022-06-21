@@ -1,5 +1,4 @@
 #include "AdasTcpClient.h"
-#include <functional>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -13,6 +12,10 @@ AdasTcpClient::AdasTcpClient(EventLoop* loop, const InetAddress& serverAddr)
     client_.setMessageCallback(
         std::bind(&AdasTcpClient::onMessage, this, _1, _2, _3));
     client_.enableRetry();
+    msgDispatcher[EV_GSENTRY_ADAS_PROCESS_STATUS_REPORT] = std::bind(&V2xDataDispatcher::ProcessGSentrySatatus, this, _1, _2);
+    msgDispatcher[EV_GSENTRY_ADAS_CALC_MAPINFO_REPORT] = std::bind(&V2xDataDispatcher::ProcessCalcMapResult, this, _1, _2);
+    msgDispatcher[EV_GSENTRY_ADAS_SPATINFO_REPORT] = std::bind(&V2xDataDispatcher::ProcessSpatInfo, this, _1, _2);
+    msgDispatcher[EV_GSENTRY_ADAS_OBJECT_VEHICLE_REPORT] = std::bind(&V2xDataDispatcher::ProcessObjVehiInfo, this, _1, _2);
   }
 
 void AdasTcpClient::onConnection(const TcpConnectionPtr& conn)
@@ -34,8 +37,13 @@ void AdasTcpClient::onConnection(const TcpConnectionPtr& conn)
 
 void AdasTcpClient::onMessage(const TcpConnectionPtr& conn, Buffer* buf, Timestamp time)
 {
-    muduo::string msg(buf->retrieveAllAsString());
-    LOG_INFO << "gSentry periodical message comes: " << msg;
+    buf->retrieveInt32();
+    uint16_t msgId = static_cast<uint16_t>(buf->readInt16());
+    if (msgDispatcher.find(msgId) != msgDispatcher.end())
+    {
+        // demo版本，未取出header所有数据
+        msgDispatcher[msgId](buf->peek(), buf->readableBytes());
+    }
 
 }
 
