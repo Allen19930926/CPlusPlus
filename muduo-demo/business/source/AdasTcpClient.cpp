@@ -1,4 +1,7 @@
 #include "AdasTcpClient.h"
+#include "V2xAdasEventMacro.h"
+#include "V2xDataDispatcher.h"
+#include "V2xDataStruct.h"
 
 using namespace muduo;
 using namespace muduo::net;
@@ -12,10 +15,10 @@ AdasTcpClient::AdasTcpClient(EventLoop* loop, const InetAddress& serverAddr)
     client_.setMessageCallback(
         std::bind(&AdasTcpClient::onMessage, this, _1, _2, _3));
     client_.enableRetry();
-    msgDispatcher[EV_GSENTRY_ADAS_PROCESS_STATUS_REPORT] = std::bind(&V2xDataDispatcher::ProcessGSentrySatatus, this, _1, _2);
-    msgDispatcher[EV_GSENTRY_ADAS_CALC_MAPINFO_REPORT] = std::bind(&V2xDataDispatcher::ProcessCalcMapResult, this, _1, _2);
-    msgDispatcher[EV_GSENTRY_ADAS_SPATINFO_REPORT] = std::bind(&V2xDataDispatcher::ProcessSpatInfo, this, _1, _2);
-    msgDispatcher[EV_GSENTRY_ADAS_OBJECT_VEHICLE_REPORT] = std::bind(&V2xDataDispatcher::ProcessObjVehiInfo, this, _1, _2);
+    msgDispatcher.insert(std::make_pair(EV_GSENTRY_ADAS_PROCESS_STATUS_REPORT, std::bind(&V2xDataDispatcher::ProcessGSentrySatatus, _1, _2)));
+    msgDispatcher.insert(std::make_pair(EV_GSENTRY_ADAS_CALC_MAPINFO_REPORT, std::bind(&V2xDataDispatcher::ProcessCalcMapResult, _1, _2)));
+    msgDispatcher.insert(std::make_pair(EV_GSENTRY_ADAS_SPATINFO_REPORT, std::bind(&V2xDataDispatcher::ProcessSpatInfo, _1, _2)));
+    msgDispatcher.insert(std::make_pair(EV_GSENTRY_ADAS_OBJECT_VEHICLE_REPORT, std::bind(&V2xDataDispatcher::ProcessObjVehiInfo, _1, _2)));
   }
 
 void AdasTcpClient::onConnection(const TcpConnectionPtr& conn)
@@ -37,12 +40,15 @@ void AdasTcpClient::onConnection(const TcpConnectionPtr& conn)
 
 void AdasTcpClient::onMessage(const TcpConnectionPtr& conn, Buffer* buf, Timestamp time)
 {
-    buf->retrieveInt32();
-    uint16_t msgId = static_cast<uint16_t>(buf->readInt16());
-    if (msgDispatcher.find(msgId) != msgDispatcher.end())
+    // muduo send big endian data, actually develper promise send little endian data
+    V2xAdasMsgHeader head;
+    head.msgId = static_cast<uint16_t>(ntohs(buf->readInt16()));
+    LOG_INFO << "recieve buff: msgid = " << head.msgId; 
+
+    if (msgDispatcher.find(head.msgId) != msgDispatcher.end())
     {
         // demo版本，未取出header所有数据
-        msgDispatcher[msgId](buf->peek(), buf->readableBytes());
+        msgDispatcher[head.msgId](reinterpret_cast<char*>(&head), static_cast<u_int16_t>(sizeof(head)));
     }
 
 }

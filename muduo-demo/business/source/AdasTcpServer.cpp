@@ -2,9 +2,14 @@
 #include <functional>
 #include <algorithm>
 
+//for test
+#include "V2xDataStruct.h"
+
 using namespace muduo;
 using namespace muduo::net;
 using namespace std::placeholders;
+
+int msgid = 0x100;
 
 AdasTcpServer::AdasTcpServer(EventLoop* loop, const InetAddress& listenAddr)
 : server_(loop, listenAddr, "ChatServer")
@@ -50,14 +55,27 @@ void AdasTcpServer::onMessage(const muduo::net::TcpConnectionPtr& conn,
 
 }
 
+// test code,  mocking gSentry send data to S32G,  0x100 ~ 0x103
+
 void AdasTcpServer::periodCb()
 {
-    auto cb = [this](TcpConnectionPtr conn)
+    V2xAdasMsgHeader head;
+    head.msgId = msgid;
+    auto cb = [this, &head](TcpConnectionPtr conn)
     {
         if (conn->connected())
         {
-            conn->send("Timely Hello!");
+            conn->send(&head.msgId, sizeof(uint16_t));
+            LOG_INFO << "send buff: msgid = " << head.msgId;
         }
     };
     std::for_each(connections_.begin(), connections_.end(), cb);
+    if (msgid == 0x103)
+    {
+        msgid = 0x100;
+    }
+    else
+    {
+        msgid++;
+    }
 }

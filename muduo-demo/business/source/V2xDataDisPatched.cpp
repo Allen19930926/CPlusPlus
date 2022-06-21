@@ -1,4 +1,5 @@
 #include "V2xDataDispatcher.h"
+#include <cstdio>
 
 void V2xDataDispatcher::ProcessGSentrySatatus(const char* buf, uint16_t len)
 {
