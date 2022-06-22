@@ -5,5 +5,5 @@ rm -rf ${cur_dir}/demo
 mkdir demo
 cd demo
 cmake ..
-make
+make -j2
 #./demo

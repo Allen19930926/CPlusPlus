@@ -11,12 +11,10 @@ SET(SRC_LIST ft/demo.cpp)
 
 include_directories(
 	business/include
-    ThirdParty/gtest/include
     ThirdParty/
 )
 
 link_directories(
-    ThirdParty/gtest/lib
     ThirdParty/muduo/lib
 )
 

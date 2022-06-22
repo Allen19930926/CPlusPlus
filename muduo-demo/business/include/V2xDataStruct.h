@@ -99,7 +99,7 @@ struct ConnectsToLaneIdList
 {
     uint16_t belongLinkID;      /* 所属道路ID，与downLinksList的id号保持一致,0~65535,数值0～255预留 */
     uint8_t  laneID;            /* 所属车道ID，0～255,无效值0,255预留 */
-}
+};
 
 struct CurLink
 {
