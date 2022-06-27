@@ -15,10 +15,10 @@ AdasTcpClient::AdasTcpClient(EventLoop* loop, const InetAddress& serverAddr)
     client_.setMessageCallback(
         std::bind(&AdasTcpClient::onMessage, this, _1, _2, _3));
     client_.enableRetry();
-    msgDispatcher.insert(std::make_pair(EV_GSENTRY_ADAS_PROCESS_STATUS_REPORT, std::bind(&V2xDataDispatcher::ProcessGSentrySatatus, _1, _2)));
-    msgDispatcher.insert(std::make_pair(EV_GSENTRY_ADAS_CALC_MAPINFO_REPORT, std::bind(&V2xDataDispatcher::ProcessCalcMapResult, _1, _2)));
-    msgDispatcher.insert(std::make_pair(EV_GSENTRY_ADAS_SPATINFO_REPORT, std::bind(&V2xDataDispatcher::ProcessSpatInfo, _1, _2)));
-    msgDispatcher.insert(std::make_pair(EV_GSENTRY_ADAS_OBJECT_VEHICLE_REPORT, std::bind(&V2xDataDispatcher::ProcessObjVehiInfo, _1, _2)));
+    msgDispatcher[EV_GSENTRY_ADAS_PROCESS_STATUS_REPORT] = std::bind(&V2xDataDispatcher::ProcessGSentrySatatus, _1, _2);
+    msgDispatcher[EV_GSENTRY_ADAS_CALC_MAPINFO_REPORT] = std::bind(&V2xDataDispatcher::ProcessCalcMapResult, _1, _2);
+    msgDispatcher[EV_GSENTRY_ADAS_SPATINFO_REPORT] = std::bind(&V2xDataDispatcher::ProcessSpatInfo, _1, _2);
+    msgDispatcher[EV_GSENTRY_ADAS_OBJECT_VEHICLE_REPORT] = std::bind(&V2xDataDispatcher::ProcessObjVehiInfo, _1, _2);
   }
 
 void AdasTcpClient::onConnection(const TcpConnectionPtr& conn)
