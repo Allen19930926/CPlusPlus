@@ -8,6 +8,7 @@ namespace CDDFusion
 
 #define CAMERA_OBJ_VEHI_NUM     20
 #define GSENTRY_OBJ_VEHI_NUM    20
+#define CDD_LANE_INFO_NUM       4
 
 
 struct EventMessage
@@ -94,10 +95,54 @@ struct CDDFusionCameraObj
     uint8_t cipv;
 };
 
+struct CDDCurntLaneTrafficLightInfo
+{
+    uint8_t     trafficLightSt;
+    float       redTime;
+    float       greenTime;
+    float       yellowTime;
+};
+
+struct CDDFusionLaneInfo
+{
+    uint32_t timestamp;
+    uint8_t laneValid;
+    uint8_t laneID;
+    uint32_t life_time;
+    uint8_t laneType;
+    float conf;
+    float laneWidth;
+    uint8_t laneColor;
+    uint8_t laneMarking;
+    float start_Xpt;
+    float start_Ypt;
+    float laneDist;
+    float c0;
+    float c1;
+    float c2;
+    float c3;
+};
+
+struct CDDgSentryWarningInfo
+{
+    uint8_t warningType;
+    uint8_t level;
+    uint8_t targetID;
+};
+
+struct CDDDisToEndLane
+{
+    float disToEndLane;
+};
+
 struct CddFusionRepo
 {
     CDDFusionGSentryObj v2xObjVehi[GSENTRY_OBJ_VEHI_NUM];
     CDDFusionCameraObj  j3ObjVehi[CAMERA_OBJ_VEHI_NUM];
+    CDDCurntLaneTrafficLightInfo    spatInfo;
+    CDDFusionLaneInfo laneInfo[CDD_LANE_INFO_NUM];
+    CDDgSentryWarningInfo gSentryWarningInfo;
+    CDDDisToEndLane   disToEndLane;
 };
 }
 

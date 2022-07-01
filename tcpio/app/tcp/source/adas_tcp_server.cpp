@@ -1,6 +1,10 @@
 #include "adas_tcp_server.h"
 #include <functional>
 #include <algorithm>
+#include "data_base.h"
+#include <condition_variable>
+#include <queue>
+#include <mutex>
 
 //for test
 #include "v2x_data_struct.h"
@@ -9,8 +13,10 @@ using namespace muduo;
 using namespace muduo::net;
 using namespace std::placeholders;
 using namespace V2X;
+extern std::mutex mtx;
+extern std::condition_variable cv;
+extern std::queue<CDDFusion::EventMessage> eventQueue;
 
-int msgid = 0x100;
 
 AdasTcpServer::AdasTcpServer(EventLoop* loop, const InetAddress& listenAddr)
 : server_(loop, listenAddr, "ChatServer", TcpServer::Option::kReusePort)
@@ -19,7 +25,6 @@ AdasTcpServer::AdasTcpServer(EventLoop* loop, const InetAddress& listenAddr)
         std::bind(&AdasTcpServer::onConnection, this, _1));
   server_.setMessageCallback(
       std::bind(&AdasTcpServer::onMessage, this, _1, _2, _3));
-      loop->runEvery(1.0, std::bind(&AdasTcpServer::periodCb, this));
 }
 
 void AdasTcpServer::start()
@@ -49,34 +54,10 @@ void AdasTcpServer::onMessage(const muduo::net::TcpConnectionPtr& conn,
                            muduo::net::Buffer* buf,
                            muduo::Timestamp time)
 {
-    muduo::string msg(buf->retrieveAllAsString());
-    LOG_INFO << conn->name() << " recieve " << msg.size() << " bytes, "
-            << "data received at " << time.toString();
-    LOG_INFO << msg;
+    std::unique_lock<std::mutex> lck(mtx);
+    // client剥离V2xAdasMsgHeader头， 读取msgId.   muduo库需要更换，因此本处先略过
+    eventQueue.emplace(0x101, buf->peek(), buf->readableBytes());
+    printf("queue size is %lu\n", eventQueue.size());
+    cv.notify_all();
 
-}
-
-// test code,  mocking gSentry send data to S32G,  0x100 ~ 0x103
-
-void AdasTcpServer::periodCb()
-{
-    V2xAdasMsgHeader head;
-    head.msgId = msgid;
-    auto cb = [this, &head](TcpConnectionPtr conn)
-    {
-        if (conn->connected())
-        {
-            conn->send(&head.msgId, sizeof(uint16_t));
-            LOG_INFO << "send buff: msgid = " << head.msgId;
-        }
-    };
-    std::for_each(connections_.begin(), connections_.end(), cb);
-    if (msgid == 0x103)
-    {
-        msgid = 0x100;
-    }
-    else
-    {
-        msgid++;
-    }
 }

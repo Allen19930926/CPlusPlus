@@ -1,6 +1,6 @@
 #include "adas_tcp_client.h"
 #include "v2x_adas_event_macro.h"
-#include "v2x_data_dispatcher.h"
+#include "event_dispatcher.h"
 #include "v2x_data_struct.h"
 #include "cdd_fusion.h"
 #include <condition_variable>
@@ -59,7 +59,7 @@ void AdasTcpClient::onMessage(const TcpConnectionPtr& conn, Buffer* buf, Timesta
     // printf("recieve v2x data\n");
     std::unique_lock<std::mutex> lck(mtx);
     // client剥离V2xAdasMsgHeader头， 读取msgId.   muduo库需要更换，因此本处先略过
-    // eventQueue.emplace(0x101, buf->peek(), buf->readableBytes());
+    eventQueue.emplace(0x101, buf->peek(), buf->readableBytes());
     printf("queue size is %lu\n", eventQueue.size());
     cv.notify_all();
 

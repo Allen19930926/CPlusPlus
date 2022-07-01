@@ -6,7 +6,7 @@
 #include <condition_variable>
 #include <queue>
 #include "cdd_fusion.h"
-#include "v2x_data_dispatcher.h"
+#include "event_dispatcher.h"
 
 using namespace muduo;
 using namespace muduo::net;
@@ -35,7 +35,7 @@ void StartEventThread()
   {
     cv.wait(lck, []{return !eventQueue.empty();});
     /* to process event */
-    V2xDataDispatcher::ProcessV2xMessage();
+    EventDispatcher::ProcessMessage();
   }
 
 }

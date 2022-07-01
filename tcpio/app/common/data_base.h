@@ -18,9 +18,13 @@ public:
     V2X::V2xData& GetV2xData() {return v2xData;}
     CDDFusion::CddFusionRepo& GetCddFusionData() {return cddFusionData;}
     CAN::HostVehiclePos& GetHostVehicle() {return host;}
+    gohigh::Obstacles& GetCameraObstacles() {return cameraObstacles;}
 
 private:
     DataRepo() {}
+    ~DataRepo() {}
+    DataRepo(const DataRepo& ref) = delete;
+    DataRepo& operator=(const DataRepo& ref) = delete;
 
 private:
     CAN::HostVehiclePos host;

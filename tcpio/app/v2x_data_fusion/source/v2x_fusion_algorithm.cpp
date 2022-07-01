@@ -21,6 +21,7 @@ namespace
 
 void V2xFusionAlgo::TransV2xVehi2CddVehi(const V2X::AdasObjVehInfo& raw, const CAN::HostVehiclePos& host, CDDFusion::CDDFusionGSentryObj& dest)
 {
+    /* 计算过程中，朝向角以camera为准，即车辆行驶方向与正北方向的夹角，逆时针为正 */
     dest.id = raw.localId;
     dest.timestamp = raw.timeStamp;
     dest.measurementStatus = 1;
@@ -28,8 +29,6 @@ void V2xFusionAlgo::TransV2xVehi2CddVehi(const V2X::AdasObjVehInfo& raw, const C
     dest.width = raw.size.width;
     dest.height = raw.size.height;
     dest.yaw = -raw.objectHeadingAngle * 0.0125 * PI / PI_DEGREE;
-    /*gSentry定义：目标车辆航向角为运动方向与正北方向的顺时针夹角, 取值0~28800，单位0.0125°
-    J3定义：     目标的方位角(朝向)，方向和vcs坐标系一致，左正右负，即逆时针正，顺时针负 */
     vector<float>&& displacement = TransWgs84ToVcsCoordinate(host, raw.vehicelPos);
     dest.dx = displacement[0];
     dest.dy = displacement[1];
@@ -43,7 +42,34 @@ void V2xFusionAlgo::TransV2xVehi2CddVehi(const V2X::AdasObjVehInfo& raw, const C
                                     raw.accelSet.latitude * V2X_ACCELERATION_DIAMETER, hostHeadRad, dest.yaw);
     dest.ax = acceleration[0];
     dest.ay = acceleration[1];
-    // dest.ttc = raw.;     ttc不在这个结构体内
+    /* 未填充数据 */
+    // dest.conf;           gSentry无法获取该信息
+    // dest.lifeTime;       gSentry无法获取该信息
+    // dest.yawConf;        gSentry无法获取该信息
+    // dest.yawRate;        gSentry无法获取该信息
+    // dest.dxVariance;     gSentry无法获取该信息
+    // dest.dyVariance;     gSentry无法获取该信息
+    // dest.vxVariance;     gSentry无法获取该信息
+    // dest.vyVariance;     gSentry无法获取该信息
+    // dest.axVariance;     gSentry无法获取该信息
+    // dest.ayVariance;     gSentry无法获取该信息
+    // dest.currLane;       该信息不在目标车辆信息中
+    // dest.ttc;            该信息不在目标车辆信息中
+    // dest.ettc;           gSentry无法获取该信息
+    // dest.cipv;           gSentry无法获取该信息
+}
+
+void V2xFusionAlgo::TransV2xSpat2CddSpat(const V2X::AdasSpatInfo& v2x, CDDFusion::CDDCurntLaneTrafficLightInfo& cdd)
+{
+    cdd.trafficLightSt = v2x.spatInfoValid;
+    // 红绿灯状态填充
+}
+
+void V2xFusionAlgo::TransV2xWarn2CddWarn(const V2X::WarningInfo& v2x, CDDFusion::CDDgSentryWarningInfo& cdd)
+{
+    cdd.warningType = v2x.warningType;
+    cdd.level = v2x.level;
+    cdd.targetID = v2x.remoteLocalId;
 }
 
 vector<float> V2xFusionAlgo::TransWgs84ToVcsCoordinate(const CAN::HostVehiclePos& host, const V2X::Position& remote)
@@ -108,7 +134,6 @@ vector<float> V2xFusionAlgo::TransWgs84ToVcsCoordinate(const CAN::HostVehiclePos
 
 vector<float> V2xFusionAlgo::TransObjVcsToHostVcs(const uint16_t objXVector, const uint16_t objYVector, const float hosthead, const float remotehead)
 {
-    /* 计算过程中，朝向角以camera为准，即车辆行驶方向与正北方向的夹角，逆时针为正 */
     vector<uint16_t> velocity{objXVector, objYVector};
     const float rotateAngle = hosthead - remotehead;
     vector<vector<double>> transMatrix = {{cos(rotateAngle), -sin(rotateAngle)},
