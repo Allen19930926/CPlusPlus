@@ -1,5 +1,7 @@
 #include "v2x_fusion_algorithm.h"
+#include "v2x_adas_event_macro.h"
 #include <cmath>
+#include <cstring>
 
 namespace
 {
@@ -18,6 +20,124 @@ namespace
     const double MINOR_AXIS = 6356752.3142;
     const double ee = (MAJOR_AXIS + MINOR_AXIS) * (MAJOR_AXIS - MINOR_AXIS) / (MAJOR_AXIS * MAJOR_AXIS);
 }
+
+void V2xFusionAlgo::ProcessRecieveData(uint8_t* data, uint16_t len)
+{
+    if (len < sizeof(V2X::V2xAdasMsgHeader))
+    {
+        return;
+    }
+    const V2X::V2xAdasMsgHeader& head = *reinterpret_cast<V2X::V2xAdasMsgHeader*>(data);
+    uint8_t* payload = data + sizeof(V2X::V2xAdasMsgHeader);
+    uint16_t length  = len - sizeof(V2X::V2xAdasMsgHeader);
+    switch(head.msgId)
+    {
+        case EV_GSENTRY_ADAS_PROCESS_STATUS_REPORT:     ProcessGSentrySatatus(payload, length); break;
+        case EV_GSENTRY_ADAS_CALC_MAPINFO_REPORT:       ProcessHostVehiExtraMapInfo(payload, length); break;
+        case EV_GSENTRY_ADAS_SPATINFO_REPORT:           ProcessSpatInfo(payload, length); break;
+        case EV_GSENTRY_ADAS_OBJECT_VEHICLE_REPORT:     ProcessObjVehiInfo(payload, length); break;
+        case EV_GSENTRY_ADAS_EGOVEHI_MAPINFO_REPORT:    ProcessHostVehiMapInfo(payload, length); break;
+        case EV_GSENTRY_ADAS_OBJVEHI_MAPINFO_REPORT:    ProcessObjVehiMapInfo(payload, length); break;
+        case EV_GSENTRY_ADAS_WARNING_REPORT:            ProcessGSentryWarningInfo(payload, length); break;
+        default: break;
+    }
+}
+
+/* bussiness data extract */
+
+void V2xFusionAlgo::ProcessGSentrySatatus(uint8_t* buf, uint16_t len)
+{
+    if (buf == nullptr || len != sizeof(V2X::GSentryStatus))
+    {
+        return ;
+    }
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    memcpy(&v2xData.status, buf, len);
+    // printf("recieve gSentry Status msg!\n");
+}
+
+void V2xFusionAlgo::ProcessHostVehiExtraMapInfo(uint8_t* buf, uint16_t len)
+{
+    if (buf == nullptr || len != sizeof(V2X::MapAddResult))
+    {
+        return ;
+    }
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    memcpy(&v2xData.mapAddRes, buf, len);
+    // printf("recieve gSentry Calc Map msg!\n");
+}
+
+void V2xFusionAlgo::ProcessSpatInfo(uint8_t* buf, uint16_t len)
+{
+    if (buf == nullptr || (len != sizeof(V2X::AdasSpatInfo) * ADAS_SPAT_INFO_NUM))
+    {
+        return ;
+    }
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    memcpy(&v2xData.spatInfo[0], buf, len);
+    CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
+    // 融合数据只用了当前车道下一个红绿灯信息，因此只取v2x数据的第一个红绿灯信息
+    TransV2xSpat2CddSpat(v2xData.spatInfo[0], fusion.spatInfo);
+    // printf("recieve gSentry Spat msg!\n");
+}
+
+void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint16_t len)
+{
+    if (buf == nullptr || (len != sizeof(V2X::ObjVehMapInfo) * ADAS_OBJ_VEH_INFO_NUM))
+    {
+        return ;
+    }
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    memcpy(&v2xData.objVehicle[0], buf, len);
+
+    CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
+    CAN::HostVehiclePos& host = DataRepo::GetInstance().GetHostVehicle();
+
+    uint16_t i = 0;
+    v2xData.objVehiNum = 0;
+    while(v2xData.objVehicle[i].localId != 0)
+    {
+        TransV2xVehi2CddVehi(v2xData.objVehicle[i], host, fusion.v2xObjVehi[i]);
+        // printf("recieve gSentry ObjVehiInfo msg!\n");
+        v2xData.objVehiNum++;
+        i++;
+    }
+}
+
+void V2xFusionAlgo::ProcessHostVehiMapInfo(uint8_t* buf, uint16_t len)
+{
+    if (buf == nullptr || (len != sizeof(V2X::EgoVehMapInfo)))
+    {
+        return ;
+    }
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    memcpy(&v2xData.egoMap, buf, len);
+}
+
+void V2xFusionAlgo::ProcessObjVehiMapInfo(uint8_t* buf, uint16_t len)
+{
+    if (buf == nullptr || len != sizeof(V2X::ObjVehMapInfo))
+    {
+        return ;
+    }
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    memcpy(&v2xData.objMap, buf, len);
+}
+
+void V2xFusionAlgo::ProcessGSentryWarningInfo(uint8_t* buf, uint16_t len)
+{
+    if (buf == nullptr || len != sizeof(V2X::WarningInfo))
+    {
+        return ;
+    }
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
+    memcpy(&v2xData.warningInfo, buf, len);
+    TransV2xWarn2CddWarn(v2xData.warningInfo, fusion.gSentryWarningInfo);
+}
+
+
+/* coordinate system transformation algorithm */
 
 void V2xFusionAlgo::TransV2xVehi2CddVehi(const V2X::AdasObjVehInfo& raw, const CAN::HostVehiclePos& host, CDDFusion::CDDFusionGSentryObj& dest)
 {

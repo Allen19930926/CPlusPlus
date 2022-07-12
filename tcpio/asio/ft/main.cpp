@@ -2,25 +2,25 @@
 #include <thread>
 #include "event_dispatcher.h"
 #include "event_queue.h"
-#include "adas_asio_tcp_server.h"
-#include "adas_asio_tcp_client.h"
+#include "proxy_interface.h"
+#include <vector>
+#include <memory>
 
 void StartIoThread()
 {
     asio::io_context io;
-    AdasAsioTcpServer server(io, 9000);
+    std::vector<std::unique_ptr<IProxy>> proxyVec;
+    // proxyVec.push_back(std::make_unique<CanProxy>(io, 9000));
+    // proxyVec.push_back(std::make_unique<GSentryProxy>(io, "127.0.0.1", "7500"));
+    proxyVec.push_back(std::make_unique<HmiProxy>(io, "127.0.0.1", "7500", 9000));
 
-    tcp::resolver resolver(io);
-    auto endPoints = resolver.resolve("127.0.0.1", "7500");
-    AdasAsioTcpClient client(io, endPoints);
-    io.run();
 
-    while (client.IsConnected())
+    for(auto& it : proxyVec)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        it->SetPeriodWriteTask(1000);
+        it->Start();
     }
-    client.close();
-
+    io.run();
 }
 
 void StartEventThread()

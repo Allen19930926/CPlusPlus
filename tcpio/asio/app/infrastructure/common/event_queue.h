@@ -4,7 +4,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
-#include "data_base.h"
+#include "event_msg.h"
 
 template<typename T>
 class EventQueue
@@ -43,7 +43,7 @@ private:
     std::queue<T> eventQueue;
 };
 
-#define CDD_FUSION_EVENT_QUEUE EventQueue<CDDFusion::EventMessage>::GetInstance()
+#define CDD_FUSION_EVENT_QUEUE EventQueue<EventMessage>::GetInstance()
 
 
 #endif /* C8959F93_13ED_430C_B702_893EC60F12CC */

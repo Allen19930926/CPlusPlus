@@ -1,7 +1,6 @@
 #ifndef EF48505C_E775_45A5_B76D_0E37D4888491
 #define EF48505C_E775_45A5_B76D_0E37D4888491
 
-#include <cstring>
 
 namespace CDDFusion
 {
@@ -9,40 +8,6 @@ namespace CDDFusion
 #define CAMERA_OBJ_VEHI_NUM     20
 #define GSENTRY_OBJ_VEHI_NUM    20
 #define CDD_LANE_INFO_NUM       4
-
-
-struct EventMessage
-{
-    EventMessage(const uint32_t id, const char* data_, const uint16_t len):msgid(id), msglen(len)
-    {
-        // printf("msgid is : %u", msgid);
-        if (data != nullptr)
-        {
-            data = new uint8_t[msglen];
-            memcpy(data, data_, msglen);
-        }
-    }
-
-    EventMessage(const EventMessage& ref):msgid(ref.msgid), msglen(ref.msglen)
-    {
-        if (ref.data != nullptr)
-        {
-            data = new uint8_t[msglen];
-            memcpy(data, ref.data, msglen);
-        }
-    }
-
-    ~EventMessage()
-    {
-        delete [] data;
-    }
-
-    EventMessage operator=(const EventMessage& ref) = delete;
-public:
-    uint32_t msgid;
-    uint16_t msglen;
-    uint8_t* data;
-};
 
 struct CDDFusionGSentryObj
 {
