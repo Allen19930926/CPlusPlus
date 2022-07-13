@@ -11,13 +11,13 @@ class V2xFusionAlgo
 public:
     static void ProcessRecieveData(uint8_t* data, uint16_t len);
 private:
-    static void ProcessGSentrySatatus(uint8_t* buf, uint16_t len);
-    static void ProcessHostVehiExtraMapInfo(uint8_t* buf, uint16_t len);
-    static void ProcessSpatInfo(uint8_t* buf, uint16_t len);
-    static void ProcessObjVehiInfo(uint8_t* buf, uint16_t len);
-    static void ProcessHostVehiMapInfo(uint8_t* buf, uint16_t len);
-    static void ProcessObjVehiMapInfo(uint8_t* buf, uint16_t len);
-    static void ProcessGSentryWarningInfo(uint8_t* buf, uint16_t len);
+    static void ProcessGSentrySatatus(uint8_t* buf, uint32_t len);
+    static void ProcessHostVehiExtraMapInfo(uint8_t* buf, uint32_t len);
+    static void ProcessSpatInfo(uint8_t* buf, uint32_t len);
+    static void ProcessObjVehiInfo(uint8_t* buf, uint32_t len);
+    static void ProcessHostVehiMapInfo(uint8_t* buf, uint32_t len);
+    static void ProcessObjVehiMapInfo(uint8_t* buf, uint32_t len);
+    static void ProcessGSentryWarningInfo(uint8_t* buf, uint32_t len);
 private:
     static void TransV2xVehi2CddVehi(const V2X::AdasObjVehInfo& v2x, const CAN::HostVehiclePos& host, CDDFusion::CDDFusionGSentryObj& cdd);
     static void TransV2xSpat2CddSpat(const V2X::AdasSpatInfo& v2x, CDDFusion::CDDCurntLaneTrafficLightInfo& cdd);

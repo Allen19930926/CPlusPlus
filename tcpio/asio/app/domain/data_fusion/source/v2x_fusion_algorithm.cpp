@@ -29,7 +29,7 @@ void V2xFusionAlgo::ProcessRecieveData(uint8_t* data, uint16_t len)
     }
     const V2X::V2xAdasMsgHeader& head = *reinterpret_cast<V2X::V2xAdasMsgHeader*>(data);
     uint8_t* payload = data + sizeof(V2X::V2xAdasMsgHeader);
-    uint16_t length  = len - sizeof(V2X::V2xAdasMsgHeader);
+    uint32_t length  = head.msgLen;
     switch(head.msgId)
     {
         case EV_GSENTRY_ADAS_PROCESS_STATUS_REPORT:     ProcessGSentrySatatus(payload, length); break;
@@ -45,18 +45,19 @@ void V2xFusionAlgo::ProcessRecieveData(uint8_t* data, uint16_t len)
 
 /* bussiness data extract */
 
-void V2xFusionAlgo::ProcessGSentrySatatus(uint8_t* buf, uint16_t len)
+void V2xFusionAlgo::ProcessGSentrySatatus(uint8_t* buf, uint32_t len)
 {
     if (buf == nullptr || len != sizeof(V2X::GSentryStatus))
     {
         return ;
     }
+    const V2X::GSentryStatus gSentryStatus = *reinterpret_cast<V2X::GSentryStatus*>(buf);
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
-    memcpy(&v2xData.status, buf, len);
-    // printf("recieve gSentry Status msg!\n");
+    v2xData.status.faultStatus = gSentryStatus.faultStatus;
+    v2xData.status.gSentryStatus = gSentryStatus.gSentryStatus;
 }
 
-void V2xFusionAlgo::ProcessHostVehiExtraMapInfo(uint8_t* buf, uint16_t len)
+void V2xFusionAlgo::ProcessHostVehiExtraMapInfo(uint8_t* buf, uint32_t len)
 {
     if (buf == nullptr || len != sizeof(V2X::MapAddResult))
     {
@@ -67,7 +68,7 @@ void V2xFusionAlgo::ProcessHostVehiExtraMapInfo(uint8_t* buf, uint16_t len)
     // printf("recieve gSentry Calc Map msg!\n");
 }
 
-void V2xFusionAlgo::ProcessSpatInfo(uint8_t* buf, uint16_t len)
+void V2xFusionAlgo::ProcessSpatInfo(uint8_t* buf, uint32_t len)
 {
     if (buf == nullptr || (len != sizeof(V2X::AdasSpatInfo) * ADAS_SPAT_INFO_NUM))
     {
@@ -81,7 +82,7 @@ void V2xFusionAlgo::ProcessSpatInfo(uint8_t* buf, uint16_t len)
     // printf("recieve gSentry Spat msg!\n");
 }
 
-void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint16_t len)
+void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint32_t len)
 {
     if (buf == nullptr || (len != sizeof(V2X::ObjVehMapInfo) * ADAS_OBJ_VEH_INFO_NUM))
     {
@@ -104,7 +105,7 @@ void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint16_t len)
     }
 }
 
-void V2xFusionAlgo::ProcessHostVehiMapInfo(uint8_t* buf, uint16_t len)
+void V2xFusionAlgo::ProcessHostVehiMapInfo(uint8_t* buf, uint32_t len)
 {
     if (buf == nullptr || (len != sizeof(V2X::EgoVehMapInfo)))
     {
@@ -114,7 +115,7 @@ void V2xFusionAlgo::ProcessHostVehiMapInfo(uint8_t* buf, uint16_t len)
     memcpy(&v2xData.egoMap, buf, len);
 }
 
-void V2xFusionAlgo::ProcessObjVehiMapInfo(uint8_t* buf, uint16_t len)
+void V2xFusionAlgo::ProcessObjVehiMapInfo(uint8_t* buf, uint32_t len)
 {
     if (buf == nullptr || len != sizeof(V2X::ObjVehMapInfo))
     {
@@ -124,7 +125,7 @@ void V2xFusionAlgo::ProcessObjVehiMapInfo(uint8_t* buf, uint16_t len)
     memcpy(&v2xData.objMap, buf, len);
 }
 
-void V2xFusionAlgo::ProcessGSentryWarningInfo(uint8_t* buf, uint16_t len)
+void V2xFusionAlgo::ProcessGSentryWarningInfo(uint8_t* buf, uint32_t len)
 {
     if (buf == nullptr || len != sizeof(V2X::WarningInfo))
     {
