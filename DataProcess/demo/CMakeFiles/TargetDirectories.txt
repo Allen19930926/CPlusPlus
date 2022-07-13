@@ -1,0 +1,6 @@
+/home/allen/Documents/code/demo/CPlusPlus/DataProcess/demo/CMakeFiles/demo.dir
+/home/allen/Documents/code/demo/CPlusPlus/DataProcess/demo/CMakeFiles/edit_cache.dir
+/home/allen/Documents/code/demo/CPlusPlus/DataProcess/demo/CMakeFiles/rebuild_cache.dir
+/home/allen/Documents/code/demo/CPlusPlus/DataProcess/demo/business/CMakeFiles/adasbusiness.dir
+/home/allen/Documents/code/demo/CPlusPlus/DataProcess/demo/business/CMakeFiles/edit_cache.dir
+/home/allen/Documents/code/demo/CPlusPlus/DataProcess/demo/business/CMakeFiles/rebuild_cache.dir

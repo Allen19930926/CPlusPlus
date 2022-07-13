@@ -31,13 +31,13 @@ struct V2xDataFusionTest : testing::Test
 
         GSentryStatus& mockStatus = *(new (&buff[len]) GSentryStatus);
         mockStatus.gSentryStatus = status;
-        mockStatus.faultStatus = false;
+        mockStatus.faultStatus = faultStatus;
         len += sizeof(GSentryStatus);
 
         return len;
     }
 
-    uint8_t buff[1000];
+    uint8_t buff[1024];
     DataProcessor proc;
 
 };
@@ -48,4 +48,12 @@ TEST_F(V2xDataFusionTest, gSentryStatus_abnormal_test)
     uint16_t len = MockGSentryStatus(4, false);
     proc.ProcessV2xData(&buff[0], len);
     ASSERT_FALSE(proc.IsGsentryWork());
+}
+
+TEST_F(V2xDataFusionTest, gSentryStatus_normal_test)
+{
+    ASSERT_TRUE(proc.IsGsentryWork());
+    uint16_t len = MockGSentryStatus(1, true);
+    proc.ProcessV2xData(&buff[0], len);
+    ASSERT_TRUE(proc.IsGsentryWork());
 }

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libadasbusiness.a CMakeFiles/adasbusiness.dir/source/data_process.cpp.o
+/usr/bin/ranlib libadasbusiness.a

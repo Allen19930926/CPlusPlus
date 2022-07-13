@@ -1,0 +1,1 @@
+/usr/bin/c++  -std=c++11 -rdynamic CMakeFiles/demo.dir/ft/demo.cpp.o CMakeFiles/demo.dir/ft/fusion_case/fusion_test.cpp.o -o demo   -L/home/allen/Documents/code/demo/CPlusPlus/DataProcess/ThirdParty/gtest/lib  -Wl,-rpath,/home/allen/Documents/code/demo/CPlusPlus/DataProcess/ThirdParty/gtest/lib -lgtest_main -lgtest -lpthread business/libadasbusiness.a 

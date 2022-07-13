@@ -7,7 +7,7 @@ add_definitions("-Wall -g")
 
 add_subdirectory(app)
 
-SET(SRC_LIST ft/main.cpp)
+SET(SRC_LIST stand_alone/main.cpp)
 
 include_directories(
     app/application/include
