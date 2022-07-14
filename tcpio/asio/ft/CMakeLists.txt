@@ -2,17 +2,18 @@ cmake_minimum_required(VERSION 3.0)
 
 PROJECT (FUNCTIONTEST)
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-add_definitions("-Wall -g")
+OPTION(ENABLE_GCOV "Enable gcov (debug, Linux builds only)" OFF)
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fprofile-arcs -ftest-coverage")
+add_definitions("-Wall -g --coverage")
 
 SET(ADAS_DIR ${PROJECT_SOURCE_DIR}/..)
 
-message("*****************************", ${ADAS_DIR}/app)
+#message("*****************************", ${ADAS_DIR}/app)
 
 add_subdirectory(${ADAS_DIR}/app adasout)
 
-SET(SRC_LIST main.cpp)
-aux_source_directory(ft/fusion_case FT_LIST)
+SET(SRC_LIST main.cpp fusion_case/fusion_test.cpp)
 
 include_directories(
     ${ADAS_DIR}/app/infrastructure/common
@@ -25,9 +26,8 @@ include_directories(
 link_directories(
     ${ADAS_DIR}/ThirdParty/gtest/lib
 )
+ADD_EXECUTABLE(ft ${SRC_LIST} )
 
-ADD_EXECUTABLE(fusion_ft ${SRC_LIST} ${FT_LIST})
-
-target_link_libraries(fusion_ft gtest_main gtest -lpthread adasbusiness)
+target_link_libraries(ft gtest_main gtest -lpthread -lgcov adasbusiness)
 
 

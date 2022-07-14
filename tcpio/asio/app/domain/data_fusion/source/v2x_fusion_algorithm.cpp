@@ -59,36 +59,34 @@ void V2xFusionAlgo::ProcessGSentrySatatus(uint8_t* buf, uint32_t len)
 
 void V2xFusionAlgo::ProcessHostVehiExtraMapInfo(uint8_t* buf, uint32_t len)
 {
-    if (buf == nullptr || len != sizeof(V2X::MapAddResult))
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    if (buf == nullptr || len != sizeof(V2X::MapAddResult) || v2xData.status.faultStatus)
     {
         return ;
     }
-    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     memcpy(&v2xData.mapAddRes, buf, len);
-    // printf("recieve gSentry Calc Map msg!\n");
 }
 
 void V2xFusionAlgo::ProcessSpatInfo(uint8_t* buf, uint32_t len)
 {
-    if (buf == nullptr || (len != sizeof(V2X::AdasSpatInfo) * ADAS_SPAT_INFO_NUM))
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    if (buf == nullptr || (len != sizeof(V2X::AdasSpatInfo) * ADAS_SPAT_INFO_NUM) || v2xData.status.faultStatus)
     {
         return ;
     }
-    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     memcpy(&v2xData.spatInfo[0], buf, len);
     CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
     // 融合数据只用了当前车道下一个红绿灯信息，因此只取v2x数据的第一个红绿灯信息
     TransV2xSpat2CddSpat(v2xData.spatInfo[0], fusion.spatInfo);
-    // printf("recieve gSentry Spat msg!\n");
 }
 
 void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint32_t len)
 {
-    if (buf == nullptr || (len != sizeof(V2X::ObjVehMapInfo) * ADAS_OBJ_VEH_INFO_NUM))
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    if (buf == nullptr || (len != sizeof(V2X::ObjVehMapInfo) * ADAS_OBJ_VEH_INFO_NUM) || v2xData.status.faultStatus)
     {
         return ;
     }
-    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     memcpy(&v2xData.objVehicle[0], buf, len);
 
     CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
@@ -107,31 +105,31 @@ void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint32_t len)
 
 void V2xFusionAlgo::ProcessHostVehiMapInfo(uint8_t* buf, uint32_t len)
 {
-    if (buf == nullptr || (len != sizeof(V2X::EgoVehMapInfo)))
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    if (buf == nullptr || (len != sizeof(V2X::EgoVehMapInfo)) || v2xData.status.faultStatus)
     {
         return ;
     }
-    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     memcpy(&v2xData.egoMap, buf, len);
 }
 
 void V2xFusionAlgo::ProcessObjVehiMapInfo(uint8_t* buf, uint32_t len)
 {
-    if (buf == nullptr || len != sizeof(V2X::ObjVehMapInfo))
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    if (buf == nullptr || len != sizeof(V2X::ObjVehMapInfo) || v2xData.status.faultStatus)
     {
         return ;
     }
-    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     memcpy(&v2xData.objMap, buf, len);
 }
 
 void V2xFusionAlgo::ProcessGSentryWarningInfo(uint8_t* buf, uint32_t len)
 {
-    if (buf == nullptr || len != sizeof(V2X::WarningInfo))
+    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    if (buf == nullptr || len != sizeof(V2X::WarningInfo) || v2xData.status.faultStatus)
     {
         return ;
     }
-    V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
     memcpy(&v2xData.warningInfo, buf, len);
     TransV2xWarn2CddWarn(v2xData.warningInfo, fusion.gSentryWarningInfo);
@@ -182,8 +180,40 @@ void V2xFusionAlgo::TransV2xVehi2CddVehi(const V2X::AdasObjVehInfo& raw, const C
 
 void V2xFusionAlgo::TransV2xSpat2CddSpat(const V2X::AdasSpatInfo& v2x, CDDFusion::CDDCurntLaneTrafficLightInfo& cdd)
 {
+    /* CDD灯色时间，解读为目标灯色开始时间 */
     cdd.trafficLightSt = v2x.spatInfoValid;
-    // 红绿灯状态填充
+    uint16_t nextStateTime = v2x.curCoutingTime;
+    uint16_t nnextStateTime = v2x.curCoutingTime + v2x.nextDurationTime;
+    const uint16_t YELLOW_GATE = 7;
+    const uint16_t GREEN_GATE = 4;
+    const uint16_t RED_GATE = 2;
+
+    if (v2x.lightState >= YELLOW_GATE)
+    {
+        cdd.yellowTime = 0;
+        cdd.redTime = nextStateTime;
+        cdd.greenTime = nnextStateTime;
+    }
+    else if (v2x.lightState >= GREEN_GATE)
+    {
+        cdd.greenTime = 0;
+        cdd.yellowTime = nextStateTime;
+        cdd.redTime = nnextStateTime;
+    }
+    else if (v2x.lightState >= RED_GATE)
+    {
+        cdd.redTime = 0;
+        cdd.greenTime = nextStateTime;
+        cdd.yellowTime = nnextStateTime;
+    }
+    else
+    {
+        cdd.trafficLightSt = 0;
+        cdd.redTime = 0xFFFF;
+        cdd.greenTime = 0xFFFF;
+        cdd.yellowTime = 0xFFFF;
+    }
+
 }
 
 void V2xFusionAlgo::TransV2xWarn2CddWarn(const V2X::WarningInfo& v2x, CDDFusion::CDDgSentryWarningInfo& cdd)

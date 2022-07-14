@@ -5,6 +5,7 @@
 #include "cdd_fusion.h"
 #include "can_info_struct.h"
 #include "hb_data.h"
+#include <cstring>
 
 // DataRepo设计为只有事件IO访问，因为不做互斥
 class DataRepo
@@ -16,6 +17,13 @@ public:
         return instance;
     }
     V2X::V2xData& GetV2xData() {return v2xData;}
+    void Clear()
+    {
+        memset(&host, 0, sizeof(host));
+        memset(&v2xData, 0, sizeof(v2xData));
+        memset(&cameraObstacles, 0, sizeof(cameraObstacles));
+        memset(&cddFusionData, 0, sizeof(cddFusionData));
+    }
     CDDFusion::CddFusionRepo& GetCddFusionData() {return cddFusionData;}
     CAN::HostVehiclePos& GetHostVehicle() {return host;}
     gohigh::Obstacles& GetCameraObstacles() {return cameraObstacles;}

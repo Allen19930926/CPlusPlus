@@ -16,7 +16,7 @@ struct EventMessage
 {
     EventMessage(const MsgType type, const char* data_, const uint16_t len):msgType(type), msglen(len)
     {
-        if (data != nullptr)
+        if (data_ != nullptr)
         {
             data = new uint8_t[msglen];
             memcpy(data, data_, msglen);

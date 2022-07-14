@@ -12,7 +12,7 @@ void StartIoThread()
     std::vector<std::unique_ptr<IProxy>> proxyVec;
     proxyVec.push_back(std::make_unique<CanProxy>(io, 9000));
     proxyVec.push_back(std::make_unique<GSentryProxy>(io, "127.0.0.1", "7500"));
-    // proxyVec.push_back(std::make_unique<HmiProxy>(io, "127.0.0.1", "7500", 9000));
+    proxyVec.push_back(std::make_unique<HmiProxy>(io, "127.0.0.1", "5000", PAD_SERVER_PORT));
 
     for(auto& it : proxyVec)
     {
