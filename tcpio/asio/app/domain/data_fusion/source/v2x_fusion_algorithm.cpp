@@ -23,7 +23,7 @@ namespace
 
 void V2xFusionAlgo::ProcessRecieveData(uint8_t* data, uint16_t len)
 {
-    if (len < sizeof(V2X::V2xAdasMsgHeader))
+    if (len < sizeof(V2X::V2xAdasMsgHeader) || data == nullptr)
     {
         return;
     }
@@ -47,7 +47,7 @@ void V2xFusionAlgo::ProcessRecieveData(uint8_t* data, uint16_t len)
 
 void V2xFusionAlgo::ProcessGSentrySatatus(uint8_t* buf, uint32_t len)
 {
-    if (buf == nullptr || len != sizeof(V2X::GSentryStatus))
+    if (len != sizeof(V2X::GSentryStatus))
     {
         return ;
     }
@@ -60,7 +60,7 @@ void V2xFusionAlgo::ProcessGSentrySatatus(uint8_t* buf, uint32_t len)
 void V2xFusionAlgo::ProcessHostVehiExtraMapInfo(uint8_t* buf, uint32_t len)
 {
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
-    if (buf == nullptr || len != sizeof(V2X::MapAddResult) || v2xData.status.faultStatus)
+    if (len != sizeof(V2X::MapAddResult) || v2xData.status.faultStatus)
     {
         return ;
     }
@@ -70,7 +70,7 @@ void V2xFusionAlgo::ProcessHostVehiExtraMapInfo(uint8_t* buf, uint32_t len)
 void V2xFusionAlgo::ProcessSpatInfo(uint8_t* buf, uint32_t len)
 {
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
-    if (buf == nullptr || (len != sizeof(V2X::AdasSpatInfo) * ADAS_SPAT_INFO_NUM) || v2xData.status.faultStatus)
+    if ((len != sizeof(V2X::AdasSpatInfo) * ADAS_SPAT_INFO_NUM) || v2xData.status.faultStatus)
     {
         return ;
     }
@@ -83,7 +83,7 @@ void V2xFusionAlgo::ProcessSpatInfo(uint8_t* buf, uint32_t len)
 void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint32_t len)
 {
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
-    if (buf == nullptr || (len != sizeof(V2X::ObjVehMapInfo) * ADAS_OBJ_VEH_INFO_NUM) || v2xData.status.faultStatus)
+    if ((len != sizeof(V2X::ObjVehMapInfo) * ADAS_OBJ_VEH_INFO_NUM) || v2xData.status.faultStatus)
     {
         return ;
     }
@@ -106,7 +106,7 @@ void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint32_t len)
 void V2xFusionAlgo::ProcessHostVehiMapInfo(uint8_t* buf, uint32_t len)
 {
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
-    if (buf == nullptr || (len != sizeof(V2X::EgoVehMapInfo)) || v2xData.status.faultStatus)
+    if ((len != sizeof(V2X::EgoVehMapInfo)) || v2xData.status.faultStatus)
     {
         return ;
     }
@@ -116,7 +116,7 @@ void V2xFusionAlgo::ProcessHostVehiMapInfo(uint8_t* buf, uint32_t len)
 void V2xFusionAlgo::ProcessObjVehiMapInfo(uint8_t* buf, uint32_t len)
 {
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
-    if (buf == nullptr || len != sizeof(V2X::ObjVehMapInfo) || v2xData.status.faultStatus)
+    if (len != sizeof(V2X::ObjVehMapInfo) || v2xData.status.faultStatus)
     {
         return ;
     }
@@ -126,7 +126,7 @@ void V2xFusionAlgo::ProcessObjVehiMapInfo(uint8_t* buf, uint32_t len)
 void V2xFusionAlgo::ProcessGSentryWarningInfo(uint8_t* buf, uint32_t len)
 {
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
-    if (buf == nullptr || len != sizeof(V2X::WarningInfo) || v2xData.status.faultStatus)
+    if (len != sizeof(V2X::WarningInfo) || v2xData.status.faultStatus)
     {
         return ;
     }

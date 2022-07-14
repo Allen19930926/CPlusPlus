@@ -14,7 +14,7 @@ enum class MsgType : uint32_t
 
 struct EventMessage
 {
-    EventMessage(const MsgType type, const char* data_, const uint16_t len):msgType(type), msglen(len)
+    EventMessage(const MsgType type, const char* data_, const uint16_t len):msgType(type), msglen(len), data(nullptr)
     {
         if (data_ != nullptr)
         {
@@ -23,7 +23,7 @@ struct EventMessage
         }
     }
 
-    EventMessage(const EventMessage& ref):msgType(ref.msgType), msglen(ref.msglen)
+    EventMessage(const EventMessage& ref):msgType(ref.msgType), msglen(ref.msglen), data(nullptr)
     {
         if (ref.data != nullptr)
         {
