@@ -1,0 +1,6 @@
+/home/allen/Documents/code/demo/CPlusPlus/tcpio/asio/brownsugar/CMakeFiles/brown-sugar.dir
+/home/allen/Documents/code/demo/CPlusPlus/tcpio/asio/brownsugar/CMakeFiles/edit_cache.dir
+/home/allen/Documents/code/demo/CPlusPlus/tcpio/asio/brownsugar/CMakeFiles/rebuild_cache.dir
+/home/allen/Documents/code/demo/CPlusPlus/tcpio/asio/brownsugar/app/CMakeFiles/adasbusiness.dir
+/home/allen/Documents/code/demo/CPlusPlus/tcpio/asio/brownsugar/app/CMakeFiles/edit_cache.dir
+/home/allen/Documents/code/demo/CPlusPlus/tcpio/asio/brownsugar/app/CMakeFiles/rebuild_cache.dir

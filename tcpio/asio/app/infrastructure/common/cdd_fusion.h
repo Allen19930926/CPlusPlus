@@ -114,10 +114,15 @@ struct CDDDisToEndLane
 struct CddFusionRepo
 {
     CDDFusionGSentryObj v2xObjVehi[GSENTRY_OBJ_VEHI_NUM];
+    uint32_t rsv0;
     CDDFusionCameraObj  j3ObjVehi[CAMERA_OBJ_VEHI_NUM];
+    uint32_t rsv1;
     CDDCurntLaneTrafficLightInfo    spatInfo;
+    uint32_t rsv2;
     CDDFusionLaneInfo laneInfo[CDD_LANE_INFO_NUM];
+    uint32_t rsv3;
     CDDgSentryWarningInfo gSentryWarningInfo;
+    uint32_t rsv4;
     CDDDisToEndLane   disToEndLane;
 };
 }

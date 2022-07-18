@@ -2,6 +2,7 @@
 #define BE79CBC3_9771_45AD_9C4A_079955F96578
 
 #include <cstring>
+#include <iostream>
 
 enum class MsgType : uint32_t
 {
@@ -25,11 +26,19 @@ struct EventMessage
 
     EventMessage(const EventMessage& ref):msgType(ref.msgType), msglen(ref.msglen), data(nullptr)
     {
+
+        // std::cout << "reference construct" << std::endl;
         if (ref.data != nullptr)
         {
             data = new uint8_t[msglen];
             memcpy(data, ref.data, msglen);
         }
+    }
+
+    EventMessage(EventMessage&& ref):msgType(ref.msgType), msglen(ref.msglen), data(ref.data)
+    {
+        // std::cout << "rvalue construct" << std::endl;
+        ref.data = nullptr;
     }
 
     ~EventMessage()

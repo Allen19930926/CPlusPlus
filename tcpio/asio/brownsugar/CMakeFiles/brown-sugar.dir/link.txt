@@ -1,0 +1,1 @@
+/usr/bin/c++  -std=c++14 -rdynamic "CMakeFiles/brown-sugar.dir/stand_alone/main.cpp.o" -o brown-sugar  -lpthread app/libadasbusiness.a -lpthread -lgcov 

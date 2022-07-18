@@ -1,18 +1,11 @@
 #include "camera_fusion_algorithm.h"
 #include <cstring>
 #include <queue>
+#include <mutex>
+#include <algorithm>
 
-
-void CameraFusionAlgo::ProcessJ3CameraData(uint8_t* buf, uint16_t len)
+namespace
 {
-    if (buf == nullptr || len != sizeof(gohigh::Obstacles))
-    {
-        return ;
-    }
-    gohigh::Obstacles& obstacles = DataRepo::GetInstance().GetCameraObstacles();
-    CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
-    memcpy(&obstacles, buf, len);
-
     // 使用小顶堆，遍历所有目标障碍物，按和本车距离进行排序，堆顶为最近障碍物
     auto compare = [](gohigh::Obstacle left, gohigh::Obstacle right)
     {
@@ -23,23 +16,44 @@ void CameraFusionAlgo::ProcessJ3CameraData(uint8_t* buf, uint16_t len)
         return (lx * lx + ly * ly) > (rx * rx + ry * ry);
     };
     std::priority_queue<gohigh::Obstacle, std::vector<gohigh::Obstacle>, decltype(compare)> nearestVehis(compare);
+
+    std::mutex camera_mtx;
+}
+
+void CameraFusionAlgo::ProcessJ3CameraData(uint8_t* buf, uint16_t len)
+{
+    if (buf == nullptr || len != sizeof(gohigh::Obstacles))
+    {
+        return ;
+    }
+    gohigh::Obstacles& obstacles = DataRepo::GetInstance().GetCameraObstacles();
+    memcpy(&obstacles, buf, len);
+
+    std::lock_guard<std::mutex> lck(camera_mtx);
     for (uint16_t i=0; i<obstacles.obstacle_num; i++)
     {
         nearestVehis.push(obstacles.obstacles[i]);
     }
+}
 
+// 使用异步定时器，处理期间汇聚的行人和车辆信息
+void CameraFusionAlgo::ExecuteCameraDataFusion()
+{
+    CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
+
+    std::lock_guard<std::mutex> lck(camera_mtx);
     // 从小顶堆堆顶抛出20个障碍物，填充到fusion结构体
     for (uint16_t i=0; i<CAMERA_OBJ_VEHI_NUM && !nearestVehis.empty(); i++)
     {
         const auto& objectVehicle = nearestVehis.top();
-        CameraFusionAlgo::TransCamera2CddObstacle(objectVehicle, obstacles.timestamp, fusion.j3ObjVehi[i]);
+        CameraFusionAlgo::TransCamera2CddObstacle(objectVehicle, fusion.j3ObjVehi[i]);
         nearestVehis.pop();
     }
 }
 
-void CameraFusionAlgo::TransCamera2CddObstacle(const gohigh::Obstacle& camera, const uint32_t timeStamp, CDDFusion::CDDFusionCameraObj& cdd)
+void CameraFusionAlgo::TransCamera2CddObstacle(const gohigh::Obstacle& camera, CDDFusion::CDDFusionCameraObj& cdd)
 {
-    cdd.timestamp = timeStamp;
+    cdd.timestamp = camera.timestamp;
     cdd.id = camera.id;
     cdd.conf = camera.conf;
     cdd.measurementStatus = camera.world_info.measurement_status;

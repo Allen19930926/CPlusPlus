@@ -6,8 +6,6 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fprofile-arcs -ftest-coverag
 
 #message("*****************************", ${PROJECT_SOURCE_DIR}/tcp/source)
 
-SET(SRC_LIST infrastructure/tcp/source/*.cpp domain/data_fusion/source/*.cpp domain/proxy/source/*.cpp)
-
 include_directories(
 	application/include
 	domain/data_fusion/include

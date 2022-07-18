@@ -96,6 +96,7 @@ void AdasAsioTcpClient::on_read(const std::error_code & ec, size_t bytes)
     // std::cout << "recieve msg(line:94, " << bytes << "bytes ) : " << &data_[0] << std::endl;
     if (!ec)
     {
+        // std::cout << "push:" << data_ << std::endl;
         CDD_FUSION_EVENT_QUEUE.push({msgType, data_, static_cast<uint16_t>(bytes)});
     }
     do_read();

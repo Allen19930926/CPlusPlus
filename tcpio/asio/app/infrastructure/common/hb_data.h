@@ -107,6 +107,7 @@ namespace gohigh
     typedef struct
     {
         uint32 id;
+        uint32 timestamp;
         uint32 type;
         uint32 conf;
         uint32 life_time;

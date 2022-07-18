@@ -369,7 +369,7 @@ struct V2xData
     uint16_t        objVehiNum;
     AdasObjVehInfo  objVehicle[ADAS_OBJ_VEH_INFO_NUM];
     EgoVehMapInfo   egoMap;
-    ObjVehMapInfo   objMap;
+    ObjVehMapInfo   objMap[ADAS_OBJ_VEH_INFO_NUM];
     WarningInfo     warningInfo;
 };
 

@@ -5,6 +5,15 @@
 #include "proxy_interface.h"
 #include <vector>
 #include <memory>
+#include "camera_fusion_algorithm.h"
+
+void DoPeriodTask(asio::steady_timer* timer, uint32_t interval)
+{
+    std::cout << " camera fusion " << std::endl;
+    CameraFusionAlgo::ExecuteCameraDataFusion();
+    timer->expires_after(std::chrono::milliseconds(interval));
+    timer->async_wait(std::bind(&DoPeriodTask, timer, interval));
+}
 
 void StartIoThread()
 {
@@ -28,8 +37,17 @@ void StartEventThread()
     while(true)
     {
         EventMessage&& msg = CDD_FUSION_EVENT_QUEUE.wait_and_get_front();
+        // std::cout << "after construct" << std::endl;
         EventDispatcher::ProcessMessage(msg);
     }
+}
+void StartPeriodThread()
+{
+    asio::io_context io;
+    uint32_t interval = 3000;
+    asio::steady_timer timer(io, std::chrono::milliseconds(interval));
+    timer.async_wait(std::bind(&DoPeriodTask, &timer, interval));
+    io.run();
 }
 
 int main(int argc, char* argv[])
@@ -38,7 +56,9 @@ int main(int argc, char* argv[])
     {
         std::thread io(StartIoThread);
         std::thread event(StartEventThread);
+        std::thread period(StartPeriodThread);
         event.detach();
+        period.detach();
         io.join();
     }
     catch(const std::exception& e)

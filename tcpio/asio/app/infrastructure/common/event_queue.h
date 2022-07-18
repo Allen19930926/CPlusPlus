@@ -23,12 +23,13 @@ public:
         cv.notify_all();
     }
 
-    T&& wait_and_get_front()
+    T wait_and_get_front()
     {
         std::unique_lock<std::mutex> lck(mtx);
         cv.wait(lck, [this]{return !eventQueue.empty();});
         T res = eventQueue.front();
         eventQueue.pop();
+        // std::cout << "before construct" << std::endl;
         return std::move(res);
     }
 private:
