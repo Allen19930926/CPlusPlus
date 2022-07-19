@@ -35,23 +35,31 @@ configure_file (
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-#include(import_deps)
+include(import_deps)
 
-#find_package(OpenCV REQUIRED)
-#find_package(Communication REQUIRED)
-#find_package(PackSDK REQUIRED)
-#find_package(Protobuf REQUIRED)
-#find_package(TurboJPEG REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(Communication REQUIRED)
+find_package(PackSDK REQUIRED)
+find_package(Protobuf REQUIRED)
+find_package(TurboJPEG REQUIRED)
 
-#INSTALL_DEPENDENCY("communication")
-#INSTALL_DEPENDENCY("pack-sdk")
-#INSTALL_DEPENDENCY("opencv")
-#INSTALL_DEPENDENCY("libzmq")
+INSTALL_DEPENDENCY("communication")
+INSTALL_DEPENDENCY("pack-sdk")
+INSTALL_DEPENDENCY("opencv")
+INSTALL_DEPENDENCY("libzmq")
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 add_definitions("-Wall -g")
 
 add_subdirectory(app)
+add_subdirectory(libs)
 
 SET(SRC_LIST stand_alone/main.cpp)
 
@@ -66,6 +74,6 @@ include_directories(
 ADD_EXECUTABLE(brown-sugar  ${SRC_LIST})
 
 
-target_link_libraries(brown-sugar  -lpthread adasbusiness)
+target_link_libraries(brown-sugar  -lpthread adasbusiness hobot-adas-sdk)
 
 
