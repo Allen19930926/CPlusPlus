@@ -29,12 +29,13 @@ const std::string config_file = "communication.json";
 
 int start_j3_communicaiton() {
 
-    // if (matrix_sample::util::GenerateFile(config_file,
-    //                                       matrix_sample::conn_content) == 0) {
-    //   std::cout << "generate config file " << config_file << " failed!"
-    //             << std::endl;
-    //   return -1;
-    // }
+    // todo  ubuntu使用默认配置文件，切换到arm平台，需要制定config文件
+    if (matrix_sample::util::GenerateFile(config_file,
+                                          matrix_sample::conn_content) == 0) {
+      std::cout << "generate config file " << config_file << " failed!"
+                << std::endl;
+      return -1;
+    }
   
   std::map<std::string, std::vector<int>> partipants_config;
 
