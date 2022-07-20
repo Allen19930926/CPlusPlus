@@ -6,6 +6,9 @@
 
 #include "can_decoder.h"
 #include "image_decoder.h"
+#include "event_queue.h"
+#include "event_msg.h"
+#include "hb_data.h"
 
 static const std::string ImageFormat(::google::protobuf::int32 fmt) {
   switch (fmt) {
@@ -77,6 +80,78 @@ static const std::string ImageFormat(::google::protobuf::int32 fmt) {
       return "BITSTREAM";
     default:
       return "Unknown";
+  }
+}
+
+
+static void ParseObstacles(const ObstacleProto::Obstacles *obstacles, gohigh::Obstacles * const result)
+{
+
+  // auto out = gohigh::Obstacles();
+  memset((void*)result, 0, sizeof(result));
+
+  result->cipv_id = obstacles->cipv_id();
+  result->mcp_id = obstacles->mcp_id();
+  result->obstacle_num = obstacles->obstacle().size();
+  auto * obs = &result->obstacles[0];
+  for (int i = 0; i < result->obstacle_num; i++)
+  {
+    auto & obstacle = obstacles->obstacle(i);
+    obs = &result->obstacles[i];
+    obs->id = obstacle.id();
+    obs->timestamp = obstacles->header().time_stamp();
+    obs->type = obstacle.type();
+    obs->conf = obstacle.conf();
+    obs->life_time = obstacle.life_time();
+    obs->serial_number = obstacle.serial_number();
+    obs->select_level = obstacle.select_level();
+    obs->world_info.yaw = obstacle.world_info().yaw();
+    obs->world_info.vel.vx = obstacle.world_info().vel().vx();
+    obs->world_info.vel.vy = obstacle.world_info().vel().vy();
+    obs->world_info.width = obstacle.world_info().width();
+    obs->world_info.height = obstacle.world_info().height();
+    obs->world_info.position.x = obstacle.world_info().position().x();
+    obs->world_info.position.y = obstacle.world_info().position().y();
+    obs->world_info.ttc = obstacle.world_info().ttc();
+    obs->world_info.curr_lane = obstacle.world_info().curr_lane();
+    obs->world_info.ettc = obstacle.world_info().ettc();
+    obs->world_info.acc = obstacle.world_info().acc();
+    obs->world_info.motion_state = obstacle.world_info().motion_state();
+    obs->world_info.vel_abs_world.vx = obstacle.world_info().vel_abs_world().vx();
+    obs->world_info.vel_abs_world.vy = obstacle.world_info().vel_abs_world().vy();
+    obs->world_info.acc_abs_world.ax = obstacle.world_info().acc_abs_world().ax();
+    obs->world_info.acc_abs_world.ay = obstacle.world_info().acc_abs_world().ay();
+    obs->world_info.motion_category = obstacle.world_info().motion_category();
+    obs->world_info.position_type = obstacle.world_info().position_type();
+    obs->world_info.yaw_rate = obstacle.world_info().yaw_rate();
+    obs->world_info.sigma_yaw = obstacle.world_info().sigma_yaw();
+    for (int j = 0; j < 9; j++)
+    {
+      obs->world_info.sigma_vel[j] = obstacle.world_info().sigma_vel(j);
+    }
+    
+    obs->world_info.sigma_width = obstacle.world_info().sigma_width();
+    obs->world_info.sigma_height = obstacle.world_info().sigma_height();
+    for (int j = 0; j < 9; j++)
+    {
+      obs->world_info.sigma_position[j] = obstacle.world_info().sigma_position(j);
+    }
+    obs->world_info.sigma_length = obstacle.world_info().sigma_length();
+    obs->world_info.conf_yaw = obstacle.world_info().conf_yaw();
+    obs->world_info.cipv = obstacle.world_info().cipv();
+    obs->world_info.measurement_status = obstacle.world_info().measurement_status();
+    obs->world_info.mid_angle = obstacle.world_info().mid_angle();
+    obs->world_info.obj_corner_point.objCornerPoint_x = obstacle.world_info().obj_corner_point().objcornerpoint_x();
+    obs->world_info.obj_corner_point.objCornerPoint_y = obstacle.world_info().obj_corner_point().objcornerpoint_y();
+    obs->world_info.obj_corner_point.objDistInLane = obstacle.world_info().obj_corner_point().objdistinlane();
+    obs->world_info.obj_corner_point.objCutInFlag = obstacle.world_info().obj_corner_point().objcutinflag();
+    obs->world_info.obj_corner_point.objCutInLane = obstacle.world_info().obj_corner_point().objcutinlane();
+    obs->world_info.obj_corner_point.ll_type = obstacle.world_info().obj_corner_point().ll_type();
+    obs->world_info.obj_corner_point.rr_type = obstacle.world_info().obj_corner_point().rr_type();
+    obs->world_info.obj_corner_point.distance_to_ll = obstacle.world_info().obj_corner_point().distance_to_ll();
+    obs->world_info.obj_corner_point.distance_to_rr = obstacle.world_info().obj_corner_point().distance_to_rr();
+    obs->world_info.acc_ref.ax = obstacle.world_info().acc_ref().ax();
+    obs->world_info.acc_ref.ay = obstacle.world_info().acc_ref().ay();
   }
 }
 
@@ -1075,10 +1150,14 @@ void ParseCanMsg(std::shared_ptr<google::protobuf::Message> message,
 
 void ParsePedResultMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block) {
-  message.get()->ParsePartialFromArray(block.meta_->data(),
-                                       static_cast<int>(block.meta_size_));
-  ObstacleProto::Obstacles *ped_result =
-      static_cast<ObstacleProto::Obstacles *>(message.get());
+    message.get()->ParsePartialFromArray(block.meta_->data(),
+                                        static_cast<int>(block.meta_size_));
+    ObstacleProto::Obstacles *ped_result =
+        static_cast<ObstacleProto::Obstacles *>(message.get());
+
+    gohigh::Obstacles result;
+    ParseObstacles(ped_result, &result);
+    CDD_FUSION_EVENT_QUEUE.push({MsgType::CAMERA, reinterpret_cast<char*>(&result), static_cast<uint16_t>(sizeof(gohigh::Obstacles))});
 }
 
 void ParseROIMsg(std::shared_ptr<google::protobuf::Message> message,
@@ -1140,10 +1219,14 @@ void ParseOdometryMsg(std::shared_ptr<google::protobuf::Message> message,
 
 void ParseVehicleresultMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
-  message.get()->ParsePartialFromArray(block.meta_->data(),
-                                       static_cast<int>(block.meta_size_));
-  ObstacleProto::Obstacles *obstacles =
-      static_cast<ObstacleProto::Obstacles *>(message.get());
+    message.get()->ParsePartialFromArray(block.meta_->data(),
+                                        static_cast<int>(block.meta_size_));
+    ObstacleProto::Obstacles *obstacles =
+        static_cast<ObstacleProto::Obstacles *>(message.get());
+
+    gohigh::Obstacles result;
+    ParseObstacles(obstacles, &result);
+    CDD_FUSION_EVENT_QUEUE.push({MsgType::CAMERA, reinterpret_cast<char*>(&result), static_cast<uint16_t>(sizeof(gohigh::Obstacles))});
 }
 
 void ParseBoxes3drawMsg(std::shared_ptr<google::protobuf::Message> message,

@@ -54,6 +54,7 @@ TEST_F(V2xDataFusionTest, normal_spatinfo_with_current_red_light_test)
     spat[0].lightState    = 3;
     spat[0].curCoutingTime = 70;
     spat[0].nextDurationTime = 20;
+
     MockV2xSpatInfo(spat, ADAS_SPAT_INFO_NUM);
 
     const CDDFusion::CddFusionRepo& cddData = DataRepo::GetInstance().GetCddFusionData();

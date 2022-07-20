@@ -118,7 +118,6 @@ namespace gohigh
 
     typedef struct
     {
-        uint32 timestamp;
         uint32 obstacle_num;
         Obstacle obstacles[MAX_OBSTACLE_NUM];
         uint32 cipv_id;
