@@ -6,12 +6,16 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fprofile-arcs -ftest-coverag
 
 #message("*****************************", ${PROJECT_SOURCE_DIR}/tcp/source)
 
+
+add_subdirectory(communication-user)
+
 include_directories(
 	application/include
 	domain/data_fusion/include
 	domain/proxy/include
 	infrastructure/common
 	infrastructure/tcp/include
+    communication-user
 )
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/infrastructure/tcp/source ADAS_FILES)

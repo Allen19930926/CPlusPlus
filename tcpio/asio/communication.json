@@ -1,0 +1,76 @@
+{
+    "discovery_pattern": 1,
+    "shm_option" : {
+      "shm_size":"100M",
+      "block_size":"1M"
+    },
+    "participants": [
+      {
+        "id": 1,
+        "protocol": "zmq_ipc",
+        "link_info": "relative_file_path1",
+        "link_type": "",
+        "zmq_option": {
+          "ZMQ_SNDHWM": 5,
+          "ZMQ_RCVHWM": 5,
+          "ZMQ_HEARTBEAT_IVL": 1000,
+          "ZMQ_HEARTBEAT_TIMEOUT": 2000
+        }
+      },
+      {
+        "id": 2,
+        "protocol": "zmq_tcp",
+        "link_info": "127.0.0.1:6788",
+        "link_type": ""
+      },
+      {
+        "id": 3,
+        "protocol": "sdio",
+        "link_info": "ap:X2SD001:1234",
+        "link_type": ""
+      },
+      {
+        "id": 4,
+        "protocol": "sdio",
+        "link_info": "cp:X2SD001:1234",
+        "link_type": ""
+      },
+      {
+        "id": 5,
+        "protocol": "zmq_ipc",
+        "link_info": "relative_file_path2",
+        "link_type": ""
+      },
+      {
+        "id": 6,
+        "protocol": "zmq_tcp",
+        "link_info": "127.0.0.1:6784",
+        "link_type": ""
+      },
+      {
+        "id": 7,
+        "protocol": "zmq_epgm",
+        "link_info": "enp7s0:12651",
+        "link_type": ""
+      },
+      {
+        "id": 8,
+        "protocol": "pcie",
+        "link_info": "dma:4:0:0",
+        "link_type": "",
+        "pcie_option": {
+          "recv_buffer_size": 30
+        }
+      },
+      {
+        "id": 9,
+        "protocol": "pcie",
+        "link_info": "dma:0:0:0",
+        "link_type": "",
+        "pcie_option": {
+          "recv_buffer_size": 30
+        }
+      }
+    ]
+  }
+  

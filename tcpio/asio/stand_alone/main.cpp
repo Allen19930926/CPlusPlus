@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include "camera_fusion_algorithm.h"
+#include "communication_interface.h"
 
 void DoPeriodTask(asio::steady_timer* timer, uint32_t interval)
 {
@@ -57,6 +58,7 @@ int main(int argc, char* argv[])
         std::thread io(StartIoThread);
         std::thread event(StartEventThread);
         std::thread period(StartPeriodThread);
+        start_j3_communicaiton();
         event.detach();
         period.detach();
         io.join();

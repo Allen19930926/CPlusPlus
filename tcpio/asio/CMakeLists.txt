@@ -65,6 +65,7 @@ SET(SRC_LIST stand_alone/main.cpp)
 
 include_directories(
     app/application/include
+    app/communication-user
     app/infrastructure/common
 	app/infrastructure/tcp/include
     app/domain/data_fusion/include
@@ -74,6 +75,6 @@ include_directories(
 ADD_EXECUTABLE(brown-sugar  ${SRC_LIST})
 
 
-target_link_libraries(brown-sugar  -lpthread adasbusiness hobot-adas-sdk)
+target_link_libraries(brown-sugar  -lpthread adasbusiness hobot-adas-sdk hobot-communication)
 
 
