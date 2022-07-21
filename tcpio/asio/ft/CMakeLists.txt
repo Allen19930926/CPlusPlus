@@ -23,12 +23,12 @@ include_directories(
 	${ADAS_DIR}/app/domain/data_fusion/include
 	${ADAS_DIR}/app/domain/proxy/include
 	${ADAS_DIR}/app/application/include
-    ${ADAS_DIR}/ThirdParty/gtest/include
+    ThirdParty/gtest/include
     ft_context/include
 )
 
 link_directories(
-    ${ADAS_DIR}/ThirdParty/gtest/lib
+    ThirdParty/gtest/lib
 )
 ADD_EXECUTABLE(ft ${SRC_LIST} ${FT_FILES})
 
