@@ -4,10 +4,13 @@ PROJECT (adasbusiness)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fprofile-arcs -ftest-coverage")
 
-#message("*****************************", ${PROJECT_SOURCE_DIR}/tcp/source)
+OPTION(FT_TEST "complie control to remove hobot files" OFF)
 
+if (FT_TEST)
 
-add_subdirectory(communication-user)
+else ()
+    add_subdirectory(communication-user)
+endif()
 
 include_directories(
 	application/include

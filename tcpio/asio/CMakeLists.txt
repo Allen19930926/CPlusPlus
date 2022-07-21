@@ -55,6 +55,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
 
 
+OPTION(FT_TEST "complie control to remove hobot files" OFF)
+
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 add_definitions("-Wall -g")
 

@@ -4,7 +4,7 @@ echo "current dir path is: ${cur_dir}"
 rm -rf ${cur_dir}/build
 mkdir build
 cd build
-cmake ..  -DENABLE_GCOV=1
+cmake ..  -DFT_TEST=1
 make -j2
 ./ft
 

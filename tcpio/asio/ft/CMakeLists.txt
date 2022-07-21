@@ -2,14 +2,15 @@ cmake_minimum_required(VERSION 3.0)
 
 PROJECT (FUNCTIONTEST)
 
-OPTION(ENABLE_GCOV "Enable gcov (debug, Linux builds only)" OFF)
+OPTION(FT_TEST "complie control to remove hobot files" OFF)
+message("FTTEST, " ${FT_TEST})
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++11 -fprofile-arcs -ftest-coverage")
 add_definitions("-Wall -g --coverage")
 
 SET(ADAS_DIR ${PROJECT_SOURCE_DIR}/..)
 
-#message("*****************************", ${ADAS_DIR}/app)
+message("*****************************", ${ADAS_DIR}/app)
 
 add_subdirectory(${ADAS_DIR}/app adasout)
 
