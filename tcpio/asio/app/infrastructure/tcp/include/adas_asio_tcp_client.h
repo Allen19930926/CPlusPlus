@@ -6,6 +6,7 @@
 #include <string>
 #include <functional>
 #include "event_msg.h"
+#include <atomic>
 
 using asio::ip::tcp;
 
@@ -15,6 +16,7 @@ public:
     AdasAsioTcpClient(asio::io_context& io_context, MsgType type, std::string ipAddr, std::string port);
     void close();
     void start();
+    void write(std::string msg);
     void SetPeriodWriteTask(const uint32_t interval, std::string msg);
 
 private:
@@ -32,8 +34,7 @@ private:
     asio::steady_timer deadline_;
     tcp::resolver::results_type endpoints_;
     MsgType msgType;
-    uint32_t aliveInterval;
-    std::string aliveMsg;
+    std::atomic_bool isConnected;
 };
 
 
