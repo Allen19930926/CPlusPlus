@@ -16,12 +16,7 @@ void StartIoThread()
 
     for(auto& it : proxyVec)
     {
-<<<<<<< HEAD
-        it->SetPeriodWriteTask(1000);
-        it->Start(); 
-=======
         it->Start();
->>>>>>> 8070cef... merge from hbdev ---- period write reconstruction
     }
 
     proxyVec[1]->SetPeriodWriteTask(IProxy::TCP_CLIENT, 2000, "gSentry proxy period write");
