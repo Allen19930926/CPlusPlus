@@ -7,14 +7,17 @@
 class GSentryProxy : public IProxy
 {
 public:
-    GSentryProxy(asio::io_context& ioService, std::string ipAddr, std::string port) : client(ioService, MsgType::V2X, ipAddr, port) {}
+    GSentryProxy(asio::io_context& ioService, std::string ipAddr, std::string port);
     ~GSentryProxy() = default;
-    void SetPeriodWriteTask(const uint32_t interval) { client.SetPeriodWriteTask(interval, keepAliveMsg); }
-    virtual void Start() override { client.start(); }
+
+private:
+    virtual void Init() override;
+    void KeepAlive(const uint32_t interval);
+    virtual void DoPeriodClientWriteTask(PeriodTimer timer ,const uint32_t interval, std::string msg) override;
+    virtual void DoPeriodServerWriteTask(PeriodTimer timer ,const uint32_t interval, std::string msg) override {}
 
 private:
     AdasAsioTcpClient client;
-    const std::string keepAliveMsg = "gSentry(client) keep alive!! gSentry(client) keep alive!! ";
 };
 
 #endif /* B243B601_9C74_4478_A22A_1A6A19103451 */

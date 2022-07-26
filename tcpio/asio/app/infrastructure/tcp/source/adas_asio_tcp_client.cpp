@@ -13,7 +13,7 @@ using namespace V2X;
 using std::string;
 
 AdasAsioTcpClient::AdasAsioTcpClient(asio::io_context& io_context, MsgType type, std::string ipAddr, std::string port)
-        : io_context_(io_context), socket_(io_context), deadline_(io_context), msgType(type), aliveInterval(0xFFFFFFFF)
+        : io_context_(io_context), socket_(io_context), deadline_(io_context), msgType(type), isConnected(false)
 {
     tcp::resolver resolver(io_context_);
     endpoints_ = resolver.resolve(ipAddr, port);
@@ -29,36 +29,22 @@ void AdasAsioTcpClient::close()
     asio::post(io_context_,[this](){socket_.close();});
 }
 
-void AdasAsioTcpClient::SetPeriodWriteTask(const uint32_t interval, string msg)
+void AdasAsioTcpClient::write(string msg)
 {
-    deadline_.cancel();
-    aliveInterval = interval;
-    aliveMsg = msg;
+    if (isConnected)
+    {
+        do_write(msg);
+    }
 }
 
 void AdasAsioTcpClient::do_write(string msg)
 {
     socket_.async_write_some(asio::buffer(msg.data(), msg.length()),
-        [this](std::error_code ec, std::size_t length)
+        [this, msg](std::error_code ec, std::size_t length)
         {
             if (!ec) 
             {
-                // to do
-            }
-        });
-}
-
-void AdasAsioTcpClient::do_period_write(const uint32_t interval, std::string msg)
-{
-    socket_.async_write_some(asio::buffer(msg.data(), msg.length() + 1),
-        [this, interval, msg](std::error_code ec, std::size_t length)
-        {
-            // std::cout << ec.message() << std::endl;
-            if (!ec) 
-            {
-                std::cout << "client period write(line:62) " << msg << std::endl;
-                deadline_.expires_after(std::chrono::milliseconds(interval));
-                deadline_.async_wait(std::bind(&AdasAsioTcpClient::do_period_write, this, interval, msg));
+                std::cout << "client write success! msg: " << msg << std::endl;
             }
         });
 }
@@ -72,10 +58,7 @@ void AdasAsioTcpClient::do_connect(const tcp::resolver::results_type& endpoints)
             {
                 deadline_.cancel();
                 do_read();
-                if (aliveInterval <= 10800)
-                {
-                    do_period_write(aliveInterval, aliveMsg);
-                }
+                isConnected = true;
             }
             else
             {
