@@ -17,7 +17,7 @@ void StartIoThread()
     for(auto& it : proxyVec)
     {
         it->SetPeriodWriteTask(1000);
-        it->Start();
+        it->Start(); 
     }
 
     io.run();
