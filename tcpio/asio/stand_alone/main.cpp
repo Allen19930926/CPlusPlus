@@ -26,9 +26,10 @@ void StartIoThread()
 
     for(auto& it : proxyVec)
     {
-        it->SetPeriodWriteTask(1000);
         it->Start();
     }
+
+    proxyVec[1]->SetPeriodWriteTask(IProxy::TCP_CLIENT, 2000, "gSentry proxy period write");
 
     io.run();
 }
