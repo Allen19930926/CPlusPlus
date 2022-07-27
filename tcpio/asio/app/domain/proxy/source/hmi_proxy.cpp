@@ -2,7 +2,7 @@
 #include "hmi_data.h"
 
 HmiProxy::HmiProxy(asio::io_context& ioService, std::string clientIp, std::string clientPort, short listenPort)
-            : IProxy(ioService), server(ioService, MsgType::HMI, listenPort),
+            : IProxy(ioService, MsgType::HMI), server(ioService, MsgType::HMI, listenPort),
               client(ioService, MsgType::HMI, clientIp, clientPort)
 {
 

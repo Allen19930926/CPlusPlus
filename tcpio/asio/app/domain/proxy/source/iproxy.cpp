@@ -2,7 +2,7 @@
 
 using std::string;
 
-IProxy::IProxy(asio::io_context& io) : io_context_(io)
+IProxy::IProxy(asio::io_context& io, MsgType type_) : io_context_(io), type(type_)
 {
 
 }
@@ -10,6 +10,11 @@ IProxy::IProxy(asio::io_context& io) : io_context_(io)
 void IProxy::Start()
 {
     Init();
+}
+
+void IProxy::Write(const char* buf , const uint16_t len)
+{
+    DoWrite(buf, len);
 }
 
 void IProxy::SetPeriodWriteTask(const ConnectType type, const uint32_t interval, string msg)

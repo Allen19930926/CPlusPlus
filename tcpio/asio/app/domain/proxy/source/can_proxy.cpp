@@ -1,6 +1,6 @@
 #include "can_proxy.h"
 
-CanProxy::CanProxy(asio::io_context& ioService, short port) : IProxy(ioService), server(ioService, MsgType::CAN, port)
+CanProxy::CanProxy(asio::io_context& ioService, short port) : IProxy(ioService, MsgType::CAN), server(ioService, MsgType::CAN, port)
 {
 
 }
@@ -22,4 +22,5 @@ void CanProxy::DoPeriodServerWriteTask(PeriodTimer timer ,const uint32_t interva
     timer->expires_after(std::chrono::milliseconds(interval));
     timer->async_wait(std::bind(&CanProxy::DoPeriodServerWriteTask, this, timer, interval, msg));
 }
+
 

@@ -15,9 +15,10 @@ private:
     void KeepAlive(const uint32_t interval);
     virtual void DoPeriodClientWriteTask(PeriodTimer timer ,const uint32_t interval, std::string msg) override;
     virtual void DoPeriodServerWriteTask(PeriodTimer timer ,const uint32_t interval, std::string msg) override {}
+    virtual void DoWrite(const char* buf , const uint16_t len){}
 
 private:
-    AdasAsioTcpClient client;
+    AdasAsioTcpClient<BasciChatMessage, BasciChatMessage> client;
 };
 
 #endif /* B243B601_9C74_4478_A22A_1A6A19103451 */
