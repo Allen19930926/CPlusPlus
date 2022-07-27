@@ -12,9 +12,13 @@ void IProxy::Start()
     Init();
 }
 
-void IProxy::Write(const char* buf , const uint16_t len)
+void IProxy::Write(const ConnectType type, const char* buf , const uint16_t len)
 {
-    DoWrite(buf, len);
+    if (type == TCP_CLIENT)
+    {
+        DoClientWrite(buf, len);
+    }
+    DoServerWrite(buf, len);
 }
 
 void IProxy::SetPeriodWriteTask(const ConnectType type, const uint32_t interval, string msg)

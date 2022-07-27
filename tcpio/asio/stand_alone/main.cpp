@@ -22,7 +22,7 @@ void StartIoThread()
     asio::io_context io;
     CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<CanProxy>(io, 9000));
     CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<GSentryProxy>(io, "127.0.0.1", "7500"));
-    // CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<HmiProxy>(io, "127.0.0.1", "5000", PAD_SERVER_PORT));
+    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<HmiProxy>(io, "127.0.0.1", "5000", PAD_SERVER_PORT));
     CDD_FUSION_PROXY_REPO.Start();
 
     std::shared_ptr<IProxy> ptr;

@@ -6,7 +6,7 @@
 #include <iostream>
 #include "event_msg.h"
 #include <string>
-#include "basic_message.h"
+#include "default_chat_message.h"
 
 class IProxy
 {
@@ -19,7 +19,7 @@ protected:
 
 public:
     void Start();
-    void Write(const char* buf, const uint16_t len);
+    void Write(const ConnectType type, const char* buf, const uint16_t len);
     void SetPeriodWriteTask(const ConnectType type, const uint32_t interval, std::string msg);
     bool IsSpecificProxyType(MsgType type_) {return type_ == type;}
 
@@ -27,7 +27,8 @@ private:
     virtual void Init() = 0;
     virtual void DoPeriodClientWriteTask(PeriodTimer timer ,const uint32_t interval, std::string msg) = 0;
     virtual void DoPeriodServerWriteTask(PeriodTimer timer ,const uint32_t interval, std::string msg) = 0;
-    virtual void DoWrite(const char* buf , const uint16_t len) = 0;
+    virtual void DoClientWrite(const char* buf , const uint16_t len) = 0;
+    virtual void DoServerWrite(const char* buf , const uint16_t len) = 0;
 
 protected:
     asio::io_context& io_context_;

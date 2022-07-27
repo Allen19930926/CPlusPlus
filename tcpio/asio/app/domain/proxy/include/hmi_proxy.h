@@ -21,11 +21,12 @@ private:
     virtual void DoPeriodServerWriteTask(PeriodTimer timer ,const uint32_t interval, std::string msg) override;
     std::string ConstructServerAliveMsg();
     std::string ConstructClientAliveMsg();
-    virtual void DoWrite(const char* buf , const uint16_t len){}
+    virtual void DoClientWrite(const char* buf , const uint16_t len);
+    virtual void DoServerWrite(const char* buf , const uint16_t len);
 
 private:
-    AdasAsioTcpServer<BasciChatMessage, BasciChatMessage> server;
-    AdasAsioTcpClient<BasciChatMessage, BasciChatMessage> client;
+    AdasAsioTcpServer<DefaultChatMessage, DefaultChatMessage> server;
+    AdasAsioTcpClient<DefaultChatMessage, DefaultChatMessage> client;
 };
 
 #endif /* C1F171C1_DCAD_43AA_A19A_966988C389AB */

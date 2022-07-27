@@ -3,16 +3,24 @@
 
 #include <string>
 
-class BasciChatMessage {
+class DefaultChatMessage {
 public:
     static constexpr std::size_t HeaderLength = 0;
     static constexpr std::size_t MaxBodyLength = 1024;
 
-    BasciChatMessage() : bodyLength(0) {}
-    BasciChatMessage(const std::string msg)
+    DefaultChatMessage() : bodyLength(0) {}
+    DefaultChatMessage(const std::string msg)
     {
         bodyLength = msg.length() + 1;
         memcpy(dataBuffer, msg.data(), msg.length() + 1);
+    }
+
+    DefaultChatMessage(const char* buf , const uint16_t len)
+    {
+        if (len < HeaderLength + MaxBodyLength)
+        {
+            memcpy(dataBuffer, buf, len);
+        }
     }
 
     char *Data() { return dataBuffer; }

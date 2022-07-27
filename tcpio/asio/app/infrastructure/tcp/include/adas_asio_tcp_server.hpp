@@ -124,7 +124,7 @@ public:
             });
     }
 
-    void write(std::string msg)
+    void write(WriteMsg msg)
     {
         // 目前设计server和client是一对一，因此server设计只与最后一次成功连接的client进行写入会话
         if (session.expired())

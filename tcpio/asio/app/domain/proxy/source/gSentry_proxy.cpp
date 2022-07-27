@@ -25,3 +25,9 @@ void GSentryProxy::DoPeriodClientWriteTask(PeriodTimer timer ,const uint32_t int
     timer->expires_after(std::chrono::milliseconds(interval));
     timer->async_wait(std::bind(&GSentryProxy::DoPeriodClientWriteTask, this, timer, interval, msg));
 }
+
+void GSentryProxy::DoClientWrite(const char* buf , const uint16_t len)
+{
+    DefaultChatMessage msg(buf, len);
+    client.write(msg);
+}

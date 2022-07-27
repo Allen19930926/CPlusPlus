@@ -51,3 +51,15 @@ void HmiProxy::DoPeriodServerWriteTask(PeriodTimer timer ,const uint32_t interva
     timer->expires_after(std::chrono::milliseconds(interval));
     timer->async_wait(std::bind(&HmiProxy::DoPeriodServerWriteTask, this, timer, interval, msg));
 }
+
+void HmiProxy::DoClientWrite(const char* buf , const uint16_t len)
+{
+    DefaultChatMessage msg(buf, len);
+    client.write(msg);
+}
+
+void HmiProxy::DoServerWrite(const char* buf , const uint16_t len)
+{
+    DefaultChatMessage msg(buf, len);
+    server.write(msg);
+}
