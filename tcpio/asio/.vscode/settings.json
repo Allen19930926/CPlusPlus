@@ -66,6 +66,12 @@
         "forward_list": "cpp",
         "filesystem": "cpp",
         "numeric": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "unordered_set": "cpp",
+        "strstream": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "slist": "cpp",
+        "cfenv": "cpp"
     }
 }

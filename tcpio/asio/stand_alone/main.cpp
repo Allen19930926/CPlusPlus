@@ -3,23 +3,25 @@
 #include "event_dispatcher.h"
 #include "event_queue.h"
 #include "proxy_interface.h"
+#include "proxy_repository.h"
 #include <vector>
 #include <memory>
 
 void StartIoThread()
 {
     asio::io_context io;
-    std::vector<std::unique_ptr<IProxy>> proxyVec;
-    proxyVec.push_back(std::make_unique<CanProxy>(io, 9000));
-    proxyVec.push_back(std::make_unique<GSentryProxy>(io, "127.0.0.1", "7500"));
-    proxyVec.push_back(std::make_unique<HmiProxy>(io, "127.0.0.1", "5000", PAD_SERVER_PORT));
+    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<CanProxy>(io, 9000));
+    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<GSentryProxy>(io, "127.0.0.1", "7500"));
+    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<HmiProxy>(io, "127.0.0.1", "5000", PAD_SERVER_PORT));
+    CDD_FUSION_PROXY_REPO.Start();
 
-    for(auto& it : proxyVec)
     {
-        it->Start();
+        std::shared_ptr<IProxy> ptr;
+        if (CDD_FUSION_PROXY_REPO.GetSpecificProxy(MsgType::V2X, ptr))
+        {
+            ptr->SetPeriodWriteTask(IProxy::TCP_CLIENT, 2000, "gSentry proxy period write");
+        }
     }
-
-    proxyVec[1]->SetPeriodWriteTask(IProxy::TCP_CLIENT, 2000, "gSentry proxy period write");
 
     io.run();
 }

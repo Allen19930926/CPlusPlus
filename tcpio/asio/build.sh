@@ -6,3 +6,4 @@ mkdir demo
 cd demo
 cmake ..
 make -j4
+#./demo
