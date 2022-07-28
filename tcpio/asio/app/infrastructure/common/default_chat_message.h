@@ -11,12 +11,14 @@ public:
     DefaultChatMessage() : bodyLength(0) {}
     DefaultChatMessage(const std::string msg)
     {
+        EncodeHeader();
         bodyLength = msg.length() + 1;
         memcpy(dataBuffer, msg.data(), msg.length() + 1);
     }
 
     DefaultChatMessage(const char* buf , const uint16_t len)
     {
+        EncodeHeader();
         if (len < HeaderLength + MaxBodyLength)
         {
             memcpy(dataBuffer, buf, len);
@@ -35,6 +37,11 @@ public:
     {
         bodyLength = 50; 
         return true;
+    }
+
+    void EncodeHeader()
+    {
+
     }
 
 private:
