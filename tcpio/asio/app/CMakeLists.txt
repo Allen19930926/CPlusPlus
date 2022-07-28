@@ -27,7 +27,9 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/domain/proxy/source ADAS_FILES)
 aux_source_directory(${PROJECT_SOURCE_DIR}/application/source ADAS_FILES)
 
 add_library(${PROJECT_NAME} STATIC ${ADAS_FILES})
-target_link_libraries(${PROJECT_NAME}  -lpthread -lgcov )
+
+
+    target_link_libraries(${PROJECT_NAME}  -lpthread -lgcov )
 
 
 

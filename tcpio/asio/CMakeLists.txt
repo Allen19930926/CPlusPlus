@@ -47,6 +47,7 @@ INSTALL_DEPENDENCY("communication")
 INSTALL_DEPENDENCY("pack-sdk")
 INSTALL_DEPENDENCY("opencv")
 INSTALL_DEPENDENCY("libzmq")
+INSTALL_JSON()
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -78,5 +79,11 @@ ADD_EXECUTABLE(brown-sugar  ${SRC_LIST})
 
 
 target_link_libraries(brown-sugar  -lpthread adasbusiness hobot-adas-sdk hobot-communication)
+
+if (FT_TEST)
+
+else ()
+    install(TARGETS ${PROJECT_NAME})
+endif()
 
 

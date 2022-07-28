@@ -2,7 +2,7 @@ set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
 # set(tools /usr)
-set(tools /home/dev/gcc-linaro-6.5.0)
+set(tools /home/allen/gcc-linaro-6.5.0-2018.12-x86_64_aarch64-linux-gnu)
 
 set(CMAKE_C_COMPILER ${tools}/bin/aarch64-linux-gnu-gcc)
 set(CMAKE_CXX_COMPILER ${tools}/bin/aarch64-linux-gnu-g++)
