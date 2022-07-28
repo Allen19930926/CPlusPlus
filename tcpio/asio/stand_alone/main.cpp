@@ -28,7 +28,8 @@ void StartIoThread()
     std::shared_ptr<IProxy> ptr;
     if (CDD_FUSION_PROXY_REPO.GetSpecificProxy(MsgType::V2X, ptr))
     {
-        // ptr->SetPeriodWriteTask(IProxy::TCP_CLIENT, 2000, "gSentry proxy period write");
+        std::shared_ptr<GSentryProxy> gSentryProxy = std::dynamic_pointer_cast<GSentryProxy>(ptr);
+        gSentryProxy->WritePeriodData(2000);
     }
 
     io.run();

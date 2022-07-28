@@ -11,11 +11,12 @@ public:
 
 private:
     virtual void Init() override;
-    void KeepAlive(const uint32_t interval);
-    virtual void DoPeriodServerWriteTask(PeriodTimer timer ,const uint32_t interval, std::string msg) override;
-    virtual void DoPeriodClientWriteTask(PeriodTimer timer ,const uint32_t interval, std::string msg) override {}
     virtual void DoClientWrite(const char* buf , const uint16_t len) {}
     virtual void DoServerWrite(const char* buf , const uint16_t len);
+
+private:
+    void KeepAlive(const uint32_t interval);
+    void WriteServerAliveMsg();
 
 private:
     AdasAsioTcpServer<DefaultChatMessage, DefaultChatMessage> server;

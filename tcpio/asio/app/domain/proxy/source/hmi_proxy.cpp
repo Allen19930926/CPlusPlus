@@ -18,38 +18,22 @@ void HmiProxy::Init()
 
 void HmiProxy::KeepAlive(const uint32_t interval)
 {
-    const std::string clientAliveMsg = ConstructServerAliveMsg();
-    const std::string serverAliveMsg = ConstructClientAliveMsg();
-    SetPeriodWriteTask(TCP_CLIENT, interval, clientAliveMsg);
-    SetPeriodWriteTask(TCP_SERVER, interval, serverAliveMsg);
+    SetPeriodTask(interval, std::bind(&HmiProxy::WriteServerAliveMsg, this));
+    SetPeriodTask(interval, std::bind(&HmiProxy::WriteClientAliveMsg, this));
 }
 
-std::string HmiProxy::ConstructServerAliveMsg()
+void HmiProxy::WriteServerAliveMsg()
 {
-    return "";
+    
 }
 
-std::string HmiProxy::ConstructClientAliveMsg()
+void HmiProxy::WriteClientAliveMsg()
 {
     gSentryKeepAliveRequestFrame frame;
     frame.tag = HMI_TAG_KEEP_ALIVE_REQ;
     json j;
     to_json(j, frame);
-    return j.dump();
-}
-
-void HmiProxy::DoPeriodClientWriteTask(PeriodTimer timer ,const uint32_t interval, std::string msg)
-{
-    client.write(msg);
-    timer->expires_after(std::chrono::milliseconds(interval));
-    timer->async_wait(std::bind(&HmiProxy::DoPeriodClientWriteTask, this, timer, interval, msg));
-}
-
-void HmiProxy::DoPeriodServerWriteTask(PeriodTimer timer ,const uint32_t interval, std::string msg)
-{
-    server.write(msg);
-    timer->expires_after(std::chrono::milliseconds(interval));
-    timer->async_wait(std::bind(&HmiProxy::DoPeriodServerWriteTask, this, timer, interval, msg));
+    client.write(j.dump());
 }
 
 void HmiProxy::DoClientWrite(const char* buf , const uint16_t len)

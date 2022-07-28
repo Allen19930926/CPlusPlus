@@ -13,14 +13,13 @@ void CanProxy::Init()
 
 void CanProxy::KeepAlive(const uint32_t interval)
 {
-    SetPeriodWriteTask(TCP_SERVER, interval, "CAN(server) keep alive!! CAN(server) keep alive!! ");
+    SetPeriodTask(interval, std::bind(&CanProxy::WriteServerAliveMsg, this));
 }
 
-void CanProxy::DoPeriodServerWriteTask(PeriodTimer timer ,const uint32_t interval, std::string msg)
+void CanProxy::WriteServerAliveMsg()
 {
+    std::string msg = "CAN(server) keep alive!! CAN(server) keep alive!! ";
     server.write(msg);
-    timer->expires_after(std::chrono::milliseconds(interval));
-    timer->async_wait(std::bind(&CanProxy::DoPeriodServerWriteTask, this, timer, interval, msg));
 }
 
 void CanProxy::DoServerWrite(const char* buf , const uint16_t len)

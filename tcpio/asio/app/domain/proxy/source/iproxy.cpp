@@ -21,7 +21,7 @@ void IProxy::Write(const ConnectType type, const char* buf , const uint16_t len)
     DoServerWrite(buf, len);
 }
 
-void IProxy::SetPeriodWriteTask(const ConnectType type, const uint32_t interval, string msg)
+void IProxy::SetPeriodTask(const uint32_t interval, PeriodWriteCallBack cb)
 {
     if (timers.size() > 10)
     {
@@ -30,10 +30,13 @@ void IProxy::SetPeriodWriteTask(const ConnectType type, const uint32_t interval,
     }
     PeriodTimer timer = std::make_shared<asio::steady_timer>(io_context_);
     timers.push_back(timer);
-    if (type == TCP_CLIENT)
-    {
-        return DoPeriodClientWriteTask(timer, interval, msg);
-    }
-    return DoPeriodServerWriteTask(timer, interval, msg);
+    DoPeriodWriteTask(timer, interval, cb);
+}
+
+void IProxy::DoPeriodWriteTask(PeriodTimer timer ,const uint32_t interval, PeriodWriteCallBack cb)
+{
+    cb();
+    timer->expires_after(std::chrono::milliseconds(interval));
+    timer->async_wait(std::bind(&IProxy::DoPeriodWriteTask, this, timer, interval, cb));
 }
 

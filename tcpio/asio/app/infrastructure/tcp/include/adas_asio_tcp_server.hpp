@@ -79,7 +79,7 @@ private:
             {
                 if (!ec)
                 {
-                    std::cout << "server write : " << writeMsgs.front().Data() << std::endl;
+                    // std::cout << "server write : " << writeMsgs.front().Data() << std::endl;
                     writeMsgs.pop_front();
                     if (!writeMsgs.empty())
                     {
