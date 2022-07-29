@@ -10,7 +10,7 @@ add_definitions("-Wall -g --coverage")
 
 SET(ADAS_DIR ${PROJECT_SOURCE_DIR}/..)
 
-message("*****************************", ${ADAS_DIR}/app)
+#message("*****************************", ${ADAS_DIR}/app)
 
 add_subdirectory(${ADAS_DIR}/app adasout)
 

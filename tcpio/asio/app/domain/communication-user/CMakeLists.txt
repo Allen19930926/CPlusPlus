@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.0)
 PROJECT (hobot-communication)
 
 include_directories(
-	${PROJECT_SOURCE_DIR}/../infrastructure/common
+	${PROJECT_SOURCE_DIR}/../../infrastructure/common
 )
 
 aux_source_directory(${PROJECT_SOURCE_DIR} HOBOT_COMMUNICATION_FILES)

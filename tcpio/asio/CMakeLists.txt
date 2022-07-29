@@ -68,11 +68,11 @@ SET(SRC_LIST stand_alone/main.cpp)
 
 include_directories(
     app/application/include
-    app/communication-user
     app/infrastructure/common
 	app/infrastructure/tcp/include
     app/domain/data_fusion/include
     app/domain/proxy/include
+    app/domain/communication-user
 )
 
 ADD_EXECUTABLE(brown-sugar  ${SRC_LIST})
