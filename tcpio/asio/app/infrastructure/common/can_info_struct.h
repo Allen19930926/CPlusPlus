@@ -12,7 +12,7 @@ struct HostVehiclePos
     uint32_t    elevation;          /* 车辆海拔，offset -10000，单位0.001m */
     uint16_t    objectHeadingAngle;     /* 目标车辆航向角为运动方向与正北方向的顺时针夹角, offset -360，单位0.010986° */
     bool        isHostPosValid;
-};
+} __attribute__((packed, aligned(1)));
 
 }
 

@@ -11,6 +11,7 @@
 // #include "v2x_data_struct.h"
 // #include "cdd_fusion.h"
 #include "event_queue.h"
+#include <glog/logging.h>
 
 using asio::ip::tcp;
 
@@ -64,7 +65,7 @@ private:
             {
             if (!ec)
             {
-                std::cout << "server read : " << readMsg.Body() << std::endl;
+                // LOG(INFO) << "server read : " << readMsg.Body();
                 CDD_FUSION_EVENT_QUEUE.push({ msgType, readMsg.Body(), static_cast<uint16_t>(readMsg.BodyLength())});
                 doReadHeader();
             }
@@ -79,12 +80,15 @@ private:
             {
                 if (!ec)
                 {
-                    // std::cout << "server write : " << writeMsgs.front().Data() << std::endl;
+                    LOG(INFO) << "server write : " << std::string(writeMsgs.front().Data(),writeMsgs.front().Length());
                     writeMsgs.pop_front();
                     if (!writeMsgs.empty())
                     {
                         do_write();
                     }
+                }
+                else {
+                    LOG(INFO) << "server write error code : " << ec.message();
                 }
         });
     }
@@ -114,6 +118,7 @@ public:
             {
                 if (!ec)
                 {
+                    LOG(INFO) << "new session" ;
                     std::shared_ptr<SessionType> activeSession = 
                             std::make_shared<SessionType>(io_context_, std::move(socket), io_context_, msgType);
                     session = activeSession;

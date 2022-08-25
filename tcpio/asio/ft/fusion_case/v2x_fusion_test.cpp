@@ -147,7 +147,7 @@ TEST_F(V2xDataFusionTest, normal_object_vehicle_info_test)
     /* 本用例测试数据从prescan获取，因此校验值使用魔法数
                 本车long 114.0016624, lat 29.9985554，X 160.41， Y -160.13, 朝正北方向行驶
                 远车long 114.0017942, lat 29.9987438，X 173.11， Y -139.25, 朝正西方向行驶, 前向速度10m/s，无转弯
-                远车在本车坐标系描述为：                 X 12.7，   Y 20.88, 速度-10m/S
+                远车在本车坐标系描述为：                 X 20.88，   Y -12.7, 速度10m/s
     */ 
     V2X::AdasObjVehInfo objVehi[ADAS_OBJ_VEH_INFO_NUM];
     V2X::AdasObjVehInfo& testVehi = objVehi[0];
@@ -173,12 +173,12 @@ TEST_F(V2xDataFusionTest, normal_object_vehicle_info_test)
     MockV2xObjVehiInfo(objVehi, ADAS_OBJ_VEH_INFO_NUM);
     const CDDFusion::CddFusionRepo& cddData = DataRepo::GetInstance().GetCddFusionData();
     
-    ASSERT_NEAR(12.7,  cddData.v2xObjVehi[0].dx, 0.2);
-    ASSERT_NEAR(20.88, cddData.v2xObjVehi[0].dy, 0.2);
-    ASSERT_NEAR(0, cddData.v2xObjVehi[0].vx, 0.2);
-    ASSERT_NEAR(-testVehi.speed * 0.02, cddData.v2xObjVehi[0].vy, 0.2);
-    ASSERT_NEAR(0, cddData.v2xObjVehi[0].ax, 0.2);
-    ASSERT_NEAR(-testVehi.accelSet.longitude * 0.01, cddData.v2xObjVehi[0].ay, 0.2);
+    ASSERT_NEAR(20.88, cddData.cddObjects[0].dx, 0.2);
+    ASSERT_NEAR(-12.7,  cddData.cddObjects[0].dy, 0.2);
+    ASSERT_NEAR(0, cddData.cddObjects[0].vx, 0.2);
+    ASSERT_NEAR(testVehi.speed * 0.02, cddData.cddObjects[0].vy, 0.2);
+    ASSERT_NEAR(0, cddData.cddObjects[0].ax, 0.2);
+    ASSERT_NEAR(testVehi.accelSet.longitude * 0.01, cddData.cddObjects[0].ay, 0.2);
 
 }
 TEST_F(V2xDataFusionTest, normal_objvehi_info_with_error_can_test)

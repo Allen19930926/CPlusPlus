@@ -42,11 +42,12 @@ find_package(Communication REQUIRED)
 find_package(PackSDK REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(TurboJPEG REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 INSTALL_DEPENDENCY("communication")
 INSTALL_DEPENDENCY("pack-sdk")
-INSTALL_DEPENDENCY("opencv")
-INSTALL_DEPENDENCY("libzmq")
+# INSTALL_DEPENDENCY("opencv")
+# INSTALL_DEPENDENCY("libzmq")
 INSTALL_JSON()
 
 set(CMAKE_CXX_STANDARD 14)
@@ -58,7 +59,7 @@ set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
 
 OPTION(FT_TEST "complie control to remove hobot files" OFF)
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -Wno-unused-function -Wno-unused-variable ")
 add_definitions("-Wall -g")
 
 add_subdirectory(app)
@@ -69,7 +70,10 @@ SET(SRC_LIST stand_alone/main.cpp)
 include_directories(
     app/application/include
     app/infrastructure/common
-	app/infrastructure/tcp/include
+    app/infrastructure/common/ipc
+    app/infrastructure/tcp/include
+    app/infrastructure/udp/include
+    app/infrastructure/ipcm/include
     app/domain/data_fusion/include
     app/domain/proxy/include
     app/domain/communication-user
@@ -78,7 +82,7 @@ include_directories(
 ADD_EXECUTABLE(brown-sugar  ${SRC_LIST})
 
 
-target_link_libraries(brown-sugar  -lpthread adasbusiness hobot-adas-sdk hobot-communication)
+target_link_libraries(brown-sugar -lpthread adasbusiness hobot-adas-sdk hobot-communication glog)
 
 if (FT_TEST)
 

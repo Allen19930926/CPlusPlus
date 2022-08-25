@@ -88,7 +88,7 @@ ENDFUNCTION(INSTALL_DEPENDENCY)
 
 FUNCTION(INSTALL_JSON )
     if (${platform}_${architecture} STREQUAL "linux_default")
-        set(json_path ${DEPENDENCIES_DIR}com.hobot.native.bole.hobot/communication/config)
+        set(json_path ${DEPENDENCIES_DIR}hobot/com.hobot.native.bole.hobot/communication/config)
     elseif (${platform}_${architecture} STREQUAL "linux_aarch64")
         set(json_path ${DEPENDENCIES_DIR}hobot/com.hobot.native.bole.hobot/communication/config)
     else ()

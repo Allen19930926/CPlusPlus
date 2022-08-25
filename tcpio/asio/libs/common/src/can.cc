@@ -1637,7 +1637,7 @@ bool CANParser::AddCanRaw(struct can_frame *frame, TimeStamp ts) {
     raw.raw = *frame;
     raw.raw_ts = ts;
     can_list_.push_back(raw);
-    if (can_list_.size() > max_can_frame_) {
+    if (can_list_.size() > static_cast<uint32_t>(max_can_frame_)) {
       can_list_.pop_front();
     }
   }
@@ -1667,7 +1667,7 @@ bool CANParser::Feed(struct can_frame *frame, TimeStamp ts) {
       }
     }
     can_list_.push_back(raw);
-    if (can_list_.size() > max_can_frame_) {
+    if (can_list_.size() > static_cast<uint32_t>(max_can_frame_)) {
       can_list_.pop_front();
     }
     last_can_frame_raw_ = raw;
@@ -1686,7 +1686,7 @@ bool CANParser::Feed(struct canfd_frame *frame, TimeStamp ts) {
     raw.raw = *frame;
     raw.raw_ts = ts;
     canfd_list_.push_back(raw);
-    if (canfd_list_.size() > max_can_frame_) {
+    if (canfd_list_.size() > static_cast<uint32_t>(max_can_frame_)) {
       canfd_list_.pop_front();
     }
   }
@@ -1804,7 +1804,7 @@ bool CANParser::GetCANFilterSetting(std::string path,
                 break;
               }
             }
-            for (int m = 0; m < setting.value_Map_.size(); m++) {
+            for (uint32_t m = 0; m < setting.value_Map_.size(); m++) {
               if (m < can_signal.value_map_.size()) {
                 can_signal.value_map_[m] =
                     static_cast<uint8_t>(setting.value_Map_[m]);
@@ -1827,6 +1827,8 @@ bool CANParser::GetCANFilterSetting(std::string path,
 
     return true;
   }
+
+  return false;
 }
 
 bool CANParser::Summarize(TimeStamp time_stamp, CANFrame &can_frame,
@@ -1849,7 +1851,7 @@ bool CANParser::Summarize(TimeStamp time_stamp, CANFrame &can_frame,
       }
 
       if (can_frame_raw.empty()) {
-        while (can_list_.size() > max_can_frame_) {
+        while (can_list_.size() > static_cast<uint32_t>(max_can_frame_)) {
           can_list_.pop_front();
         }
       }
@@ -1879,7 +1881,7 @@ bool CANParser::Summarize(TimeStamp time_stamp, CANFrame &can_frame,
       }
 
       if (canfd_frame_raw.empty()) {
-        while (canfd_list_.size() > max_can_frame_) {
+        while (canfd_list_.size() > static_cast<uint32_t>(max_can_frame_)) {
           canfd_list_.pop_front();
         }
       }
@@ -2966,6 +2968,8 @@ int CANParser::ParseYawRateValid(const CANRawDataMap &raw_data_map,
   raw.data[idx].YawRateValid.time_stamp_ = raw.raw_ts;
   raw.data[idx].YawRateValid.yawrate_valid = yawrate_valid_flag;
   raw.info_count++;
+
+  return 1;
 }
 
 int CANParser::ParseYawRate(const CANRawDataMap &raw_data_map,
@@ -4580,9 +4584,8 @@ int CANParser::ParseCanFrame(const int64_t &timestamp,
     }
     if (can_cvt_func_[iter->first]) {
       CANFrameCvtFunc cvt = can_cvt_func_[iter->first];
-      int count = 0;
       if (cvt != NULL) {
-        count = (this->*cvt)(raw_data_map, *raw);
+        (this->*cvt)(raw_data_map, *raw);
       }
     }
   }

@@ -167,5 +167,7 @@ int start_j3_communicaiton() {
 
 //   handle frame
   user.HandleMsg();   //生产-消费者模式，拉起消息处理线程
+
+  return 0;
 }
 

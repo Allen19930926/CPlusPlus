@@ -3,6 +3,7 @@
 
 #include "iproxy.h"
 #include <string>
+#include "v2x_tcp_message.h"
 
 class GSentryProxy : public IProxy
 {
@@ -24,7 +25,7 @@ private:
     void WriteData();
 
 private:
-    AdasAsioTcpClient<DefaultChatMessage, DefaultChatMessage> client;
+    AdasAsioTcpClient<V2xTcpMessage, DefaultChatMessage> client;
 };
 
 #endif /* B243B601_9C74_4478_A22A_1A6A19103451 */

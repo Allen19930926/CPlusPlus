@@ -1,0 +1,12 @@
+2022-08-24 17:58:14 [    INFO] STEP01: send gSentry status : normal 
+2022-08-24 17:58:14 [    INFO] STEP02: check the response, gSentry status should be normal
+2022-08-24 17:58:14 [    INFO] STEP1: send spat info : green 
+2022-08-24 17:58:14 [    INFO] STEP2: check the response, current light should be green
+2022-08-24 17:58:14 [    INFO] STEP1: send v2x warning info : fcw collision
+2022-08-24 17:58:14 [    INFO] STEP2: check the response, current warning should be fcw collision
+2022-08-24 17:58:14 [    INFO] STEP1: send v2x host vehicle info
+2022-08-24 17:58:15 [    INFO] STEP2: send v2x object vehicle info
+2022-08-24 17:58:15 [    INFO] STEP3: check the response
+2022-08-24 17:58:15 [    INFO] STEP1: send v2x host vehicle info
+2022-08-24 17:58:15 [    INFO] STEP2: send v2x object vehicle info
+2022-08-24 17:58:15 [    INFO] STEP3: check the response

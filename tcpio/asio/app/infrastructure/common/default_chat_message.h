@@ -5,14 +5,19 @@
 
 class DefaultChatMessage {
 public:
+    //static constexpr std::size_t HeaderLength = 4;
     static constexpr std::size_t HeaderLength = 0;
-    static constexpr std::size_t MaxBodyLength = 1024;
+    static constexpr std::size_t MaxBodyLength = 1024 * 10;
 
     DefaultChatMessage() : bodyLength(0) {}
     DefaultChatMessage(const std::string msg)
     {
-        bodyLength = msg.length() + 1;
-        memcpy(dataBuffer, msg.data(), msg.length() + 1);
+        std::size_t len = msg.length() + 1;
+        if (len < HeaderLength + MaxBodyLength)
+        {
+            bodyLength = len;
+            memcpy(dataBuffer, msg.data(), len);
+        }
     }
 
     DefaultChatMessage(const char* buf , const uint16_t len)
@@ -20,6 +25,7 @@ public:
         if (len < HeaderLength + MaxBodyLength)
         {
             memcpy(dataBuffer, buf, len);
+            bodyLength = len;
         }
     }
 
@@ -37,7 +43,7 @@ public:
         return true;
     }
 
-private:
+protected:
     char dataBuffer[HeaderLength + MaxBodyLength];
     std::size_t bodyLength;
 };

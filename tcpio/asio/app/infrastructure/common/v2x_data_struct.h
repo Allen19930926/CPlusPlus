@@ -8,6 +8,8 @@
 #define ROAD_POINTS_NUM_PER_LANE        31
 #define CONNECTION_NUM_PER_LANE         4
 #define CONNECTION_NUM_PER_LINK         4
+#define ADAS_ADJACENT_LANE_NUM          2
+#define ADAS_WARN_INFO_NUM              3
 
 namespace V2X
 {
@@ -28,7 +30,7 @@ struct VehicleSize
     uint16_t length;            /* 目标车身长度,取值0~4095，单位0.01m */
     uint16_t width;             /* 目标车身长度,取值0~1023，单位0.01m */
     uint8_t  height;            /* 目标车身长度,取值0~127，单位0.05m */
-};
+} __attribute__((packed, aligned(1)));;
 
 struct VehicleBrakes
 {
@@ -49,20 +51,20 @@ struct VehicleBrakes
                                     1 Off：系统处于关闭状态。
                                     2 On：系统处于开启状态
                                     3 reserved：预留 */
-};
+} __attribute__((packed, aligned(1)));;
 
 struct VehicleAccelSet
 {
     int16_t longitude;          /* 纵向加速度。向前加速为正，反向为负。取值-5000~5000，单位0.01m/s2 */
     int16_t latitude;           /* 横向加速度。向右加速为正，反向为负。取值-5000~5000，单位0.01m/s2 */
-};
+} __attribute__((packed, aligned(1)));;
 
 struct Position
 {
     int32_t latitude;           /* 定义纬度数值，北纬为正，南纬为负。取值-900000000~900000001，单位1e-7° */
     int32_t longitude;          /* 定义经度数值。东经为正，西经为负。取值-1799999999~1800000001，单位1e-7° */
     int32_t elevation;          /* 车辆海拔，-4096~61439，无效值-4096，单位0.1m */
-};
+} __attribute__((packed, aligned(1)));;
 
 struct RoadPoint
 {
@@ -86,7 +88,7 @@ struct ObjMapAddResult
                                 5:DiffNodeLeftLink不同驶向节点左车道
                                 6:SameNodeLeftLink相同驶向节点左车道
                                 7:OppositeLink对向车道 */
-};
+} __attribute__((packed, aligned(1)));;
 
 struct RegulatorySpeedLimit
 {
@@ -248,8 +250,7 @@ struct AdasSpatInfo
                                 7：yellow黄灯亮
                                 8：flashing-yellow黄灯闪烁（警示灯） */
     uint16_t    nextDurationTime; /* 下个灯色的周期时间  红变绿剩余时间/绿变红剩余时间，0~36001 无效值36001，单位0.1s */
-
-};
+} __attribute__((packed, aligned(1)));
 
 /* EV_GSENTRY_ADAS_OBJECT_VEHICLE_REPORT */
 struct AdasObjVehInfo
@@ -295,7 +296,7 @@ struct AdasObjVehInfo
                                 48：motorcycle-wPassengersBasic*/
     VehicleSize size;
     uint16_t    objectHeadingAngle;     /* 目标车辆航向角为运动方向与正北方向的顺时针夹角, 取值0~28800，单位0.0125° */
-    uint16_t    objectYawAngle;         /* 目标车辆横摆角速度顺时针旋转为正，逆时针为负, 取值-32767~32768，无效值32768，单位0.01°/s */
+    int16_t     objectYawAngle;         /* 目标车辆横摆角速度顺时针旋转为正，逆时针为负, 取值-32767~32768，无效值32768，单位0.01°/s */
     uint8_t     gear;                   /* 车辆档位状态,取值0~7
                                         0 Neutral：空档
                                         1 Park：停止档
@@ -330,8 +331,9 @@ struct AdasObjVehInfo
     uint16_t            speed;          /* 车辆大小。取值0~8191,无效值8191,单位0.02m/s */
     VehicleAccelSet     accelSet;
     Position            vehicelPos;
+    uint8_t             targetClassification;
     ObjMapAddResult     mapInfo;
-};
+} __attribute__((packed, aligned(1)));
 
 /* EV_GSENTRY_ADAS_EGOVEHI_MAPINFO_REPORT */
 struct EgoVehMapInfo
@@ -340,7 +342,7 @@ struct EgoVehMapInfo
     CurLink         curLink;
     CurLane         curLane;
     DownLinksList   downLinksList[CONNECTION_NUM_PER_LINK];
-    AdjacentLane    adjacentLane;
+    AdjacentLane    adjacentLane[ADAS_ADJACENT_LANE_NUM];
 };
 
 /* EV_GSENTRY_ADAS_OBJVEHI_MAPINFO_REPORT */
@@ -370,7 +372,7 @@ struct V2xData
     AdasObjVehInfo  objVehicle[ADAS_OBJ_VEH_INFO_NUM];
     EgoVehMapInfo   egoMap;
     ObjVehMapInfo   objMap[ADAS_OBJ_VEH_INFO_NUM];
-    WarningInfo     warningInfo;
+    WarningInfo     warningInfo[ADAS_WARN_INFO_NUM];
 };
 
 }

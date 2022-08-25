@@ -8,3 +8,5 @@ add_library(common OBJECT
     src/data_handler.cc)
 target_include_directories(common PUBLIC include ${NLOHMANNJSON_INCLUDES})
 target_include_directories(common PRIVATE include/common)
+target_compile_options(common PRIVATE -Wno-unused-function)
+target_compile_options(common PRIVATE -Wno-unused-variable)

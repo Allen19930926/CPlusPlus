@@ -84,7 +84,7 @@ private:
             {
                 if (!ec)
                 {
-                    std::cout << "client write : " << writeMsgs.front().Data() << std::endl;
+                    // std::cout << "client write : " << writeMsgs.front().Data() << std::endl;
                     writeMsgs.pop_front();
                     if (!writeMsgs.empty())
                     {
@@ -114,7 +114,15 @@ private:
                     if (!ec)
                     {
                         // std::cout << "client read : " << readMsg.Body() << std::endl;
-                        CDD_FUSION_EVENT_QUEUE.push({msgType, readMsg.Body(), static_cast<uint16_t>(readMsg.BodyLength())});
+                        if (msgType != MsgType::V2X)
+                        {
+                            CDD_FUSION_EVENT_QUEUE.push({msgType, readMsg.Body(), static_cast<uint16_t>(readMsg.BodyLength())});
+                        }
+                        else
+                        {
+                            CDD_FUSION_EVENT_QUEUE.push({msgType, readMsg.Data(), static_cast<uint16_t>(readMsg.Length())});
+                        }
+                        
                         doReadHeader();
                     }
                 });

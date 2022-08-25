@@ -2,6 +2,11 @@
 #include "v2x_adas_event_macro.h"
 #include <cmath>
 #include <cstring>
+#include <glog/logging.h>
+#include "Eigen/Dense"
+#include "proxy_repository.h"
+#include "gSentry_proxy.h"
+#include "bs_debug.h"
 
 namespace
 {
@@ -63,6 +68,7 @@ void V2xFusionAlgo::ProcessGSentrySatatus(uint8_t* buf, uint32_t len)
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     v2xData.status.faultStatus = gSentryStatus.faultStatus;
     v2xData.status.gSentryStatus = gSentryStatus.gSentryStatus;
+    WirteBack(reinterpret_cast<char*>(&v2xData.status), static_cast<uint16_t>(sizeof(V2X::GSentryStatus)));
 }
 
 void V2xFusionAlgo::ProcessHostVehiExtraMapInfo(uint8_t* buf, uint32_t len)
@@ -76,6 +82,7 @@ void V2xFusionAlgo::ProcessHostVehiExtraMapInfo(uint8_t* buf, uint32_t len)
 
     CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
     fusion.disToEndLane.disToEndLane = v2xData.mapAddRes.distToNode;
+    LOG(INFO) << "disToEndLane : " << fusion.disToEndLane.disToEndLane;
 }
 
 void V2xFusionAlgo::ProcessSpatInfo(uint8_t* buf, uint32_t len)
@@ -89,6 +96,7 @@ void V2xFusionAlgo::ProcessSpatInfo(uint8_t* buf, uint32_t len)
     CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
     // 融合数据只用了当前车道下一个红绿灯信息，因此只取v2x数据的第一个红绿灯信息
     TransV2xSpat2CddSpat(v2xData.spatInfo[0], fusion.spatInfo);
+    WirteBack(reinterpret_cast<char*>(&fusion.spatInfo), static_cast<uint16_t>(sizeof(CDDFusion::CDDCurntLaneTrafficLightInfo)));
 }
 
 void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint32_t len)
@@ -99,6 +107,11 @@ void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint32_t len)
     }
 
     CAN::HostVehiclePos& host = DataRepo::GetInstance().GetHostVehicle();
+    // host.latitude = 2099985554;
+    // host.longitude = 2940016624;
+    // host.elevation = 40000;
+    // host.objectHeadingAngle = 0;
+    // host.isHostPosValid = true;
     if (!host.isHostPosValid)
     {
         return ;
@@ -110,13 +123,14 @@ void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint32_t len)
 
     uint16_t i = 0;
     v2xData.objVehiNum = 0;
-    while(v2xData.objVehicle[i].localId != 0 && i < ADAS_OBJ_VEH_INFO_NUM)
+    while(v2xData.objVehicle[i].localId != 0 && i < ADAS_OBJ_VEH_INFO_NUM && i < ADAS_GSENTRY_OBJ_VEHI_NUM)
     {
-        TransV2xVehi2CddVehi(v2xData.objVehicle[i], host, fusion.v2xObjVehi[i]);
+        TransV2xVehi2CddVehi(v2xData.objVehicle[i], host, fusion.cddObjects[i]);
         // printf("recieve gSentry ObjVehiInfo msg!\n");
         v2xData.objVehiNum++;
         i++;
     }
+    WirteBack(reinterpret_cast<char*>(&fusion.cddObjects), static_cast<uint16_t>(sizeof(fusion.cddObjects)));
 }
 
 void V2xFusionAlgo::ProcessHostVehiMapInfo(uint8_t* buf, uint32_t len)
@@ -141,42 +155,44 @@ void V2xFusionAlgo::ProcessObjVehiMapInfo(uint8_t* buf, uint32_t len)
 
 void V2xFusionAlgo::ProcessGSentryWarningInfo(uint8_t* buf, uint32_t len)
 {
-    if (len != sizeof(V2X::WarningInfo))
+    if (len != sizeof(V2X::WarningInfo) * ADAS_WARN_INFO_NUM)
     {
         return ;
     }
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
     memcpy(&v2xData.warningInfo, buf, len);
-    TransV2xWarn2CddWarn(v2xData.warningInfo, fusion.gSentryWarningInfo);
+    TransV2xWarn2CddWarn(v2xData.warningInfo[0], fusion.gSentryWarningInfo);
+    WirteBack(reinterpret_cast<char*>(&fusion.gSentryWarningInfo), static_cast<uint16_t>(sizeof(CDDFusion::CDDgSentryWarningInfo)));
 }
 
 
 /* coordinate system transformation algorithm */
 
-void V2xFusionAlgo::TransV2xVehi2CddVehi(const V2X::AdasObjVehInfo& raw, const CAN::HostVehiclePos& host, CDDFusion::CDDFusionGSentryObj& dest)
+void V2xFusionAlgo::TransV2xVehi2CddVehi(const V2X::AdasObjVehInfo& raw, const CAN::HostVehiclePos& host, CDD_Fusion_ObjInfo_BUS& dest)
 {
     /* 计算过程中，朝向角以camera为准，即车辆行驶方向与正北方向的夹角，逆时针为正 */
-    dest.id = raw.localId;
-    dest.timestamp = raw.timeStamp;
-    dest.measurementStatus = 1;
-    dest.length = raw.size.length;
-    dest.width = raw.size.width;
-    dest.height = raw.size.height;
-    dest.yaw = -raw.objectHeadingAngle * 0.0125 * PI / PI_DEGREE;
+    dest.De_ID_u8 = raw.localId;
+    dest.De_Timestamp_u32 = raw.timeStamp;
+    dest.De_measurement_status_u8 = 1;
+    dest.De_length_f32 = raw.size.length;
+    dest.De_width_f32 = raw.size.width;
+    dest.De_height_f32 = raw.size.height;
+    dest.De_Yaw_f32 = -raw.objectHeadingAngle * 0.0125 * PI / PI_DEGREE;
     vector<float>&& displacement = TransWgs84ToVcsCoordinate(host, raw.vehicelPos);
-    dest.dx = displacement[0];
-    dest.dy = displacement[1];
+    dest.De_dx_f32 = displacement[0];
+    dest.De_dy_f32 = displacement[1];
 
     const double hostHeadRad  = -(host.objectHeadingAngle * CAN_HEAD_ANGLE_DIAMETER - CAN_HEAD_ANGLE_OFFSET) * PI / PI_DEGREE;
-    vector<float>&& velocity = TransObjVcsToHostVcs(raw.speed * V2X_VELOCITY_DIAMETER, 0, hostHeadRad, dest.yaw);
-    dest.vx = velocity[0];
-    dest.vy = velocity[1];
+    vector<float>&& velocity = TransObjVcsToHostVcs(raw.speed * V2X_VELOCITY_DIAMETER, 0, hostHeadRad, dest.De_Yaw_f32);
+    dest.De_vx_f32 = velocity[0];
+    dest.De_vy_f32 = velocity[1];
 
     vector<float>&& acceleration = TransObjVcsToHostVcs(raw.accelSet.longitude * V2X_ACCELERATION_DIAMETER, 
-                                    raw.accelSet.latitude * V2X_ACCELERATION_DIAMETER, hostHeadRad, dest.yaw);
-    dest.ax = acceleration[0];
-    dest.ay = acceleration[1];
+                                    raw.accelSet.latitude * V2X_ACCELERATION_DIAMETER, hostHeadRad, dest.De_Yaw_f32);
+    dest.De_ax_f32 = acceleration[0];
+    dest.De_ay_f32 = acceleration[1];
+    dest.De_source_u32 = 1;
     /* 未填充数据 */
     // dest.conf;           gSentry无法获取该信息
     // dest.lifeTime;       gSentry无法获取该信息
@@ -230,6 +246,16 @@ void V2xFusionAlgo::TransV2xSpat2CddSpat(const V2X::AdasSpatInfo& v2x, CDDFusion
         cdd.yellowTime = 0xFFFF;
     }
 
+    if (cdd.trafficLightSt == 0)
+    {
+        LOG(INFO) << "trafficLightSt : error";
+        return ;
+    }
+
+    LOG(INFO) << "redTime : " << cdd.redTime;
+    LOG(INFO) << "greenTime : " << cdd.greenTime;
+    LOG(INFO) << "yellowTime : " << cdd.yellowTime;
+
 }
 
 void V2xFusionAlgo::TransV2xWarn2CddWarn(const V2X::WarningInfo& v2x, CDDFusion::CDDgSentryWarningInfo& cdd)
@@ -264,47 +290,35 @@ vector<float> V2xFusionAlgo::TransWgs84ToVcsCoordinate(const CAN::HostVehiclePos
     const double remoteEcefZ = (remoteCurveRadius * (1 - ee) + remoteElev) * sin(remoteLatRad);
 
     /* ECEF ==============> ENU */
-    /* calculate the coordinate index of remote in ENU system which is located at host */
-    vector<double> deltaPos = {remoteEcefX - hostEcefX, remoteEcefY - hostEcefY, remoteEcefZ - hostEcefZ};
-    vector<vector<double>> enuTransMatrix = { {-sin(hostLonRad),                    cos(hostLonRad),                          0       },
-                                              {-sin(hostLatRad) * cos(hostLonRad), -sin(hostLatRad) * sin(hostLonRad), cos(hostLatRad)},
-                                              { cos(hostLatRad) * cos(hostLonRad),  cos(hostLatRad) * sin(hostLonRad), sin(hostLatRad)}};
 
-    vector<float> enupos;
-    for (uint32_t i=0; i<enuTransMatrix.size(); i++)
-    {
-        double tmpans = 0;
-        for (uint32_t j=0; j<enuTransMatrix[0].size(); j++)
-        {
-            tmpans += enuTransMatrix[i][j] * deltaPos[j];
-        }
-        enupos.push_back(tmpans);
-    }
+    Eigen::Vector3d deltaPos(remoteEcefX - hostEcefX, remoteEcefY - hostEcefY, remoteEcefZ - hostEcefZ);
+    Eigen::Matrix3d enuTransMatrix {
+        {-sin(hostLonRad),                    cos(hostLonRad),                          0       },
+        {-sin(hostLatRad) * cos(hostLonRad), -sin(hostLatRad) * sin(hostLonRad), cos(hostLatRad)},
+        {cos(hostLatRad) * cos(hostLonRad),  cos(hostLatRad) * sin(hostLonRad), sin(hostLatRad) }
+    };
+    Eigen::Vector3d enupos = enuTransMatrix * deltaPos;
 
     /* ENU ==============> VCS */
-    vector<vector<double>> vcsTransMatrix = { { cos(hostHeadRad), sin(hostHeadRad), 0},
-                                              {-sin(hostHeadRad), cos(hostHeadRad), 0},
-                                              {        0        ,        0        , 1}};
-    vector<float> ans;
-    for (uint32_t i=0; i<vcsTransMatrix.size(); i++)
-    {
-        double tmpans = 0;
-        for (uint32_t j=0; j<vcsTransMatrix[0].size(); j++)
-        {
-            tmpans += vcsTransMatrix[i][j] * enupos[j];
-        }
-        ans.push_back(tmpans);
-    }
 
-    return std::move(ans);
+    Eigen::Matrix3d vcsTransMatrix  {
+        { cos(hostHeadRad + 0.5 * PI), sin(hostHeadRad + 0.5 * PI), 0}, 
+        {-sin(hostHeadRad + 0.5 * PI), cos(hostHeadRad + 0.5 * PI), 0},
+        {       0        ,         0        , 1}
+    };
+    Eigen::Vector3d ans = vcsTransMatrix * enupos;
+
+    std::vector<float> ansvec(ans.data(), ans.data() + ans.rows() * ans.cols());
+
+    return std::move(ansvec);
 }
 
 vector<float> V2xFusionAlgo::TransObjVcsToHostVcs(const uint16_t objXVector, const uint16_t objYVector, const float hosthead, const float remotehead)
 {
     vector<uint16_t> velocity{objXVector, objYVector};
     const float rotateAngle = hosthead - remotehead;
-    vector<vector<double>> transMatrix = {{cos(rotateAngle), -sin(rotateAngle)},
-                                          {sin(rotateAngle),  cos(rotateAngle)}};
+    vector<vector<double>> transMatrix = {{ cos(rotateAngle), sin(rotateAngle)},
+                                          {-sin(rotateAngle), cos(rotateAngle)}};
     vector<float> ans;
     for (uint32_t i=0; i<transMatrix.size(); i++)
     {
@@ -318,3 +332,15 @@ vector<float> V2xFusionAlgo::TransObjVcsToHostVcs(const uint16_t objXVector, con
     return std::move(ans);
 }
 
+void V2xFusionAlgo::WirteBack(char* buf, uint16_t len)
+{
+#ifdef __x86_64__
+    std::shared_ptr<IProxy> ptr;
+    if (CDD_FUSION_PROXY_REPO.GetSpecificProxy(MsgType::V2X, ptr))
+    {
+        std::shared_ptr<GSentryProxy> gSentryProxy = std::dynamic_pointer_cast<GSentryProxy>(ptr);
+        gSentryProxy->Write(IProxy::ConnectType::TCP_CLIENT, buf, len);
+        // CDebugFun::PrintBuf(reinterpret_cast<uint8_t*>(buf), len);
+    }
+#endif
+}

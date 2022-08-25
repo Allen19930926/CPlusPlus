@@ -94,7 +94,7 @@ static void ParseObstacles(const ObstacleProto::Obstacles *obstacles, gohigh::Ob
   result->mcp_id = obstacles->mcp_id();
   result->obstacle_num = obstacles->obstacle().size();
   auto * obs = &result->obstacles[0];
-  for (int i = 0; i < result->obstacle_num; i++)
+  for (uint32_t i = 0; i < result->obstacle_num; i++)
   {
     auto & obstacle = obstacles->obstacle(i);
     obs = &result->obstacles[i];
@@ -125,14 +125,14 @@ static void ParseObstacles(const ObstacleProto::Obstacles *obstacles, gohigh::Ob
     obs->world_info.position_type = obstacle.world_info().position_type();
     obs->world_info.yaw_rate = obstacle.world_info().yaw_rate();
     obs->world_info.sigma_yaw = obstacle.world_info().sigma_yaw();
-    for (int j = 0; j < 9; j++)
+    for (uint32_t j = 0; j < 9; j++)
     {
       obs->world_info.sigma_vel[j] = obstacle.world_info().sigma_vel(j);
     }
     
     obs->world_info.sigma_width = obstacle.world_info().sigma_width();
     obs->world_info.sigma_height = obstacle.world_info().sigma_height();
-    for (int j = 0; j < 9; j++)
+    for (uint32_t j = 0; j < 9; j++)
     {
       obs->world_info.sigma_position[j] = obstacle.world_info().sigma_position(j);
     }
@@ -1164,32 +1164,32 @@ void ParseROIMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block) {
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  PerceptionBaseProto::ModelROI *resize_roi =
-      static_cast<PerceptionBaseProto::ModelROI *>(message.get());
+//   PerceptionBaseProto::ModelROI *resize_roi =
+//       static_cast<PerceptionBaseProto::ModelROI *>(message.get());
 }
 
 void ParseRuntimeMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block) {
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  RuntimeProto::RuntimeProto *runtime =
-      static_cast<RuntimeProto::RuntimeProto *>(message.get());
+//   RuntimeProto::RuntimeProto *runtime =
+//       static_cast<RuntimeProto::RuntimeProto *>(message.get());
 }
 
 void ParseRuntimeEnvMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block) {
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  RuntimeEnvProto::RuntimeEnvProto *runtime_env =
-      static_cast<RuntimeEnvProto::RuntimeEnvProto *>(message.get());
+//   RuntimeEnvProto::RuntimeEnvProto *runtime_env =
+//       static_cast<RuntimeEnvProto::RuntimeEnvProto *>(message.get());
 }
 
 void ParseScanPointsMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  ScanPointProto::ScanPoints *scan_points =
-      static_cast<ScanPointProto::ScanPoints *>(message.get());
+//   ScanPointProto::ScanPoints *scan_points =
+//       static_cast<ScanPointProto::ScanPoints *>(message.get());
 
 }
 
@@ -1197,8 +1197,8 @@ void ParseSkeletonRawsMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  SkeletonProto::SkeletonRaws *skeleton_raws =
-      static_cast<SkeletonProto::SkeletonRaws *>(message.get());
+//   SkeletonProto::SkeletonRaws *skeleton_raws =
+//       static_cast<SkeletonProto::SkeletonRaws *>(message.get());
 
 }
 
@@ -1206,15 +1206,15 @@ void ParseTrafficlightMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  ObstacleProto::Obstacles *obstacles =
-      static_cast<ObstacleProto::Obstacles *>(message.get());
+//   ObstacleProto::Obstacles *obstacles =
+//       static_cast<ObstacleProto::Obstacles *>(message.get());
 }
 void ParseOdometryMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  OdometryProto::OdometryFrame *odometry =
-      static_cast<OdometryProto::OdometryFrame *>(message.get());
+//   OdometryProto::OdometryFrame *odometry =
+//       static_cast<OdometryProto::OdometryFrame *>(message.get());
 }
 
 void ParseVehicleresultMsg(std::shared_ptr<google::protobuf::Message> message,
@@ -1233,49 +1233,49 @@ void ParseBoxes3drawMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  	Box3DRawProto::Box3DRaws *box3fraws =
-      static_cast<Box3DRawProto::Box3DRaws *>(message.get());
+  	// Box3DRawProto::Box3DRaws *box3fraws =
+    //   static_cast<Box3DRawProto::Box3DRaws *>(message.get());
 }
 
 void ParseLaneresultMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  	LaneProto::Lines *lines =
-      static_cast<LaneProto::Lines *>(message.get());
+  	// LaneProto::Lines *lines =
+    //   static_cast<LaneProto::Lines *>(message.get());
 }
 void ParseLaneparsingMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  	ParsingProto::Parsing *parsing =
-      static_cast<ParsingProto::Parsing *>(message.get());
+  	// ParsingProto::Parsing *parsing =
+    //   static_cast<ParsingProto::Parsing *>(message.get());
 }
 void ParseParsingMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  	ParsingProto::Parsing *parsing =
-      static_cast<ParsingProto::Parsing *>(message.get());
+  	// ParsingProto::Parsing *parsing =
+    //   static_cast<ParsingProto::Parsing *>(message.get());
 }
 void ParseOnlinecalibMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  	OnlineCalibMsgProto::OnlineCalibMsgProto *Onlinecalib =
-      static_cast<OnlineCalibMsgProto::OnlineCalibMsgProto *>(message.get());
+  	// OnlineCalibMsgProto::OnlineCalibMsgProto *Onlinecalib =
+    //   static_cast<OnlineCalibMsgProto::OnlineCalibMsgProto *>(message.get());
 }
 void ParseIspparamMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  	ISPParamProto::ISPParamProto *ispparam =
-      static_cast<ISPParamProto::ISPParamProto *>(message.get());
+  	// ISPParamProto::ISPParamProto *ispparam =
+    //   static_cast<ISPParamProto::ISPParamProto *>(message.get());
 }
 void ParseObjectMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  	object::Object *object =
-      static_cast<object::Object *>(message.get());
+  	// object::Object *object =
+    //   static_cast<object::Object *>(message.get());
 }

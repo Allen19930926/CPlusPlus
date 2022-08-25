@@ -22,7 +22,7 @@ void DataHandler::CreateBlockData(
       const auto& data_size_vec = frame_msg->GetData().get()->GetDataSizeVec();
 
       if (data_vec.size() == data_size_vec.size()) {
-        for (int i = 0; i < data_vec.size(); i++) {
+        for (uint32_t i = 0; i < data_vec.size(); i++) {
           data->push_back(static_cast<uint8_t*>(data_vec[i]));
           data_size->push_back(data_size_vec[i]);
         }

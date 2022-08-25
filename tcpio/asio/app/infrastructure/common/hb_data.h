@@ -1,4 +1,4 @@
-﻿#ifndef HB_DATA_H_
+#ifndef HB_DATA_H_
 #define HB_DATA_H_
 
 //#pragma pack(push, 4)
