@@ -1,5 +1,6 @@
 #include "fusion_asio_tcp_client.h"
-
+#include "log_debug.h"
+#include "glog/logging.h"
 
 FusionAsioTcpClient::FusionAsioTcpClient(asio::io_context& io_context, std::string ipAddr, std::string port)
     : io_context_(io_context), socket_(io_context), timer(io_context)
@@ -25,12 +26,12 @@ void FusionAsioTcpClient::do_connect(const tcp::resolver::results_type& endpoint
         {
             if (!ec)
             {
+                LOG(INFO) << "fusion process is connected!!!";
                 timer.cancel();
                 doReadHeader();
             }
             else
             {
-                // std::cout << "Connect error(line:80) : " << ec.message() << ", trying to reconnecting in every 1s" << std::endl;
                 timer.expires_after(std::chrono::seconds(1));
                 timer.async_wait(std::bind(&FusionAsioTcpClient::do_connect, this, endpoints_));
             }
@@ -42,6 +43,7 @@ void FusionAsioTcpClient::doReadHeader()
     asio::async_read(socket_, asio::buffer(readMsg.Data(), FusionChatMessage::HeaderLength),
             [this](std::error_code ec, std::size_t length)
             {
+                CDebugFun::PrintBuf(reinterpret_cast<uint8_t*>(readMsg.Data()), FusionChatMessage::HeaderLength);
                 if (!ec && readMsg.DecodeHeader())
                 {
                     doReadBody();

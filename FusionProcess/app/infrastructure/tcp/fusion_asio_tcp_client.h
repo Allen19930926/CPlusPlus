@@ -5,7 +5,6 @@
 #include "asio/steady_timer.hpp"
 #include <string>
 #include <functional>
-#include <iostream>
 #include "fusion_chat_message.h"
 
 using asio::ip::tcp;
