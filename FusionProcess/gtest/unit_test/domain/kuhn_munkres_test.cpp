@@ -37,5 +37,5 @@ TEST_F(KMAlgoTest, normal_function_test)
 
 TEST_F(KMAlgoTest, KM_step_unit_test)
 {
-    
+
 }

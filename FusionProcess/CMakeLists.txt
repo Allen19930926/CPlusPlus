@@ -32,5 +32,5 @@ link_directories(
 
 ADD_EXECUTABLE(post-fusion  ${SRC_LIST})
 
-target_link_libraries(post-fusion -lpthread FUSION_BUSINESS glog)
+target_link_libraries(post-fusion -lpthread fusion_bussiness glog)
 

@@ -36,6 +36,6 @@ link_directories(
 
 ADD_EXECUTABLE(ft ${SRC_LIST} ${FT_FILES})
 
-target_link_libraries(ft gtest_main gtest -lpthread -lgcov FUSION_BUSINESS glog)
+target_link_libraries(ft gtest_main gtest -lpthread -lgcov fusion_bussiness glog)
 
 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-PROJECT (FUSION_BUSINESS)
+PROJECT (fusion_bussiness)
 
 include_directories(
     infrastructure/tcp
