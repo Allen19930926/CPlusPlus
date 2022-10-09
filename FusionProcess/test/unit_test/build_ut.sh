@@ -6,7 +6,7 @@ rm -rf ${SCRIPT_DIR}/output
 cd ${SCRIPT_DIR}
 mkdir output
 cd output
-cmake ${SCRIPT_DIR}  -DFT_TEST=1
+cmake ${SCRIPT_DIR}/  -DFT_TEST=2
 make -j2
 ./ft
 

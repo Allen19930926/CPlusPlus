@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/output",
+  "command": "/usr/bin/c++  -I/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/../../test/ThirdParty/gtest/include -I/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/../../app/domain/data_association/KM_algorithm -I/home/allen/Documents/CPlusPlus/FusionProcess/app/include -I/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/../../dependencies/eigen3 -I/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/../../dependencies/linux_default/glog/include  -fprofile-arcs -ftest-coverage -fno-exceptions   -Wall -g --coverage -std=c++14 -o CMakeFiles/ft.dir/main.cpp.o -c /home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/main.cpp",
+  "file": "/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/main.cpp"
+},
+{
+  "directory": "/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/output",
+  "command": "/usr/bin/c++  -I/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/../../test/ThirdParty/gtest/include -I/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/../../app/domain/data_association/KM_algorithm -I/home/allen/Documents/CPlusPlus/FusionProcess/app/include -I/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/../../dependencies/eigen3 -I/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/../../dependencies/linux_default/glog/include  -fprofile-arcs -ftest-coverage -fno-exceptions   -Wall -g --coverage -std=c++14 -o CMakeFiles/ft.dir/domain/kuhn_munkres_test.cpp.o -c /home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/domain/kuhn_munkres_test.cpp",
+  "file": "/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/domain/kuhn_munkres_test.cpp"
+},
+{
+  "directory": "/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/output/fusion",
+  "command": "/usr/bin/c++  -I/home/allen/Documents/CPlusPlus/FusionProcess/app/infrastructure/common -I/home/allen/Documents/CPlusPlus/FusionProcess/app/domain/data_association/KM_algorithm -I/home/allen/Documents/CPlusPlus/FusionProcess/app/include -I/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/../../dependencies/eigen3 -I/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/../../dependencies/linux_default/glog/include  -fprofile-arcs -ftest-coverage -fno-exceptions   -Wall -g --coverage -std=c++14 -o CMakeFiles/fusion_bussiness.dir/domain/data_association/KM_algorithm/kuhn_munkres_algo.cpp.o -c /home/allen/Documents/CPlusPlus/FusionProcess/app/domain/data_association/KM_algorithm/kuhn_munkres_algo.cpp",
+  "file": "/home/allen/Documents/CPlusPlus/FusionProcess/app/domain/data_association/KM_algorithm/kuhn_munkres_algo.cpp"
+},
+{
+  "directory": "/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/output/fusion",
+  "command": "/usr/bin/c++  -I/home/allen/Documents/CPlusPlus/FusionProcess/app/infrastructure/common -I/home/allen/Documents/CPlusPlus/FusionProcess/app/domain/data_association/KM_algorithm -I/home/allen/Documents/CPlusPlus/FusionProcess/app/include -I/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/../../dependencies/eigen3 -I/home/allen/Documents/CPlusPlus/FusionProcess/test/unit_test/../../dependencies/linux_default/glog/include  -fprofile-arcs -ftest-coverage -fno-exceptions   -Wall -g --coverage -std=c++14 -o CMakeFiles/fusion_bussiness.dir/infrastructure/kalman_filter/kalman_filter.cpp.o -c /home/allen/Documents/CPlusPlus/FusionProcess/app/infrastructure/kalman_filter/kalman_filter.cpp",
+  "file": "/home/allen/Documents/CPlusPlus/FusionProcess/app/infrastructure/kalman_filter/kalman_filter.cpp"
+}
+]

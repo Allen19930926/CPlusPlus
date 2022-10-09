@@ -6,6 +6,8 @@
 #include <string>
 #include <functional>
 #include "fusion_chat_message.h"
+#include <queue>
+#include "default_chat_message.h"
 
 using asio::ip::tcp;
 
@@ -17,16 +19,24 @@ public:
     void start();
 
 private:
-    void do_connect(const tcp::resolver::results_type& endpoints);
+    void keep_alive();
+    void do_connect();
     void doReadHeader();
     void doReadBody();
+    void write(const DefaultChatMessage& msg);
+    void do_write();
 
 private:
     asio::io_context& io_context_;
     tcp::socket socket_;
-    asio::steady_timer timer;
-    tcp::resolver::results_type endpoints_;
+    asio::steady_timer reconnectTimer;
+    asio::steady_timer aliveTimer;
     FusionChatMessage readMsg;
+    std::deque<DefaultChatMessage> writeMsgs;
+    std::atomic_bool isConnected;
+    std::string ip;
+    std::string port_;
+    uint32_t reconnectCount;
 };
 
 #endif /* C5CF927E_9DE0_47DA_85F1_E5A9DEE64D22 */
