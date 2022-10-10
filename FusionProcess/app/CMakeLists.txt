@@ -6,6 +6,7 @@ include_directories(
     infrastructure/common
     infrastructure/sensor_object
     domain/data_association/KM_algorithm
+    ${GTEST_INCLUDES}
 )
 
 

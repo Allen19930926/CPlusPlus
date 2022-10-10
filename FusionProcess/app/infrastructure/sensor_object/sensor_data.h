@@ -3,7 +3,9 @@
 
 #include "sensor_object.h"
 #include <queue>
+#include "gtest/gtest.h"
 
+class SensorDataTest_add_max_frame_test;
 
 class Sensor
 {
@@ -12,9 +14,10 @@ public:
     bool QueryNeareatFrame(const uint64_t timeStamp, SensorFrame& queryFrame);
     void AddFrame(const SensorFrame& frame);
     bool IsSpecificType(const uint8_t type) {return type == sensorType;}
-public:
+private:
     uint32_t GetCachedFrameNum() {return frames_.size();}
 private:
+    FRIEND_TEST(SensorDataTest, add_max_frame_test);
     uint8_t     sensorType;
     std::deque<SensorFrame> frames_;
 };
