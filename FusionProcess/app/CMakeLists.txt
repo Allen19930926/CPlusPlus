@@ -4,12 +4,14 @@ PROJECT (fusion_bussiness)
 
 include_directories(
     infrastructure/common
+    infrastructure/sensor_object
     domain/data_association/KM_algorithm
 )
 
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/domain/data_association/KM_algorithm FUSION_FILES)
 aux_source_directory(${PROJECT_SOURCE_DIR}/infrastructure/kalman_filter FUSION_FILES)
+aux_source_directory(${PROJECT_SOURCE_DIR}/infrastructure/sensor_object FUSION_FILES)
 
 if (NOT (FT_TEST EQUAL 2))
     include_directories(infrastructure/tcp)

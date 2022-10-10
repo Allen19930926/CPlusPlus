@@ -1,2 +1,0 @@
-/usr/bin/ar qc libfusion_bussiness.a CMakeFiles/fusion_bussiness.dir/domain/data_association/KM_algorithm/kuhn_munkres_algo.cpp.o CMakeFiles/fusion_bussiness.dir/infrastructure/kalman_filter/kalman_filter.cpp.o
-/usr/bin/ranlib libfusion_bussiness.a
