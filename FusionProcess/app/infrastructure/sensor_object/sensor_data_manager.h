@@ -6,10 +6,12 @@
 
 class SensorDataManager
 {
+public:
+    void AddSensorMeasurements(const SensorFrame& frame);
 private:
     using SensorType = uint8_t;
 public:
-    std::unordered_map<SensorType, Sensor> sensorMap;
+    std::unordered_map<SensorType, Sensor> sensors;
 }
 
 #endif /* FA3A08FF_9ADF_49BD_9FDD_336756F0C840 */

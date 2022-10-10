@@ -6,7 +6,7 @@ namespace
     const uint8_t  maxCachedFrameNum = 10;
 }
 
-bool Sensor::QueryNeareatFrame(const uint64_t timeStamp, SensorFrame& queryFrame)
+bool Sensor::QueryLatestFrame(const uint64_t timeStamp, std::vector<SensorFrame>& queryFrames)
 {
     if (frames_.size() == 0)
     {
@@ -14,16 +14,16 @@ bool Sensor::QueryNeareatFrame(const uint64_t timeStamp, SensorFrame& queryFrame
         return false;
     }
 
-    uint32_t latestQueryTime = 0;
     for (uint32_t i=0; i<frames_.size(); i++)
     {
         if (frames_[i].timeStamp > timeStamp || frames_[i].timeStamp <= latestQueryTime)
         {
             continue;
         }
-        queryFrame = frames_[i];
-        latestQueryTime = frames_[i].timeStamp;
+        queryFrames.push_back(frames_[i]);
     }
+
+    latestQueryTime = timeStamp;
 
     return true;
 }
