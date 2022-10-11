@@ -4,21 +4,27 @@
 #include "sensor_object.h"
 #include <queue>
 #include <vector>
-#include "gtest/gtest.h"
-
-class SensorDataTest_add_max_frame_test;
 
 class Sensor
 {
 public:
+    /// @brief constructor func
+    /// @param type 
     Sensor(const uint8_t type): sensorType(type), latestQueryTime(0) {}
-    bool QueryLatestFrame(const uint64_t timeStamp, std::vector<SensorFrame>& queryFrames);
+    /// @brief query and get sensor frames since latestQueryTime
+    /// @param timeStamp 
+    /// @param queryFrames
+    void QueryLatestFrame(const uint32_t timeStamp, std::vector<SensorFrame>& queryFrames);
+    /// @brief Add new frame to deque. if cached frame number is greater than maxCachedFrameNum , then will drop oldest frame data
+    /// @param frame 
     void AddFrame(const SensorFrame& frame);
+    /// @brief judge whether class type is the same as input sensor type
+    /// @param type 
+    /// @return whether class type is the same as input sensor type
     bool IsSpecificType(const uint8_t type) {return type == sensorType;}
-private:
     uint32_t GetCachedFrameNum() {return frames_.size();}
+    void Clear() {frames_.clear();}
 private:
-    FRIEND_TEST(SensorDataTest, add_max_frame_test);
     uint8_t     sensorType;
     uint32_t    latestQueryTime;
     std::deque<SensorFrame> frames_;

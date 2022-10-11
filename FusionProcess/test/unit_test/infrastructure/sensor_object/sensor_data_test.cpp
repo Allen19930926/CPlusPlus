@@ -43,6 +43,17 @@ TEST_F(SensorDataTest, add_max_frame_test)
     }
 }
 
+TEST_F(SensorDataTest, add_frame_fail_test)
+{
+    SensorFrame frame;
+    frame.sensorType = 5;
+    frame.timeStamp = 12468431;
+
+    sensor->AddFrame(frame);
+
+    EXPECT_EQ(uint32_t(0), sensor->GetCachedFrameNum());
+}
+
 TEST_F(SensorDataTest, query_frame_with_null_deque_test)
 {
     SensorFrame frame;
@@ -50,8 +61,9 @@ TEST_F(SensorDataTest, query_frame_with_null_deque_test)
     frame.timeStamp = 12468431;
 
     std::vector<SensorFrame> queryFrame;
+    sensor->QueryLatestFrame(frame.timeStamp, queryFrame);
 
-    EXPECT_FALSE(sensor->QueryLatestFrame(frame.timeStamp, queryFrame));
+    EXPECT_EQ(uint32_t(0), queryFrame.size());
 }
 
 TEST_F(SensorDataTest, query_frame_normal_test)
@@ -76,13 +88,13 @@ TEST_F(SensorDataTest, query_frame_normal_test)
     }
 
     std::vector<SensorFrame> queryFrame;
-    EXPECT_TRUE(sensor->QueryLatestFrame(1000, queryFrame));
+    sensor->QueryLatestFrame(1000, queryFrame);
     queryFrame.clear();
 
     // deque   12468523 12468525 12468527 12468529 12468531 1000 900 800 700 600
     // query   12468530
     // expect  12468529
-    EXPECT_TRUE(sensor->QueryLatestFrame(latestTime - 1, queryFrame));
+    sensor->QueryLatestFrame(latestTime - 1, queryFrame);
     EXPECT_EQ(uint32_t(4), queryFrame.size());
 
     std::sort(queryFrame.begin(), queryFrame.end(), [](const SensorFrame& lhs, const SensorFrame& rhs) {return lhs.timeStamp > rhs.timeStamp;});
@@ -92,4 +104,20 @@ TEST_F(SensorDataTest, query_frame_normal_test)
         latestTime -= 2;
         EXPECT_EQ(latestTime, it.timeStamp);
     }
+}
+
+TEST_F(SensorDataTest, clear_frame_test)
+{
+    SensorFrame frame;
+    frame.sensorType = 1;
+    frame.timeStamp = 12468431;
+
+    for (uint32_t i=0; i<50; i++)
+    {
+        frame.timeStamp++;
+        sensor->AddFrame(frame);
+    }
+    sensor->Clear();
+
+    EXPECT_EQ(uint32_t(0), sensor->GetCachedFrameNum());
 }
