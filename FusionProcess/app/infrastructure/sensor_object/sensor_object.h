@@ -4,9 +4,16 @@
 #include <Eigen/Dense>
 #include <vector>
 
+enum class SensorType : uint8_t
+{
+    CAMERA = 0,
+    V2X,
+    FRONT_RADAR,
+    INVALID
+};
+
 struct alignas(16) SensorObject
 {
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     uint32_t            timestamp;             /* 时间戳 */
     uint8_t             id;                    /* 观测对象ID，如cameraid、radarid等 */
     float               conf;                  /*  */
@@ -35,7 +42,7 @@ struct alignas(16) SensorObject
 struct alignas(16) SensorFrame
 {
     uint32_t    timeStamp;
-    uint8_t     sensorType;
+    SensorType  sensorType;
     std::vector<SensorObject> sensors;
 };
 

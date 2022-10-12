@@ -7,7 +7,7 @@ struct SensorDataTest : testing::Test
 {
     void SetUp()
     {
-        sensor = new Sensor(1);
+        sensor = new Sensor(SensorType::CAMERA);
     }
 
     void TearDown()
@@ -21,7 +21,7 @@ struct SensorDataTest : testing::Test
 TEST_F(SensorDataTest, add_max_frame_test)
 {
     SensorFrame frame;
-    frame.sensorType = 1;
+    frame.sensorType = SensorType::CAMERA;
     frame.timeStamp = 12468431;
 
     for (uint32_t i=0; i<50; i++)
@@ -46,7 +46,7 @@ TEST_F(SensorDataTest, add_max_frame_test)
 TEST_F(SensorDataTest, add_frame_fail_test)
 {
     SensorFrame frame;
-    frame.sensorType = 5;
+    frame.sensorType = SensorType::INVALID;
     frame.timeStamp = 12468431;
 
     sensor->AddFrame(frame);
@@ -57,7 +57,7 @@ TEST_F(SensorDataTest, add_frame_fail_test)
 TEST_F(SensorDataTest, query_frame_with_null_deque_test)
 {
     SensorFrame frame;
-    frame.sensorType = 1;
+    frame.sensorType = SensorType::CAMERA;
     frame.timeStamp = 12468431;
 
     std::vector<SensorFrame> queryFrame;
@@ -69,7 +69,7 @@ TEST_F(SensorDataTest, query_frame_with_null_deque_test)
 TEST_F(SensorDataTest, query_frame_normal_test)
 {
     SensorFrame frame;
-    frame.sensorType = 1;
+    frame.sensorType = SensorType::CAMERA;
     frame.timeStamp = 12468431;
 
     for (uint32_t i=0; i<50; i++)
@@ -109,7 +109,7 @@ TEST_F(SensorDataTest, query_frame_normal_test)
 TEST_F(SensorDataTest, clear_frame_test)
 {
     SensorFrame frame;
-    frame.sensorType = 1;
+    frame.sensorType = SensorType::CAMERA;
     frame.timeStamp = 12468431;
 
     for (uint32_t i=0; i<50; i++)

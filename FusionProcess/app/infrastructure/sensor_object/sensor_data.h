@@ -10,7 +10,7 @@ class Sensor
 public:
     /// @brief constructor func
     /// @param type 
-    Sensor(const uint8_t type): sensorType(type), latestQueryTime(0) {}
+    Sensor(const SensorType type): sensorType(type), latestQueryTime(0) {}
     /// @brief query and get sensor frames since latestQueryTime
     /// @param timeStamp 
     /// @param queryFrames
@@ -21,11 +21,11 @@ public:
     /// @brief judge whether class type is the same as input sensor type
     /// @param type 
     /// @return whether class type is the same as input sensor type
-    bool IsSpecificType(const uint8_t type) {return type == sensorType;}
+    bool IsSpecificType(const SensorType type) {return type == sensorType;}
     uint32_t GetCachedFrameNum() {return frames_.size();}
     void Clear() {frames_.clear();}
 private:
-    uint8_t     sensorType;
+    SensorType  sensorType;
     uint32_t    latestQueryTime;
     std::deque<SensorFrame> frames_;
 };

@@ -8,8 +8,6 @@
 
 class SensorDataManager
 {
-private:
-    using SensorType = std::string;
 public:
     static SensorDataManager& GetInstance()
     {
