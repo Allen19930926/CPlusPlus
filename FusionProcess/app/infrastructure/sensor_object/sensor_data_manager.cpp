@@ -22,30 +22,30 @@ void SensorDataManager::AddSensorMeasurements(const SensorFrame& frame)
         return ;
     }
 
-    auto pair = sensors.find(frame.sensorType);
+    auto pair = sensors.find(frame.sensor_type);
     pair->second.AddFrame(frame);
 }
 
-bool SensorDataManager::QueryLatestFrames(const uint32_t timeStamp, std::vector<SensorFrame>& frames)
+bool SensorDataManager::QueryLatestFrames(const uint32_t time_stamp, std::vector<SensorFrame>& frames)
 {
     frames.clear();
 
     for (auto& pair : sensors)
     {
         std::vector<SensorFrame> eachSensorFrames;
-        pair.second.QueryLatestFrame(timeStamp, eachSensorFrames);
+        pair.second.QueryLatestFrame(time_stamp, eachSensorFrames);
         frames.insert(frames.end(), eachSensorFrames.begin(), eachSensorFrames.end());
     }
 
-    std::sort(frames.begin(), frames.end(), [](const SensorFrame& lhs, const SensorFrame& rhs) { return lhs.timeStamp < rhs.timeStamp; });
+    std::sort(frames.begin(), frames.end(), [](const SensorFrame& lhs, const SensorFrame& rhs) { return lhs.time_stamp < rhs.time_stamp; });
 
     return true;
 }
 
-uint32_t SensorDataManager::GetCacheFrameNum(const SensorType sensorType)
+uint32_t SensorDataManager::GetCacheFrameNum(const SensorType sensor_type)
 {
     uint32_t count = 0;
-    auto pair = sensors.find(sensorType);
+    auto pair = sensors.find(sensor_type);
     if (pair != sensors.end())
     {
         count = pair->second.GetCachedFrameNum();
@@ -63,6 +63,6 @@ void SensorDataManager::Clear()
 
 bool SensorDataManager::IsTargetSensor(const SensorFrame& frame)
 {
-    return (sensors.find(frame.sensorType) != sensors.end());
+    return (sensors.find(frame.sensor_type) != sensors.end());
 }
 

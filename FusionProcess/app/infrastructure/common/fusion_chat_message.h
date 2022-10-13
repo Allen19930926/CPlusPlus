@@ -6,8 +6,8 @@
 
 struct FusionChatHeader
 {
-    uint32_t sensorType;
-    uint32_t timestamp;
+    uint32_t sensor_type;
+    uint32_t time_stamp;
     uint32_t objectNum;
     uint32_t bodyLength;
 };

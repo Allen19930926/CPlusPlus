@@ -21,33 +21,33 @@ struct SensorDataTest : testing::Test
 TEST_F(SensorDataTest, add_max_frame_test)
 {
     SensorFrame frame;
-    frame.sensorType = SensorType::CAMERA;
-    frame.timeStamp = 12468431;
+    frame.sensor_type = SensorType::CAMERA;
+    frame.time_stamp = 12468431;
 
     for (uint32_t i=0; i<50; i++)
     {
-        frame.timeStamp++;
+        frame.time_stamp++;
         sensor->AddFrame(frame);
     }
 
     EXPECT_EQ(uint32_t(10), sensor->GetCachedFrameNum());
 
     std::vector<SensorFrame> queryFrame;
-    sensor->QueryLatestFrame(frame.timeStamp, queryFrame);
-    std::sort(queryFrame.begin(), queryFrame.end(), [](const SensorFrame& lhs, const SensorFrame& rhs) {return lhs.timeStamp > rhs.timeStamp;});
+    sensor->QueryLatestFrame(frame.time_stamp, queryFrame);
+    std::sort(queryFrame.begin(), queryFrame.end(), [](const SensorFrame& lhs, const SensorFrame& rhs) {return lhs.time_stamp > rhs.time_stamp;});
 
     for (const auto& it : queryFrame)
     {
-        EXPECT_EQ(frame.timeStamp, it.timeStamp);
-        frame.timeStamp--;
+        EXPECT_EQ(frame.time_stamp, it.time_stamp);
+        frame.time_stamp--;
     }
 }
 
 TEST_F(SensorDataTest, add_frame_fail_test)
 {
     SensorFrame frame;
-    frame.sensorType = SensorType::INVALID;
-    frame.timeStamp = 12468431;
+    frame.sensor_type = SensorType::MAX;
+    frame.time_stamp = 12468431;
 
     sensor->AddFrame(frame);
 
@@ -57,11 +57,11 @@ TEST_F(SensorDataTest, add_frame_fail_test)
 TEST_F(SensorDataTest, query_frame_with_null_deque_test)
 {
     SensorFrame frame;
-    frame.sensorType = SensorType::CAMERA;
-    frame.timeStamp = 12468431;
+    frame.sensor_type = SensorType::CAMERA;
+    frame.time_stamp = 12468431;
 
     std::vector<SensorFrame> queryFrame;
-    sensor->QueryLatestFrame(frame.timeStamp, queryFrame);
+    sensor->QueryLatestFrame(frame.time_stamp, queryFrame);
 
     EXPECT_EQ(uint32_t(0), queryFrame.size());
 }
@@ -69,21 +69,21 @@ TEST_F(SensorDataTest, query_frame_with_null_deque_test)
 TEST_F(SensorDataTest, query_frame_normal_test)
 {
     SensorFrame frame;
-    frame.sensorType = SensorType::CAMERA;
-    frame.timeStamp = 12468431;
+    frame.sensor_type = SensorType::CAMERA;
+    frame.time_stamp = 12468431;
 
     for (uint32_t i=0; i<50; i++)
     {
-        frame.timeStamp += 2;
+        frame.time_stamp += 2;
         sensor->AddFrame(frame);
     }
 
-    uint32_t latestTime = frame.timeStamp;
+    uint32_t latestTime = frame.time_stamp;
 
-    frame.timeStamp = 1000;
+    frame.time_stamp = 1000;
     for (uint32_t i=0; i<5; i++)
     {
-        frame.timeStamp -= 100;
+        frame.time_stamp -= 100;
         sensor->AddFrame(frame);
     }
 
@@ -97,24 +97,24 @@ TEST_F(SensorDataTest, query_frame_normal_test)
     sensor->QueryLatestFrame(latestTime - 1, queryFrame);
     EXPECT_EQ(uint32_t(4), queryFrame.size());
 
-    std::sort(queryFrame.begin(), queryFrame.end(), [](const SensorFrame& lhs, const SensorFrame& rhs) {return lhs.timeStamp > rhs.timeStamp;});
+    std::sort(queryFrame.begin(), queryFrame.end(), [](const SensorFrame& lhs, const SensorFrame& rhs) {return lhs.time_stamp > rhs.time_stamp;});
 
     for (const auto& it : queryFrame)
     {
         latestTime -= 2;
-        EXPECT_EQ(latestTime, it.timeStamp);
+        EXPECT_EQ(latestTime, it.time_stamp);
     }
 }
 
 TEST_F(SensorDataTest, clear_frame_test)
 {
     SensorFrame frame;
-    frame.sensorType = SensorType::CAMERA;
-    frame.timeStamp = 12468431;
+    frame.sensor_type = SensorType::CAMERA;
+    frame.time_stamp = 12468431;
 
     for (uint32_t i=0; i<50; i++)
     {
-        frame.timeStamp++;
+        frame.time_stamp++;
         sensor->AddFrame(frame);
     }
     sensor->Clear();

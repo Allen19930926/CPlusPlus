@@ -23,14 +23,14 @@ struct SensorDataManagerTest : testing::Test
 TEST_F(SensorDataManagerTest, add_frame_normal_test)
 {
     SensorFrame frame;
-    frame.sensorType = SensorType::CAMERA;
-    frame.timeStamp = 13487432;
+    frame.sensor_type = SensorType::CAMERA;
+    frame.time_stamp = 13487432;
     manager->AddSensorMeasurements(frame);
 
-    frame.sensorType = SensorType::V2X;
+    frame.sensor_type = SensorType::V2X;
     manager->AddSensorMeasurements(frame);
 
-    frame.sensorType = SensorType::FRONT_RADAR;
+    frame.sensor_type = SensorType::FRONT_RADAR;
     manager->AddSensorMeasurements(frame);
 
     ASSERT_EQ(uint32_t(1), manager->GetCacheFrameNum(SensorType::CAMERA));
@@ -41,8 +41,8 @@ TEST_F(SensorDataManagerTest, add_frame_normal_test)
 TEST_F(SensorDataManagerTest, add_frame_fail_and_target_frame_judge_test)
 {
     SensorFrame frame;
-    frame.sensorType = SensorType::INVALID;
-    frame.timeStamp = 13487432;
+    frame.sensor_type = SensorType::MAX;
+    frame.time_stamp = 13487432;
     manager->AddSensorMeasurements(frame);
 
     ASSERT_EQ(uint32_t(0), manager->GetCacheFrameNum(SensorType::CAMERA));
@@ -53,17 +53,17 @@ TEST_F(SensorDataManagerTest, add_frame_fail_and_target_frame_judge_test)
 TEST_F(SensorDataManagerTest, query_lastest_frames_test)
 {
     SensorFrame frame;
-    frame.sensorType = SensorType::CAMERA;
-    frame.timeStamp = 13487432;
+    frame.sensor_type = SensorType::CAMERA;
+    frame.time_stamp = 13487432;
     for (uint32_t i=0; i<20; i++)
     {
-        frame.timeStamp++;
+        frame.time_stamp++;
         manager->AddSensorMeasurements(frame);
     }
-    frame.timeStamp = 1000;
+    frame.time_stamp = 1000;
     for (uint32_t i=0; i<4; i++)
     {
-        frame.timeStamp -= 200;
+        frame.time_stamp -= 200;
         manager->AddSensorMeasurements(frame);
     }
 
@@ -85,12 +85,12 @@ TEST_F(SensorDataManagerTest, query_lastest_frames_test)
 TEST_F(SensorDataManagerTest, get_cached_frame_num_test)
 {
     SensorFrame frame;
-    frame.sensorType = SensorType::CAMERA;
-    frame.timeStamp = 13487432;
+    frame.sensor_type = SensorType::CAMERA;
+    frame.time_stamp = 13487432;
     manager->AddSensorMeasurements(frame);
 
     ASSERT_EQ(uint32_t(1), manager->GetCacheFrameNum(SensorType::CAMERA));
-    ASSERT_EQ(uint32_t(0), manager->GetCacheFrameNum(SensorType::INVALID));
+    ASSERT_EQ(uint32_t(0), manager->GetCacheFrameNum(SensorType::MAX));
 }
 
 // TEST_F(SensorDataManagerTest, any_test)
