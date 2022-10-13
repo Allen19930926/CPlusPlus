@@ -10,7 +10,7 @@
 extern "C" {
 #include "ipc-shm.h"
 }
-
+#include <iomanip>
 
 #define LOCAL_SHM_ADDR 0x34100000
 #define IPC_SHM_SIZE 0x100000 /* 1M local shm, 1M remote shm */
@@ -26,7 +26,7 @@ static void IpcM_RxCallback(void *cb_arg, int chan_id, void *buf, size_t size);
 /* data buffer configguration*/
 struct ipc_shm_pool_cfg buf_pools[] = {
 	{
-		.num_bufs = 10,
+		.num_bufs = 32,
 		.buf_size = S_BUF_LEN
 	},
 	{
@@ -101,6 +101,7 @@ static void IpcM_ProtocolParse(uint32);
 
 static void IpcM_HandleError(uint32 error)
 {
+	LOG(INFO) << "IPCM Error: " << error;
 	IpcM_lastErrorCode = error;
 }
 
@@ -122,75 +123,20 @@ static void IpcM_Appl_rxCallback(IpcM_FrameTypes_T frameType, const char * data,
 			LOG(ERROR) << ("received data size does not match sizeof timespec");
 			return;
 		}
+		LOG(INFO) << "receive time sync frame";
 		
 		struct timespec ts;
     	IpcM_Memcpy(&ts, data, sizeof(ts));
 		clock_settime(CLOCK_REALTIME, &ts);
 	}
-    else if (frameType == IPC_APPL_FRAME_GNSS_ACC) {
-		if (len != sizeof(IPC_GNSS_Acc))
+    else if (frameType == IPC_APPL_FRAME_GNSS_DATA) {
+		if (len != sizeof(IPC_GNSS_Data))
 		{
-			LOG(ERROR) << ("received data size does not match sizeof IPC_GNSS_Acc");
+			LOG(ERROR) << ("received data size does not match sizeof IPC_GNSS_Data");
 			return;
 		}
-		CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_GNSS_ACC, data , static_cast<uint16_t>(len)});
+		CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_GNSS_DATA, data , static_cast<uint16_t>(len)});
     }
-	else if (frameType == IPC_APPL_FRAME_GNSS_GYRO) {
-		if (len != sizeof(IPC_GNSS_Gyro))
-		{
-			LOG(ERROR) << ("received data size does not match sizeof IPC_GNSS_Gyro");
-			return;
-		}
-		CDD_FUSION_EVENT_QUEUE.push({ MsgType::IPC_GNSS_GYRO, data , static_cast<uint16_t>(len)});
-    }
-	else if (frameType == IPC_APPL_FRAME_GNSS_HEADING_PITCH_ROLL) {
-		if (len != sizeof(IPC_GNSS_HeadingPitchRoll))
-		{
-			LOG(ERROR) << ("received data size does not match sizeof IPC_GNSS_HeadingPitchRoll");
-			return;
-		}
-		CDD_FUSION_EVENT_QUEUE.push({ MsgType::IPC_GNSS_HEADING_PITCH_ROLL, data , static_cast<uint16_t>(len) });
-    }
-	else if (frameType == IPC_APPL_FRAME_GNSS_HEIGHT_TIME) {
-		if (len != sizeof(IPC_GNSS_HeightAndTime))
-		{
-			LOG(ERROR) << ("received data size does not match sizeof IPC_GNSS_HeightAndTime");
-			return;
-		}
-		CDD_FUSION_EVENT_QUEUE.push({ MsgType::IPC_GNSS_HEIGHT_TIME, data , static_cast<uint16_t>(len) });
-    }
-	else if (frameType == IPC_APPL_FRAME_GNSS_LAT_LONG) {
-		if (len != sizeof(IPC_GNSS_LatitudeLongitude))
-		{
-			LOG(ERROR) << ("received data size does not match sizeof IPC_GNSS_LatitudeLongitude");
-			return;
-		}
-		CDD_FUSION_EVENT_QUEUE.push({ MsgType::IPC_GNSS_LAT_LONG, data , static_cast<uint16_t>(len) });
-	}
-	else if (frameType == IPC_APPL_FRAME_GNSS_SPEED) {
-		if (len != sizeof(IPC_GNSS_Speed))
-		{
-			LOG(ERROR) << ("received data size does not match sizeof IPC_GNSS_Speed");
-			return;
-		}
-		CDD_FUSION_EVENT_QUEUE.push({ MsgType::IPC_GNSS_SPEED, data , static_cast<uint16_t>(len) });
-	}
-	else if (frameType == IPC_APPL_FRAME_GNSS_DATA_INFO) {
-		if (len != sizeof(IPC_GNSS_DataInfo))
-		{
-			LOG(ERROR) << ("received data size does not match sizeof IPC_GNSS_DataInfo");
-			return;
-		}
-		CDD_FUSION_EVENT_QUEUE.push({ MsgType::IPC_GNSS_DATA_INFO, data , static_cast<uint16_t>(len) });
-	}
-	else if (frameType == IPC_APPL_FRAME_GNSS_STD) {
-		if (len != sizeof(IPC_GNSS_Std))
-		{
-			LOG(ERROR) << ("received data size does not match sizeof IPC_GNSS_Std");
-			return;
-		}
-		CDD_FUSION_EVENT_QUEUE.push({ MsgType::IPC_GNSS_STD, data , static_cast<uint16_t>(len) });
-	}
 	else if (frameType == IPC_APPL_FRAME_GNSS_UTC) {
 		if (len != sizeof(IPC_GNSS_UTC))
 		{
@@ -255,6 +201,7 @@ void IpcM_Init(void)
 
 void IpcM_MainFunction(void)
 {
+	static int counter = 0;
     static boolean sync_once = FALSE;
 	static IpcM_States_T old_state = IPCM_INIT;
 	IpcM_Result_T ipcSendResult = IPCM_SEND_ERROR;
@@ -262,6 +209,10 @@ void IpcM_MainFunction(void)
 	if (old_state != IpcM_MainState) {
 		DLOG(INFO) << "state transit from: " << old_state << " to " << IpcM_MainState;
 		old_state = IpcM_MainState;
+	}
+	if (counter++ == 20) {
+		counter = 0;
+		DLOG(INFO) << "IpcM_MainState: " << IpcM_MainState;
 	}
 	switch (IpcM_MainState)
 	{
@@ -364,6 +315,7 @@ IpcM_Result_T IpcM_Send(const IpcM_FrameTypes_T frameType, const void* srcAddres
 	// LOG(INFO) << "acquired buffer on: " << std::hex << reinterpret_cast<std::uintptr_t>(buf);
     *((uint32 *)buf) = (uint32)frameType;
 
+
 	/* write data to acquired buffer */
 //    for (i = 0; i < msgLen; i++)
 //    {
@@ -371,6 +323,12 @@ IpcM_Result_T IpcM_Send(const IpcM_FrameTypes_T frameType, const void* srcAddres
 //    }
     /* might corrupt when use memcpy */
     IpcM_Memcpy(buf + 4, srcAddress, msgLen);
+
+	// for (int i = 0; i < msgLen + 4; i++)
+	// 	printf("%02x", *(buf + i));
+	// printf("\n");
+    // 	std::cout << std::hex << *(buf + i) << " ";
+	// std::cout << std::endl;
 
 	/* send data to remote peer */
 	err = ipc_shm_tx(chanId, buf, msgLen + 4); //add by Tao, give 0 to instance no.
@@ -390,6 +348,13 @@ static void IpcM_RxCallback(void *arg, int chanId, void *buf, size_t size)
 
 	if (size > IPCF_SHM_MAX_BUFFER_LENGTH) {
 		IpcM_HandleError(IPCM_INVALID_ARG);
+		/* release the buffer */
+		// err = ipc_shm_release_buf(chanId, buf);
+		// // LOG(INFO) << "release buffer on: " << std::hex << reinterpret_cast<std::uintptr_t>(buf);
+		// if (err) {
+		// 	LOG(ERROR) << "failed to release buf, error code: " << err;
+		// }
+		// return;
 	}
 
 	/* consume received data */
@@ -397,9 +362,10 @@ static void IpcM_RxCallback(void *arg, int chanId, void *buf, size_t size)
 
 	/* release the buffer */
 	err = ipc_shm_release_buf(chanId, buf);
-	LOG(INFO) << "release buffer on: " << std::hex << reinterpret_cast<std::uintptr_t>(buf);
+	// LOG(INFO) << "release buffer on: " << std::hex << reinterpret_cast<std::uintptr_t>(buf);
 	if (err) {
         LOG(ERROR) << "failed to release buf, error code: " << err;
+		// return;
 	}
 	
 	/* protocol parse, add by Tao*/
@@ -495,27 +461,25 @@ static IpcM_Result_T IpcM_SendKeepAliveFrame(uint8 temp, uint8 cpuLoad, uint32 t
 
 }
 
-void IpcM::Run() {
-  if (start_thread_) {
-    LOG(INFO) << "ipcm Thread is running ...";
-    return;
-  }
-  
+
+void IpcM::Init() {
   IpcM_Init();
-  LOG(INFO) << "ipcm thread running ->";
-  start_thread_ = true;
-  ipcm_thread_ = std::thread([this]() {
-    while (start_thread_) {
-      IpcM_MainFunction();
-      std::chrono::milliseconds timespan(50);
-      std::this_thread::sleep_for(timespan);
-    }
-	LOG(INFO) << "ipcm thread ending";
+}
+
+void IpcM::DeInit() {
+	// DLOG(INFO) << "stopping IpcM thread";
+	LOG(INFO) << "ipcm free resource";
     IpcM_Free();
-  });
+}
+
+void IpcM::Run() {
+	IpcM_MainFunction();
 }
 
 int IpcM::Write(const IpcM_FrameTypes_T frameType, const void* srcAddress, const uint16 msgLen) {
+	if (IpcM_MainState != IPCM_RUNNING) {
+		return -1;
+	}
     IpcM_Send(frameType, srcAddress, msgLen);
     return 0;
 }

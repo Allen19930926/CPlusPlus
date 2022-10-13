@@ -60,11 +60,14 @@ typedef struct
 
 typedef struct
 {
-  VAR(UInt32, TYPEDEF)  De_Timestamp_u32;
-  VAR(UInt8, TYPEDEF)   De_ID_u8;
+  VAR(UInt32, TYPEDEF) De_Timestamp_u32;
+  VAR(UInt8, TYPEDEF) De_ID_u8;
   VAR(Float32, TYPEDEF) De_conf_f32;
-  VAR(UInt8, TYPEDEF)   De_measurement_status_u8;
-  VAR(UInt32, TYPEDEF)  De_life_time_u32;
+  VAR(UInt8, TYPEDEF) De_measurement_status_u8;
+  VAR(UInt32, TYPEDEF) De_life_time_u32;
+  VAR(UInt8, TYPEDEF) De_source_u8;
+  VAR(UInt8, TYPEDEF) De_ObjectType_u8;
+  VAR(UInt8, TYPEDEF) De_ObjectMovingStatus_u8;
   VAR(Float32, TYPEDEF) De_length_f32;
   VAR(Float32, TYPEDEF) De_width_f32;
   VAR(Float32, TYPEDEF) De_height_f32;
@@ -87,7 +90,6 @@ typedef struct
   VAR(Float32, TYPEDEF) De_ttc_f32;
   VAR(Float32, TYPEDEF) De_ettc_f32;
   VAR(Boolean, TYPEDEF) De_CIPV_u8;
-  VAR(UInt32, TYPEDEF)  De_source_u32;
 } CDD_Fusion_ObjInfo_BUS;
 
 typedef VAR(CDD_Fusion_ObjInfo_BUS, TYPEDEF) CDD_Fusion_ObjInfo_Array40[40];
@@ -139,15 +141,13 @@ typedef struct
 {
   VAR(Boolean, TYPEDEF) De_AEB_SwtRequest_u8;
   VAR(UInt8, TYPEDEF) De_FCW_SnvtySet_u8;
-  VAR(Float32, TYPEDEF) De_TimeGapSet_f32;
-  VAR(Boolean, TYPEDEF) De_ResumeSwitch_u8;
-  VAR(Boolean, TYPEDEF) De_CACCSWOn_u8;
-  VAR(Boolean, TYPEDEF) De_IDA_ResSw_u8;
-  VAR(Boolean, TYPEDEF) De_IDA_CancelSw_u8;
-  VAR(Boolean, TYPEDEF) De_VehSpdSetSw_u8;
-  VAR(Boolean, TYPEDEF) De_CACCcancelSW_u8;
+  VAR(Boolean, TYPEDEF) De_CACC_Switch_u8;
+  VAR(Boolean, TYPEDEF) De_IDA_Switch_u8;
+  VAR(Boolean, TYPEDEF) De_CACC_Resume_u8;
+  VAR(Boolean, TYPEDEF) De_CACC_Cancel_u8;
+  VAR(UInt8, TYPEDEF) De_TimeGapSet_f32;
   VAR(Float32, TYPEDEF) De_Vset_f32;
-  VAR(Float32, TYPEDEF) De_VehSpd_f32;
+  VAR(Float32, TYPEDEF) De_VDis_f32;
   VAR(UInt32, TYPEDEF) De_RequestCounter_u32;
 } SignalInput_HMI_BUS;
 
@@ -161,52 +161,30 @@ typedef struct {
     float acc_x;
     float acc_y;
     float acc_z;
-} IPC_GNSS_Acc;
-
-typedef struct {
     float gyro_x;
     float gyro_y;
     float gyro_z;
-} IPC_GNSS_Gyro;
-
-typedef struct {
     float pitchAngle;
     float rollAngle;
     float headingAngle;
-} IPC_GNSS_HeadingPitchRoll;
-
-typedef struct {
     float locatHeight;
     uint32 time;
-} IPC_GNSS_HeightAndTime;
-
-typedef struct {
-    float latitude;
-    float longitude;
-} IPC_GNSS_LatitudeLongitude;
-
-typedef struct {
+    double latitude;
+    double longitude;
     float northSpd;
     float eastSpd;
     float toGroundSpd;
-} IPC_GNSS_Speed;
-
-typedef struct {
     uint8 gpsFlagPos;
     uint8 numSv;
     uint8 gpsFlagHeading;
     uint8 gpsAge;
     uint8 gpsStatus;
     uint8 status;
-    uint32 reserved;
-} IPC_GNSS_DataInfo;
-
-typedef struct {
     float stdLat;
     float stdLon;
     float stdLocateHeight;
     float stdHeading;
-} IPC_GNSS_Std;
+} IPC_GNSS_Data;
 
 typedef struct {
     uint8 utcYear;

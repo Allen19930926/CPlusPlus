@@ -10,6 +10,8 @@ public:
     static void ExecuteCameraDataFusion();
 private:
     static void ProcessJ3CameraData(uint8_t* buf, uint16_t len);
+    static void ProcessCameraObstacles(uint8_t* buf, uint16_t len);
+    static void ProcessCameraLines(uint8_t* buf, uint16_t len);
     static void TransCamera2CddObstacle(const gohigh::Obstacle& camera, CDD_Fusion_ObjInfo_BUS& cdd);
 };
 

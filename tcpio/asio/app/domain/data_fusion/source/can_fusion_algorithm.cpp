@@ -23,22 +23,15 @@ void CanFusionAlgo::ProcessRecieveData(MsgType msgType, uint8_t* data, uint16_t 
 
     switch (msgType)
     {
-        case MsgType::IPC_GNSS_HEADING_PITCH_ROLL:
+        case MsgType::IPC_GNSS_DATA:
         {
-            const IPC_GNSS_HeadingPitchRoll& hostOrient = *reinterpret_cast<IPC_GNSS_HeadingPitchRoll*>(data);
-            hostPos.objectHeadingAngle = hostOrient.headingAngle;
+            const IPC_GNSS_Data& gnssData = *reinterpret_cast<IPC_GNSS_Data*>(data);
+            hostPos.objectHeadingAngle = gnssData.headingAngle;
+            hostPos.longitude = gnssData.longitude;
+            hostPos.latitude = gnssData.latitude;
+            hostPos.elevation = gnssData.locatHeight;
         }break;
-        case MsgType::IPC_GNSS_LAT_LONG:
-        {
-            const IPC_GNSS_LatitudeLongitude& hostLatLon = *reinterpret_cast<IPC_GNSS_LatitudeLongitude*>(data);
-            hostPos.longitude = hostLatLon.longitude;
-            hostPos.latitude = hostLatLon.latitude;
-        }break;
-        case MsgType::IPC_GNSS_HEIGHT_TIME:
-        {
-            const IPC_GNSS_HeightAndTime& hostHeight = *reinterpret_cast<IPC_GNSS_HeightAndTime*>(data);
-            hostPos.elevation = hostHeight.locatHeight;
-        }break;
-        default:    break;
+        default:    
+            break;
     }
 }

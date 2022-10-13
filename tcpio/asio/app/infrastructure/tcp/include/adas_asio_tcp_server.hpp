@@ -80,7 +80,7 @@ private:
             {
                 if (!ec)
                 {
-                    LOG(INFO) << "server write : " << std::string(writeMsgs.front().Data(),writeMsgs.front().Length());
+                    // LOG(INFO) << "server write : " << std::string(writeMsgs.front().Data(),writeMsgs.front().Length());
                     writeMsgs.pop_front();
                     if (!writeMsgs.empty())
                     {
@@ -118,7 +118,7 @@ public:
             {
                 if (!ec)
                 {
-                    LOG(INFO) << "new session" ;
+                    LOG(INFO) << "new session, message type:" << (int)msgType ;
                     std::shared_ptr<SessionType> activeSession = 
                             std::make_shared<SessionType>(io_context_, std::move(socket), io_context_, msgType);
                     session = activeSession;

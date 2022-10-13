@@ -39,6 +39,16 @@ public:
     }
 
     int GetTag() {
+        if (!(j.contains("tag")))
+        {
+            return -1;   
+        }
+        if(!j["tag"].is_number())
+        {
+            std::cout<<"tag is not number"<< std::endl;
+            return -1;
+        };
+
         return j["tag"];
     }
 

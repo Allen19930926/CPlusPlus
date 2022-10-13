@@ -17,8 +17,16 @@ IpcProxy::IpcProxy(asio::io_context& io) : IProxy(io, MsgType::IPC_DUMMY){
 
 }
 
+IpcProxy::~IpcProxy() {
+	ipcm.DeInit();
+}
+
 
 void IpcProxy::Init() {
+    ipcm.Init();
+}
+
+void IpcProxy::DoPeriodTask_50ms() {
     ipcm.Run();
 }
 
@@ -40,7 +48,7 @@ void IpcProxy::ProcessIncomingMessage(MsgType msgType, uint8_t * data, uint16_t 
 		ipcm.Write(IPC_APPL_FRAME_HMI_CTRL, data, len);
 		break;
 	case MsgType::IPC_OBJ_INFO:
-		ipcm.Write(IPC_APPL_FRAME_FUSION_CAM_OBJ, data, len);
+		ipcm.Write(IPC_APPL_FRAME_FUSION_OBJ, data, len);
 		break;
 	case MsgType::IPC_LANE_INFO:
 		ipcm.Write(IPC_APPL_FRAME_FUSION_LANE_INFO, data, len);

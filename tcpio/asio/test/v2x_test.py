@@ -13,7 +13,8 @@ import ctypes
 
 ipsoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ipsoc.connect(('www.baidu.com', 80))
-target = ipsoc.getsockname()[0]
+# target = ipsoc.getsockname()[0]
+target = '0.0.0.0'
 ipsoc.close()
 com_port = 35558
 v2x_port = 50600
@@ -301,7 +302,7 @@ class TestClassGsentryProxy:
 
         log.info(f"STEP4: check the response")
         # 取第一辆车数据进行比较
-        all_object_vehicles = com_client.recv_once(MsgType.CDD_CAMERA)
+        all_object_vehicles = com_client.recv_once(MsgType.IPC_OBJ_INFO)
         assert abs(all_object_vehicles.object_vehicles[0].De_dy_f32 + 27.06) < 0.2 
         assert abs(all_object_vehicles.object_vehicles[0].De_dx_f32 + 34.93) < 0.2 
         assert abs(all_object_vehicles.object_vehicles[0].De_vx_f32 - 9.3969) < 0.02 

@@ -9,6 +9,10 @@
 #include "event_queue.h"
 #include "event_msg.h"
 #include "hb_data.h"
+#include <map>
+#include <glog/logging.h>
+
+std::map<int, float> lifetime;
 
 static const std::string ImageFormat(::google::protobuf::int32 fmt) {
   switch (fmt) {
@@ -90,6 +94,8 @@ static void ParseObstacles(const ObstacleProto::Obstacles *obstacles, gohigh::Ob
   // auto out = gohigh::Obstacles();
   memset((void*)result, 0, sizeof(result));
 
+  LOG(INFO) << "execute parse J3 data";
+
   result->cipv_id = obstacles->cipv_id();
   result->mcp_id = obstacles->mcp_id();
   result->obstacle_num = obstacles->obstacle().size();
@@ -125,14 +131,14 @@ static void ParseObstacles(const ObstacleProto::Obstacles *obstacles, gohigh::Ob
     obs->world_info.position_type = obstacle.world_info().position_type();
     obs->world_info.yaw_rate = obstacle.world_info().yaw_rate();
     obs->world_info.sigma_yaw = obstacle.world_info().sigma_yaw();
-    for (uint32_t j = 0; j < 9; j++)
+    for (uint32_t j = 0; j < obstacle.world_info().sigma_vel_size(); j++)
     {
       obs->world_info.sigma_vel[j] = obstacle.world_info().sigma_vel(j);
     }
     
     obs->world_info.sigma_width = obstacle.world_info().sigma_width();
     obs->world_info.sigma_height = obstacle.world_info().sigma_height();
-    for (uint32_t j = 0; j < 9; j++)
+    for (uint32_t j = 0; j < obstacle.world_info().sigma_position_size(); j++)
     {
       obs->world_info.sigma_position[j] = obstacle.world_info().sigma_position(j);
     }
@@ -152,6 +158,14 @@ static void ParseObstacles(const ObstacleProto::Obstacles *obstacles, gohigh::Ob
     obs->world_info.obj_corner_point.distance_to_rr = obstacle.world_info().obj_corner_point().distance_to_rr();
     obs->world_info.acc_ref.ax = obstacle.world_info().acc_ref().ax();
     obs->world_info.acc_ref.ay = obstacle.world_info().acc_ref().ay();
+
+
+    LOG(INFO) << " parse j3 vehicle.De_Timestamp_u32          = " << obs->timestamp;
+    LOG(INFO) << " parse j3 vehicle.De_ID_u8                  = " << obs->id;
+    LOG(INFO) << " parse j3 vehicle.De_dx_f32                 = " << obs->world_info.position.x;
+    LOG(INFO) << " parse j3 vehicle.De_dy_f32                 = " << obs->world_info.position.y;
+    LOG(INFO) << " parse j3 vehicle.De_vx_f32                 = " << obs->world_info.vel_abs_world.vx;
+    LOG(INFO) << " parse j3 vehicle.De_vy_f32                 = " << obs->world_info.vel_abs_world.vx;
   }
 }
 
@@ -402,19 +416,99 @@ void ParseLineV2Msg(std::shared_ptr<google::protobuf::Message> message,
 
   line_v2::Lines *lines = static_cast<line_v2::Lines *>(message.get());
 
-  std::cout << "LineV2 -> {";
-  std::cout << "Line: [";
-  for (auto &l : lines->lines()) {
-    std::cout << "{id: " << l.id() << ", "
-              << "str_id: " << l.str_id() << ", "
-              << "type: " << l.type() << ", "
-              << "source: " << l.source() << ", "
-              << "position: " << l.position() << ", "
-              << "}, " << std::endl;
+  // std::cout << "LineV2 -> {";
+  // std::cout << "Line: [";
+  // for (auto &l : lines->lines()) {
+  //   std::cout << "{id: " << l.id() << ", "
+  //             << "str_id: " << l.str_id() << ", "
+  //             << "type: " << l.type() << ", "
+  //             << "source: " << l.source() << ", "
+  //             << "position: " << l.position() << ", "
+  //             << "}, " << std::endl;
+  // }
+  // std::cout << "], " << std::endl;
+  // std::cout << "}" << std::endl;
+  // std::cout << std::endl;
+    auto print = [](const gohigh::Line * const line) {
+      LOG(INFO) << "Line [ id: " << line->id;
+      LOG(INFO) << "valid: " << line->valid;
+      LOG(INFO) << "life_time: " << line->life_time;
+      LOG(INFO) << "type: " << line->type;
+      LOG(INFO) << "conf: " << line->conf;
+      LOG(INFO) << "width: " << line->width ;
+      LOG(INFO) << "start_pt: [" << line->start_pt.x << " " << line->start_pt.y << "]";
+      LOG(INFO) << "y_coeff: [" << line->y_coeff[0] << " " << line->y_coeff[1] << " " << line->y_coeff[2] << " " << line->y_coeff[3] << "]";
+      LOG(INFO) << "color: " << line->color;
+      LOG(INFO) << "marking: " << line->marking;
+      LOG(INFO) << "parsing_conf: " << line->parsing_conf;
+      LOG(INFO) << "rmse: " << line->rmse;
+    };
+
+  auto out = gohigh::Lines();
+  memset(&out, 0, sizeof(out));
+  out.dtlc = lines->dtlc();
+  out.ttlc = lines->ttlc();
+  out.timestamp = static_cast<uint32>(lines->header().time_stamp());
+  out.left.valid = out.right.valid = out.left_left.valid = out.right_right.valid = false;
+  auto * lin = &out.left;
+  for (auto& line : lines->lines())
+  {
+      if (line.type() != line_v2::LineType_LaneLine)
+      {
+          LOG(INFO) << "This line type (" << line.type() << ")is not LineType_LaneLine(2), skip extact!!";
+          LOG(INFO) << "start_pt: [" << line.lines_3d(0).start_pt().x() << " " << line.lines_3d(0).start_pt().y() << "]";
+      }
+      switch (line.position())
+      {
+      case line_v2::LinePosition_Left:
+          lin = &out.left;
+          LOG(INFO) << "extrac left lane info from J3:";
+          break;
+      case line_v2::LinePosition_LeftLeft:
+          lin = &out.left_left;
+          LOG(INFO) << "extrac left_left lane info from J3:";
+          break;
+      case line_v2::LinePosition_Right:
+          lin = &out.right;
+          LOG(INFO) << "extrac right lane info from J3:";
+          break;
+      case line_v2::LinePosition_RightRight:
+          lin = &out.right_right;
+          LOG(INFO) << "extrac right_right lane info from J3:";
+      default:
+          continue;
+      }
+      lin->id = line.id();
+
+      auto iter = lifetime.find(lin->id);
+      if (iter != lifetime.end()) {
+        lin->life_time = iter->second;
+      }
+      else {
+        LOG(ERROR) << "no life time found for id: " << lin->id;
+      }
+      // lin->life_time = line.life_time();
+      lin->type = line.type();
+      lin->conf = line.conf();
+      auto& cl = line.lines_3d(0);
+      lin->width = cl.width();
+      lin->start_pt.x = static_cast<float>(cl.start_pt().x());
+      lin->start_pt.y = static_cast<float>(cl.start_pt().y());
+      lin->y_coeff[0] = static_cast<float>(cl.y_coeff(0));
+      lin->y_coeff[1] = static_cast<float>(cl.y_coeff(1));
+      lin->y_coeff[2] = static_cast<float>(cl.y_coeff(2));
+      lin->y_coeff[3] = static_cast<float>(cl.y_coeff(3));
+      lin->t_max = static_cast<float>(cl.t_max());
+      lin->color = cl.color();
+      lin->marking = cl.marking();
+      lin->parsing_conf = cl.parsing_conf();
+      lin->rmse = cl.rmse();
+      lin->valid = true;
+      print(lin);
   }
-  std::cout << "], " << std::endl;
-  std::cout << "}" << std::endl;
-  std::cout << std::endl;
+  lifetime.clear();
+  // LOG(INFO) << "Send lanes";
+  CDD_FUSION_EVENT_QUEUE.push({MsgType::CAMERA, reinterpret_cast<char*>(&out), static_cast<uint16_t>(sizeof(out))});
 }
 
 // Obstacles Parsing
@@ -1241,8 +1335,15 @@ void ParseLaneresultMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){
   message.get()->ParsePartialFromArray(block.meta_->data(),
                                        static_cast<int>(block.meta_size_));
-  	// LaneProto::Lines *lines =
-    //   static_cast<LaneProto::Lines *>(message.get());
+  LaneProto::Lines *lines =
+    static_cast<LaneProto::Lines *>(message.get());
+
+  lifetime.clear();
+  for (auto& line : lines->lines())
+  {
+    lifetime.insert(std::pair<int,float>(line.id(), line.life_time()));
+  }
+  // memset(lifetime, 0, 4);
 }
 void ParseLaneparsingMsg(std::shared_ptr<google::protobuf::Message> message,
                  const matrix_sample::BlockDese &block){

@@ -53,7 +53,7 @@ struct CddFusionRepo
 {
     CDD_Fusion_ObjInfo_BUS  cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM + ADAS_CAMERA_OBJ_VEHI_NUM];
     CDDCurntLaneTrafficLightInfo    spatInfo;
-    CDDFusionLaneInfo laneInfo[CDD_LANE_INFO_NUM];
+    CDD_Fusion_LaneInfo_Array4 laneInfo;
     CDDgSentryWarningInfo gSentryWarningInfo;
     CDDDisToEndLane   disToEndLane;
 };

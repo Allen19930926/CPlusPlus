@@ -19,7 +19,7 @@ void CanProxy::KeepAlive(const uint32_t interval)
 void CanProxy::WriteServerAliveMsg()
 {
     std::string msg = "CAN(server) keep alive!! CAN(server) keep alive!! ";
-    server.write(msg);
+    // server.write(msg);
 }
 
 void CanProxy::DoServerWrite(const char* buf , const uint16_t len)

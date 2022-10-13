@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <math.h>
 #include <cstring>
 
@@ -30,8 +31,7 @@ const std::map<int, std::string> HmiProxy_CACCDecisionDefinition = {
 };
 
 const std::map<MsgType, size_t> HmiProxy_MessageDefinition = {
-	{MsgType::IPC_GNSS_HEADING_PITCH_ROLL,  sizeof(IPC_GNSS_HeadingPitchRoll)},
-	{MsgType::IPC_GNSS_LAT_LONG,  sizeof(IPC_GNSS_LatitudeLongitude)},
+	{MsgType::IPC_GNSS_DATA, sizeof(IPC_GNSS_Data)},
 	{MsgType::IPC_SYS_ERROR,  sizeof(IPC_System_Error)},
 	{MsgType::IPC_EVH,  sizeof(EVH_SubjectInfo_BUS)},
 	{MsgType::IPC_HMI_INFO,  sizeof(FuncCoord_FAM_HMI_Info)},
@@ -47,6 +47,7 @@ HmiProxy::HmiProxy(asio::io_context& ioService, std::string clientIp, std::strin
 	pad_CAEBStatus.tag = static_cast<int>(HMI_PAD_TAG_DEF::HMI_TAG_PAD_CAEB_STATUS_REP);
 	pad_SysErrorVec.tag = static_cast<int>(HMI_PAD_TAG_DEF::HMI_TAG_PAD_SYS_ERROR_REP);
 	pad_HostVehInfo.tag = static_cast<int>(HMI_PAD_TAG_DEF::HMI_TAG_PAD_EGO_VEH_DATA_REP);
+	pad_HostVehCIPVInfo.tag = static_cast<int>(HMI_PAD_TAG_DEF::HMI_TAG_PAD_EGO_VEH_DATA_REP);
 	pad_CACCDecision.tag = static_cast<int>(HMI_PAD_TAG_DEF::HMI_TAG_PAD_CACC_DECISION_REP);
 	pad_CAEBDecision.tag = static_cast<int>(HMI_PAD_TAG_DEF::HMI_TAG_PAD_CAEB_CAEB_REP);
 	pad_SwitchSetingInfo.tag = static_cast<int>(HMI_PAD_TAG_DEF::HMI_TAG_PAD_SWITCH_SETTING_REP);
@@ -102,7 +103,7 @@ void HmiProxy::DoServerWrite(T& msg)
 
 void HmiProxy::ProcessRecieveIPCData(MsgType msgType, uint8_t* data, uint16_t len)
 {
-	LOG(INFO) << "receive data from IPC: " << static_cast<int>(msgType);
+	// LOG(INFO) << "receive data from IPC: " << static_cast<int>(msgType);
 	auto iter = HmiProxy_MessageDefinition.find(msgType);
 	if (iter == HmiProxy_MessageDefinition.end())
 	{
@@ -116,20 +117,13 @@ void HmiProxy::ProcessRecieveIPCData(MsgType msgType, uint8_t* data, uint16_t le
 	}
 	switch (msgType)
 	{
-	case MsgType::IPC_GNSS_HEADING_PITCH_ROLL:
+	case MsgType::IPC_GNSS_DATA:
 	{
-		IPC_GNSS_HeadingPitchRoll* IPC_gnss_HPR = (IPC_GNSS_HeadingPitchRoll*)(data);
-		pad_HostVehInfo.data.heading = IPC_gnss_HPR->headingAngle;
+		IPC_GNSS_Data gnssData = *(IPC_GNSS_Data *)(data);
+		pad_HostVehInfo.data.heading = round(gnssData.headingAngle * 100) / 100;
+		pad_HostVehInfo.data.latitude = gnssData.latitude;
+		pad_HostVehInfo.data.longitude = gnssData.longitude;
 	}; break;
-
-	case MsgType::IPC_GNSS_LAT_LONG:
-	{
-		IPC_GNSS_LatitudeLongitude* IPC_gnss_latlong = (IPC_GNSS_LatitudeLongitude*)(data);
-		pad_HostVehInfo.data.latitude = IPC_gnss_latlong->latitude;
-		pad_HostVehInfo.data.longitude = IPC_gnss_latlong->longitude;
-		pad_HostVehInfo.data.followDistance = 10.0;//参数可选，有远车才上报。暂设置为10
-	}; break;
-
 	case MsgType::IPC_SYS_ERROR:
 	{
 		pad_SysErrorVec.data.systemError.clear();
@@ -147,8 +141,8 @@ void HmiProxy::ProcessRecieveIPCData(MsgType msgType, uint8_t* data, uint16_t le
 	case MsgType::IPC_EVH:
 	{
 		EVH_SubjectInfo_BUS* hostInfo = (EVH_SubjectInfo_BUS*)(data);
-		pad_HostVehInfo.data.speed = hostInfo->De_ego_vxMs_f32;
-		pad_HostVehInfo.data.acceleration = sqrtf(powf(hostInfo->De_ego_axMs2_f32, 2) + powf(hostInfo->De_ego_ayMs2_f32, 2));
+		pad_HostVehInfo.data.speed = round(hostInfo->De_ego_vxMs_f32);
+		pad_HostVehInfo.data.acceleration = round(sqrtf(powf(hostInfo->De_ego_axMs2_f32, 2) + powf(hostInfo->De_ego_ayMs2_f32, 2)) * 10) / 10;
 	}; break;
 
 	case MsgType::IPC_HMI_INFO: 
@@ -188,40 +182,12 @@ void HmiProxy::ProcessRecieveIPCData(MsgType msgType, uint8_t* data, uint16_t le
 			}
 			SendCACCDecisionInfo();
 		}
-			
 		
 
-    	//CAEB前向碰撞预警信息上报，自动紧急制动激活上报
+    	//CAEB前向碰撞预警决策上报
 		pad_CAEBDecision.data.preWarning = tmp_getMcoreInfo->De_FCW_AEB_FuncSts_u8;
 		pad_CAEBDecision.data.CAEB = tmp_getMcoreInfo->De_AEB_Triger_u8;
-    	SendCAEBActionInfo(); 
-
-		//CIPV数据上报，周期性50ms定时上报
-		//目标车车速（绝对速度）
-		float r_vx = DataRepo::GetInstance().GetCddFusionData().cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM].De_vx_f32;
-		float r_vy = DataRepo::GetInstance().GetCddFusionData().cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM].De_vy_f32;
-		double r_v = sqrtf(powf(r_vx, 2) + powf(r_vy, 2));
-
-		pad_HostVehInfo.data.objSpeed = r_v / 3.6;       // =>目标车车速 单位km/h
-
-		//目标距离（相对距离）
-		float r_dx = DataRepo::GetInstance().GetCddFusionData().cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM].De_dx_f32;
-		float r_dy = DataRepo::GetInstance().GetCddFusionData().cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM].De_dy_f32;
-		double r_d = sqrtf(powf(r_dx, 2) + powf(r_dy, 2));
-
-		if(r_vx < 0) //同车道迎向 x为车辆前进方向
-		{
-			pad_HostVehInfo.data.relativeVeloc = (r_v + pad_HostVehInfo.data.speed) / 3.6 ;    
-			pad_HostVehInfo.data.objDistance =  r_d / (r_v + pad_HostVehInfo.data.speed);    
-		}
-		else  //同车道同向
-		{
-			double tmp = (r_v - pad_HostVehInfo.data.speed) / 3.6;
-			pad_HostVehInfo.data.relativeVeloc = (tmp > 0)? tmp : 0 ;    // =>相对速度 单位km/h
-			pad_HostVehInfo.data.objDistance =  r_d / (r_v - pad_HostVehInfo.data.speed);      // =>目标时距 单位s
-
-		} 
-
+    	
 		getMcoreInfo = *tmp_getMcoreInfo;
 
 		//对pad的请求进行响应
@@ -330,7 +296,7 @@ void HmiProxy::HandleRecieveIPCRespMsg()
 			if(true == getMcoreInfo.De_CACC_SpeedSet_Rsp_u8)
 			{
 				frame.rsp = 0; //响应操作成功
-				frame.data.currentSpeed = sendMcoreInfo.De_VehSpd_f32;
+				frame.data.currentSpeed = sendMcoreInfo.De_Vset_f32;
 			}
 			else if (0 == getMcoreInfo.De_CACC_SpeedSet_Rsp_u8)
 			{
@@ -339,7 +305,7 @@ void HmiProxy::HandleRecieveIPCRespMsg()
 			else
 			{
 				frame.rsp = getMcoreInfo.De_CACC_SpeedSet_Rsp_u8;
-				frame.data.currentSpeed = sendMcoreInfo.De_VehSpd_f32;
+				frame.data.currentSpeed = sendMcoreInfo.De_Vset_f32;
 				LOG(INFO) << "fail to set speed ";
 			}
 		}
@@ -834,27 +800,27 @@ void HmiProxy::HandlePadMessage(uint8_t* data, uint16_t len) {
 	switch (tag) {
 	case HMI_PAD_TAG_DEF::HMI_TAG_PAD_CACC_ON_REQ: {
 		sendMcoreInfo.De_RequestCounter_u32 = counter; 
-		sendMcoreInfo.De_CACCSWOn_u8 = true;
+		sendMcoreInfo.De_CACC_Switch_u8 = true;
 		CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_HMI_CTRL, (const char *)&sendMcoreInfo , sizeof(SignalInput_HMI_BUS)});
 	}
 		break;
 	case HMI_PAD_TAG_DEF::HMI_TAG_PAD_CACC_OFF_REQ: {
 		sendMcoreInfo.De_RequestCounter_u32 = counter; 
-		sendMcoreInfo.De_CACCSWOn_u8 = false;
+		sendMcoreInfo.De_CACC_Switch_u8 = false;
 		CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_HMI_CTRL, (const char *)&sendMcoreInfo , sizeof(SignalInput_HMI_BUS)});
 	}
 		break;
 	case HMI_PAD_TAG_DEF::HMI_TAG_PAD_CACC_RESET_REQ: {
 		sendMcoreInfo.De_RequestCounter_u32 = counter; 
-		sendMcoreInfo.De_ResumeSwitch_u8 = true;
+		sendMcoreInfo.De_CACC_Resume_u8 = true;
 		CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_HMI_CTRL, (const char *)&sendMcoreInfo , sizeof(SignalInput_HMI_BUS)});
 	}
 		break;
 	case HMI_PAD_TAG_DEF::HMI_TAG_PAD_CACC_CC_REQ: {
 		sendMcoreInfo.De_RequestCounter_u32 = counter; 
 		auto request = msg.Deserialize< PadCACCCruiseControlRequestFrame>();
-		sendMcoreInfo.De_VehSpdSetSw_u8 = true;
-		sendMcoreInfo.De_VehSpd_f32 = request.data.setSpeed;                             
+		sendMcoreInfo.De_CACC_Resume_u8 = true;
+		sendMcoreInfo.De_Vset_f32 = request.data.setSpeed;                             
 		CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_HMI_CTRL, (const char *)&sendMcoreInfo , sizeof(SignalInput_HMI_BUS)});
 	}
 		break;
@@ -867,13 +833,13 @@ void HmiProxy::HandlePadMessage(uint8_t* data, uint16_t len) {
 		break;
 	case HMI_PAD_TAG_DEF::HMI_TAG_PAD_CACC_IDA_ON_REQ: {
 		sendMcoreInfo.De_RequestCounter_u32 = counter; 
-		sendMcoreInfo.De_IDA_ResSw_u8= true;
+		sendMcoreInfo.De_IDA_Switch_u8= true;
 		CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_HMI_CTRL, (const char *)&sendMcoreInfo , sizeof(SignalInput_HMI_BUS)});
 	}
 		break;
 	case HMI_PAD_TAG_DEF::HMI_TAG_PAD_CACC_IDA_OFF_REQ: {
 		sendMcoreInfo.De_RequestCounter_u32 = counter; 
-		sendMcoreInfo.De_IDA_CancelSw_u8 = true;
+		sendMcoreInfo.De_IDA_Switch_u8 = false;
 		CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_HMI_CTRL, (const char *)&sendMcoreInfo , sizeof(SignalInput_HMI_BUS)});
 	}
 		break;
@@ -933,7 +899,7 @@ void HmiProxy::HandlePadMessage(uint8_t* data, uint16_t len) {
 	}
 		break;
 	case HMI_PAD_TAG_DEF::HMI_TAG_PAD_CAEB_AEB_OFF_REQ: {//待确认8
-		sendMcoreInfo.De_AEB_SwtRequest_u8 = true;
+		sendMcoreInfo.De_AEB_SwtRequest_u8 = false;
 		sendMcoreInfo.De_RequestCounter_u32 = counter; 
 		CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_HMI_CTRL, (const char *)&sendMcoreInfo , sizeof(SignalInput_HMI_BUS)});
 	}
@@ -943,7 +909,7 @@ void HmiProxy::HandlePadMessage(uint8_t* data, uint16_t len) {
 		PadKeepAliveResponseFrame frame;
 		frame.tag = static_cast<int>(HMI_PAD_TAG_DEF::HMI_TAG_PAD_KEEP_ALIVE_RESP);
 		frame.rsp = 0;
-		frame.data.deviceSerialNumber = "CDC1X32";
+		frame.data.deviceNum = "CDC1X32";
 		DoServerWrite(frame);
 	}
 		break;
@@ -995,48 +961,65 @@ void HmiProxy::HandlePadMessage(uint8_t* data, uint16_t len) {
 	
 }
 
-void HmiProxy::FillCIPVInfo()
+void HmiProxy::DoPeriodTask_50ms()
 {
-	  //单位待确定！！！！！！！！！！
-	  //类别
-	float r_vx = DataRepo::GetInstance().GetCddFusionData().cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM].De_vx_f32;
-	float r_vy = DataRepo::GetInstance().GetCddFusionData().cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM].De_vy_f32;
-	double r_v = sqrtf(powf(r_vx, 2) + powf(r_vy, 2));  //目标车速度（绝对）
+	//系统故障状态上报，有故障时50ms上报一次，无故障时发送空消息告诉hmi故障清除
+	SendSysErrorStatus();
+    // CAEB决策 50ms上报一次
+    SendCAEBDecisionInfo(); 
+}
 
-	float h_vx = DataRepo::GetInstance().GetCddFusionData().cddObjects[0].De_vx_f32;
-	float h_vy = DataRepo::GetInstance().GetCddFusionData().cddObjects[0].De_vy_f32;
-	double h_v = sqrtf(powf(h_vx, 2) + powf(h_vy, 2));  //本车速度（绝对）
+void HmiProxy::DoPeriodTask_200ms()
+ {
 
-	float r_dx = DataRepo::GetInstance().GetCddFusionData().cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM].De_dx_f32;
-	float r_dy = DataRepo::GetInstance().GetCddFusionData().cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM].De_dy_f32;
-	double r_d = sqrtf(powf(r_dx, 2) + powf(r_dy, 2));  //目标车距离（相对）
-
-	if(DataRepo::GetInstance().GetV2xData().objVehicle->vehicleClass == 2) //前方同同！！！！
+	//CIPV数据上报，周期性200ms定时上报
+	bool cipvExist = false;
+    for(uint32_t i = ADAS_GSENTRY_OBJ_VEHI_NUM; i < ADAS_GSENTRY_OBJ_VEHI_NUM + ADAS_CAMERA_OBJ_VEHI_NUM; i++)
 	{
-		pad_HostVehInfo.data.relativeVeloc = abs(r_v - h_v);                // 相对速度km/h
-		pad_HostVehInfo.data.objDistance = (pad_HostVehInfo.data.relativeVeloc != 0)? (r_d / pad_HostVehInfo.data.relativeVeloc) : 100000;   // 时距
+        auto obj = DataRepo::GetInstance().GetCddFusionData().cddObjects[i];
+		if(obj.De_CIPV_u8 == true)
+		{
+			cipvExist = true;
+			
+			pad_HostVehCIPVInfo.data.heading = pad_HostVehInfo.data.heading;
+			pad_HostVehCIPVInfo.data.latitude = pad_HostVehInfo.data.latitude;
+			pad_HostVehCIPVInfo.data.longitude = pad_HostVehInfo.data.longitude;
+			pad_HostVehCIPVInfo.data.speed = pad_HostVehInfo.data.speed;
+			pad_HostVehCIPVInfo.data.acceleration = pad_HostVehInfo.data.acceleration;
+			//目标车车速（绝对速度）
+			float r_vx = obj.De_vx_f32;
+			float r_vy = obj.De_vy_f32;
+			double r_v = sqrtf(powf(r_vx, 2) + powf(r_vy, 2));
+
+			pad_HostVehCIPVInfo.data.objSpeed = r_v / 3.6;       // =>目标车车速 单位km/h
+
+			//目标距离（相对距离）
+			float r_dx = obj.De_dx_f32;
+			float r_dy = obj.De_dy_f32;
+			double r_d = sqrtf(powf(r_dx, 2) + powf(r_dy, 2));
+			pad_HostVehCIPVInfo.data.followDistance = round(r_d*100)/100;
+
+			if(r_vx < 0) //迎向 x为车辆前进方向
+			{
+				pad_HostVehCIPVInfo.data.relativeVeloc = (r_v + pad_HostVehCIPVInfo.data.speed) / 3.6 ;    
+				pad_HostVehCIPVInfo.data.objDistance =  r_d / (r_v + pad_HostVehCIPVInfo.data.speed);    
+			}
+			else  //同向
+			{
+				double tmp = (pad_HostVehCIPVInfo.data.speed - r_v) / 3.6;
+				pad_HostVehCIPVInfo.data.relativeVeloc = (tmp > 0)? tmp : 0 ;    // =>相对速度 单位km/h
+				pad_HostVehCIPVInfo.data.objDistance =  r_d / tmp;      // =>目标时距 单位s
+			}
+		} 
 	}
-	else if(DataRepo::GetInstance().GetV2xData().objVehicle->vehicleClass == 15) //迎面逆向
+	if(false == cipvExist)
 	{
-		pad_HostVehInfo.data.relativeVeloc = abs(r_v + h_v);
-		pad_HostVehInfo.data.objDistance = (pad_HostVehInfo.data.relativeVeloc != 0)? (r_d / pad_HostVehInfo.data.relativeVeloc) : 100000; 
+		DoServerWrite(pad_HostVehInfo);
 	}
 	else
 	{
-		pad_HostVehInfo.data.relativeVeloc = 0;
-		pad_HostVehInfo.data.objDistance = 0;
+		DoServerWrite(pad_HostVehCIPVInfo);
 	}
-}
-
-
-void HmiProxy::DoPeriodTask()
- {
-  	//系统故障状态上报，有故障时50ms上报一次，无故障时发送空消息告诉hmi故障清除
-	SendSysErrorStatus();
-
-  	//本车数据上报，周期性50ms定时上报
-	SendPadEgoVehInfo();
-
 
  }
 
@@ -1074,7 +1057,7 @@ void HmiProxy::SendCACCDecisionInfo()
 	DoServerWrite(pad_CACCDecision);
 }
 
-void HmiProxy::SendCAEBActionInfo()
+void HmiProxy::SendCAEBDecisionInfo()
 {
 	DoServerWrite(pad_CAEBDecision);
 }

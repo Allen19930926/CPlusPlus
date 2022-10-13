@@ -1,6 +1,13 @@
 
 #include "ipcm.h"
 
+void IpcM::Init() {
+  
+}
+
+void IpcM::DeInit() {
+  
+}
 
 void IpcM::Run() {
   if (start_thread_) {

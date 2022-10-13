@@ -28,7 +28,7 @@ std::string getLocalIpAddress() {
             char addressBuffer[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
             std::string ipAddr(addressBuffer, strlen(addressBuffer));
-            if (ipAddr.compare(0, 9, "192.168.1") == 0) {
+            if (ipAddr.compare(0, 9, "192.168.20") == 0) {
               if (ifAddrStruct!=NULL) freeifaddrs(ifAddrStruct);
               return ipAddr;
             }
@@ -36,7 +36,7 @@ std::string getLocalIpAddress() {
         }
     }
     if (ifAddrStruct!=NULL) freeifaddrs(ifAddrStruct);
-    return "192.168.1.153";
+    return "192.168.20.153";
 }
 
 using json = nlohmann::json;

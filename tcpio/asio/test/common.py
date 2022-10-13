@@ -8,6 +8,7 @@ from datetime import datetime
 import collections
 import logging
 from ctypes import *
+import time
 
 log = logging.getLogger(__name__)
 
@@ -50,17 +51,27 @@ class MsgType:
 class HmiCtrl(LittleEndianStructure):
     _pack_ = 4
     _fields_ = [
+        #  ('De_AEB_SwtRequest_u8', c_ubyte),
+        #  ('De_FCW_SnvtySet_u8', c_ubyte),
+        #  ('De_TimeGapSet_f32', c_float),
+        #  ('De_ResumeSwitch_u8', c_ubyte),
+        #  ('De_CACCSWOn_u8', c_ubyte),
+        #  ('De_IDA_ResSw_u8"', c_ubyte),
+        #  ('De_IDA_CancelSw_u8', c_ubyte),
+        #  ('De_VehSpdSetSw_u8', c_ubyte),
+        #  ('De_CACCcancelSW_u8', c_ubyte),
+        #  ('De_Vset_f32', c_float),
+        #  ('De_VehSpd_f32', c_float),
+        #  ('De_RequestCounter_u32', c_uint32),
          ('De_AEB_SwtRequest_u8', c_ubyte),
          ('De_FCW_SnvtySet_u8', c_ubyte),
-         ('De_TimeGapSet_f32', c_float),
-         ('De_ResumeSwitch_u8', c_ubyte),
-         ('De_CACCSWOn_u8', c_ubyte),
-         ('De_IDA_ResSw_u8"', c_ubyte),
-         ('De_IDA_CancelSw_u8', c_ubyte),
-         ('De_VehSpdSetSw_u8', c_ubyte),
-         ('De_CACCcancelSW_u8', c_ubyte),
-         ('De_Vset_f32', c_float),
-         ('De_VehSpd_f32', c_float),
+         ('De_CACC_Switch_u8', c_ubyte),
+         ('De_IDA_Switch_u8', c_ubyte),
+         ('De_CACC_Resume_u8', c_ubyte),
+         ('De_CACC_Cancel_u8"', c_ubyte),
+         ('De_TimeGapSet_u8', c_ubyte),
+         ('De_VSet_f32', c_float),
+         ('De_VDis_f32', c_float),
          ('De_RequestCounter_u32', c_uint32),
     ]
 
@@ -214,45 +225,45 @@ class CdsData(LittleEndianStructure):
         ('enduranceMileage', c_uint32), 
     ]
 
-class HmiCtrl(LittleEndianStructure):
-    _pack_ = 4
-    _fields_ = [
-         ('De_AEB_SwtRequest_u8', c_ubyte),
-         ('De_FCW_SnvtySet_u8', c_ubyte),
-         ('De_TimeGapSet_f32', c_float),
-         ('De_ResumeSwitch_u8', c_ubyte),
-         ('De_CACCSWOn_u8', c_ubyte),
-         ('De_IDA_ResSw_u8"', c_ubyte),
-         ('De_IDA_CancelSw_u8', c_ubyte),
-         ('De_VehSpdSetSw_u8', c_ubyte),
-         ('De_CACCcancelSW_u8', c_ubyte),
-         ('De_Vset_f32', c_float),
-         ('De_VehSpd_f32', c_float),
-         ('De_RequestCounter_u32', c_uint32),
-    ]
+# class HmiCtrl(LittleEndianStructure):
+#     _pack_ = 4
+#     _fields_ = [
+#          ('De_AEB_SwtRequest_u8', c_ubyte),
+#          ('De_FCW_SnvtySet_u8', c_ubyte),
+#          ('De_TimeGapSet_f32', c_float),
+#          ('De_ResumeSwitch_u8', c_ubyte),
+#          ('De_CACCSWOn_u8', c_ubyte),
+#          ('De_IDA_ResSw_u8"', c_ubyte),
+#          ('De_IDA_CancelSw_u8', c_ubyte),
+#          ('De_VehSpdSetSw_u8', c_ubyte),
+#          ('De_CACCcancelSW_u8', c_ubyte),
+#          ('De_Vset_f32', c_float),
+#          ('De_VehSpd_f32', c_float),
+#          ('De_RequestCounter_u32', c_uint32),
+#     ]
 
-class HmiInfo(LittleEndianStructure):
-    _pack_ = 4
-    _fields_ = [
-        ('De_ADAS_FCW_u8', c_ubyte),
-        ('De_gSentry_Warning_u8', c_ubyte),
-        ('De_FCW_AEB_FuncSts_u8', c_ubyte),
-        ('De_AEB_Triger_u8', c_ubyte),
-        ('De_AEB_Response_u8', c_ubyte),
-        ('De_CACC_CACCStatus_u8', c_ubyte),
-        ('De_CACC_ACCStatus_u8', c_ubyte),
-        ('De_CACC_IDAStatus_u8', c_ubyte),
-        ('De_CACC_Decision_u8', c_ubyte),
-        ('De_CACC_CACCOn_Rsp_u8', c_ubyte),
-        ('De_CACC_CACCOff_Rsp_u8', c_ubyte),
-        ('De_CACC_CACCResume_Rsp_u8', c_ubyte),
-        ('De_CACC_SpeedSet_Rsp_u8', c_ubyte),
-        ('De_CACC_TimeGapSet_Rsp_u8', c_ubyte),
-        ('De_CACC_IDAOn_Rsp_u8', c_ubyte),
-        ('De_CACC_IDAOff_Rsp_u8', c_ubyte),
-        ('De_CACC_SportMode_Rsp_u8', c_ubyte),
-        ('De_ResponseCounter_u32', c_uint32),
-    ]
+# class HmiInfo(LittleEndianStructure):
+#     _pack_ = 4
+#     _fields_ = [
+#         ('De_ADAS_FCW_u8', c_ubyte),
+#         ('De_gSentry_Warning_u8', c_ubyte),
+#         ('De_FCW_AEB_FuncSts_u8', c_ubyte),
+#         ('De_AEB_Triger_u8', c_ubyte),
+#         ('De_AEB_Response_u8', c_ubyte),
+#         ('De_CACC_CACCStatus_u8', c_ubyte),
+#         ('De_CACC_ACCStatus_u8', c_ubyte),
+#         ('De_CACC_IDAStatus_u8', c_ubyte),
+#         ('De_CACC_Decision_u8', c_ubyte),
+#         ('De_CACC_CACCOn_Rsp_u8', c_ubyte),
+#         ('De_CACC_CACCOff_Rsp_u8', c_ubyte),
+#         ('De_CACC_CACCResume_Rsp_u8', c_ubyte),
+#         ('De_CACC_SpeedSet_Rsp_u8', c_ubyte),
+#         ('De_CACC_TimeGapSet_Rsp_u8', c_ubyte),
+#         ('De_CACC_IDAOn_Rsp_u8', c_ubyte),
+#         ('De_CACC_IDAOff_Rsp_u8', c_ubyte),
+#         ('De_CACC_SportMode_Rsp_u8', c_ubyte),
+#         ('De_ResponseCounter_u32', c_uint32),
+#     ]
     
 class GNSS_Acc(LittleEndianStructure):
     _pack_ = 4
@@ -377,7 +388,7 @@ class V2x_OneAdasObjVehInfo(LittleEndianStructure):
         ("vehicleClass", c_uint8),
         ("size", V2x_VehicleSize),
         ("objectHeadingAngle", c_uint16), 
-        ("objectYawAngle", c_int16), 
+        ("objectYawAngle", c_uint16), 
         ("gear", c_uint8),
         ("steeringWheelAngle", c_int8),
         ("remoteLight", c_uint8), 
@@ -514,7 +525,6 @@ class Camera_Obstacles(LittleEndianStructure):
         ("mcp_id", c_uint32)
     ]
 
-
 class Cdd_CurntLaneTrafficLightInfo(LittleEndianStructure):
     _pack_ = 4
     _fields_ = [
@@ -564,7 +574,9 @@ class Cdd_OneObjectVehicle(LittleEndianStructure):
         ("De_ttc_f32", c_float),
         ("De_ettc_f32", c_float),
         ("De_CIPV_u8", c_uint8),
-        ("De_source_u32", c_uint32)
+        ("De_source_u8", c_uint32),
+        ("De_objectType_u8", c_uint8),
+        ("De_objectMovingStatus_u8", c_uint8),
     ]
 
 
@@ -573,8 +585,6 @@ class Cdd_AllObjectVehicles(LittleEndianStructure):
     _fields_ = [
         ("object_vehicles", Cdd_OneObjectVehicle * 40)
     ]
-
-
 
 com_msg_map = {
     MsgType.IPC_HMI_CTRL : HmiCtrl,
@@ -592,11 +602,11 @@ com_msg_map = {
     MsgType.IPC_CAN: CdsData,
     MsgType.CAN : V2x_HostVehiInfo,
     MsgType.CAMERA : Camera_Obstacles,
-    MsgType.CDD_CAMERA: Cdd_AllObjectVehicles
+    MsgType.IPC_OBJ_INFO: Cdd_AllObjectVehicles
 }
 
 
-com_tcp_header_pack_fmt = '>III'
+com_tcp_header_pack_fmt = '>IIIQ'
 
 
 class ComClient:
@@ -613,11 +623,29 @@ class ComClient:
         body = bytearray(data)
         if msg_type is None:
             msg_type = next((m for m, t in com_msg_map.items() if t == type(data)))
-        header = pack(com_tcp_header_pack_fmt, 0x00FF0000, len(body), msg_type)
+        header = pack(com_tcp_header_pack_fmt, 0x00FF0000, len(body), msg_type, int(time.time()*10e8))
         #logging.info(len(body))
         #logging.info(' '.join([hex(x) for x in header + body]))
         self.socket.send(header + body)
     
+    # def recv_once(self, expected_msg_type, timeout=3):
+    #     start_time = datetime.now()
+    #     while (datetime.now() - start_time).total_seconds() < timeout:
+    #         ready = select.select([self.socket], [], [], 1.0)
+    #         if ready[0]:
+    #             self.socket.setblocking(True)
+    #             recv_data = self.socket.recv(12)
+    #             start_flag, length, msg_type = unpack(com_tcp_header_pack_fmt, recv_data)
+    #             # print(f'{start_flag}, {length}, {msg_type}')
+    #             if start_flag == 0x00FF0000 and length < 65536 :
+    #                 if msg_type == expected_msg_type:
+    #                     recv_data = self.socket.recv(length)
+    #                     logging.info(' '.join([hex(x) for x in recv_data]))
+    #                     return com_msg_map[msg_type].from_buffer_copy(recv_data)
+    #                 else:
+    #                     self.socket.recv(length)
+    #             self.socket.setblocking(False)
+
     def recv_once(self, expected_msg_type, timeout=3):
         start_time = datetime.now()
         while (datetime.now() - start_time).total_seconds() < timeout:
@@ -625,12 +653,12 @@ class ComClient:
             if ready[0]:
                 self.socket.setblocking(True)
                 recv_data = self.socket.recv(12)
-                start_flag, length, msg_type = unpack(com_tcp_header_pack_fmt, recv_data)
+                start_flag, length, msg_type, timestamp = unpack(com_tcp_header_pack_fmt, recv_data)
                 # print(f'{start_flag}, {length}, {msg_type}')
                 if start_flag == 0x00FF0000 and length < 65536 :
                     if msg_type == expected_msg_type:
                         recv_data = self.socket.recv(length)
-                        # logging.info(' '.join([hex(x) for x in recv_data]))
+                        logging.info(' '.join([hex(x) for x in recv_data]))
                         return com_msg_map[msg_type].from_buffer_copy(recv_data)
                     else:
                         self.socket.recv(length)

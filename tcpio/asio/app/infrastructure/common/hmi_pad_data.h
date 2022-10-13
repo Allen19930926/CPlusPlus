@@ -110,8 +110,8 @@ struct PadKeepAliveResponseFrame {
   int rsp;
   std::string detail;
   struct data {
-    std::string deviceSerialNumber;
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(data, deviceSerialNumber)
+    std::string deviceNum;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(data, deviceNum)
   }data;
   NLOHMANN_DEFINE_TYPE_INTRUSIVE(PadKeepAliveResponseFrame, tag, rsp, detail, data)
 };
@@ -160,16 +160,29 @@ struct PadEgoVehInfoFrame {
 	struct data {
         double speed;
         double acceleration;
-        double followDistance;
+        double latitude;
+        double longitude;
+	      double heading;
+		NLOHMANN_DEFINE_TYPE_INTRUSIVE(data, speed, acceleration, latitude, longitude, heading)
+	}data;
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(PadEgoVehInfoFrame, tag, data)
+};
+
+struct PadEgoVehCIPVInfoFrame {
+	int tag;
+	struct data {
+        double speed;
+        double acceleration;
         double latitude;
         double longitude;
 	      double heading;
         double objSpeed;
         double objDistance;
         double relativeVeloc;
-		NLOHMANN_DEFINE_TYPE_INTRUSIVE(data, speed, acceleration, followDistance, latitude, longitude, heading, objSpeed, objDistance, relativeVeloc)
+        double followDistance;
+		NLOHMANN_DEFINE_TYPE_INTRUSIVE(data, speed, acceleration, latitude, longitude, heading, objSpeed, objDistance, relativeVeloc, followDistance)
 	}data;
-	NLOHMANN_DEFINE_TYPE_INTRUSIVE(PadEgoVehInfoFrame, tag, data)
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(PadEgoVehCIPVInfoFrame, tag, data)
 };
 
 struct PadCACCDecisionFrame {

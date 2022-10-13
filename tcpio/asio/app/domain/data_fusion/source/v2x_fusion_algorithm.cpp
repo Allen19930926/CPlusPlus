@@ -7,6 +7,7 @@
 #include "proxy_repository.h"
 #include "gSentry_proxy.h"
 #include "bs_debug.h"
+#include "event_queue.h"
 
 namespace
 {
@@ -28,6 +29,7 @@ namespace
 
 void V2xFusionAlgo::ProcessRecieveData(uint8_t* data, uint16_t len)
 {
+    LOG(INFO) << "enter V2xFusionAlgo::ProcessRecieveData";
     if (len < sizeof(V2X::V2xAdasMsgHeader) || data == nullptr)
     {
         return ;
@@ -38,6 +40,7 @@ void V2xFusionAlgo::ProcessRecieveData(uint8_t* data, uint16_t len)
     uint32_t length  = head.msgLen;
 
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
+    LOG(INFO) << "V2xFusionAlgo process recv data, msgId:" << head.msgId << " fault status:" << v2xData.status.faultStatus;
     if ((head.msgId != EV_GSENTRY_ADAS_PROCESS_STATUS_REPORT) && v2xData.status.faultStatus)
     {
         return ;
@@ -65,6 +68,10 @@ void V2xFusionAlgo::ProcessGSentrySatatus(uint8_t* buf, uint32_t len)
         return ;
     }
     const V2X::GSentryStatus gSentryStatus = *reinterpret_cast<V2X::GSentryStatus*>(buf);
+    LOG(INFO) << "--------------------ProcessGSentrySatatus------------------- " ;
+    LOG(INFO) << "1 gSentryStatus : " << int(gSentryStatus.gSentryStatus);
+    LOG(INFO) << "2 faultStatus : " << int(gSentryStatus.faultStatus);
+    LOG(INFO) << "------------------------------------------------------------ " ;
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     v2xData.status.faultStatus = gSentryStatus.faultStatus;
     v2xData.status.gSentryStatus = gSentryStatus.gSentryStatus;
@@ -75,49 +82,93 @@ void V2xFusionAlgo::ProcessHostVehiExtraMapInfo(uint8_t* buf, uint32_t len)
 {
     if (len != sizeof(V2X::MapAddResult))
     {
+        LOG(INFO) << "--------------------ProcessHostVehiExtraMapInfo------------------- " ;
+        LOG(INFO) << "len != sizeof(V2X::MapAddResult) return " ;
+        LOG(INFO) << "len  " << len;
         return ;
     }
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     memcpy(&v2xData.mapAddRes, buf, len);
-
+    LOG(INFO) << "--------------------ProcessHostVehiExtraMapInfo------------------- " ;
+    LOG(INFO) << "1 offsetTolink : " << v2xData.mapAddRes.offsetTolink;
+    LOG(INFO) << "2 offsetTolane : " << v2xData.mapAddRes.offsetTolane;
+    LOG(INFO) << "3 distToNode : " << v2xData.mapAddRes.distToNode;
+    LOG(INFO) << "4 isAtAcross : " << (int)v2xData.mapAddRes.isAtAcross;
+    LOG(INFO) << "------------------------------------------------------------------ " ;
     CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
     fusion.disToEndLane.disToEndLane = v2xData.mapAddRes.distToNode;
-    LOG(INFO) << "disToEndLane : " << fusion.disToEndLane.disToEndLane;
+	CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_DIS2ENDLANE, (const char *)(&fusion.disToEndLane), sizeof(fusion.disToEndLane)});
 }
 
 void V2xFusionAlgo::ProcessSpatInfo(uint8_t* buf, uint32_t len)
 {
     if (len != sizeof(V2X::AdasSpatInfo) * ADAS_SPAT_INFO_NUM)
     {
+        LOG(INFO) << "--------------------ProcessSpatInfo------------------- " ;
+        LOG(INFO) << "len != sizeof(V2X::AdasSpatInfo) * ADAS_SPAT_INFO_NUM return " ;
+        LOG(INFO) << "len  " << len;
         return ;
     }
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
-    memcpy(&v2xData.spatInfo[0], buf, len);
+    memcpy(&v2xData.spatInfo, buf, len);
+    for(int i = 0; i<5;i++)
+    {
+    LOG(INFO) << "--------------------ProcessSpatInfo------------------- " ;
+    LOG(INFO) << "1 spatInfo["<< i<< "].timeStamp : " << v2xData.spatInfo[i].timeStamp;
+    LOG(INFO) << "2 spatInfo["<< i<< "].spatInfoValid : " << (int)v2xData.spatInfo[i].spatInfoValid;
+    LOG(INFO) << "3 spatInfo["<< i<< "].belongsNodeId : " << v2xData.spatInfo[i].belongsNodeId;
+    LOG(INFO) << "4 spatInfo["<< i<< "].curCoutingTime : " << v2xData.spatInfo[i].curCoutingTime;
+    LOG(INFO) << "5 spatInfo["<< i<< "].nextLight : " << (int)v2xData.spatInfo[i].nextLight;
+    LOG(INFO) << "5 spatInfo["<< i<< "].nextDurationTime : " << v2xData.spatInfo[i].nextDurationTime;
+    LOG(INFO) << "------------------------------------------------------------------ " ;
+    }
     CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
     // 融合数据只用了当前车道下一个红绿灯信息，因此只取v2x数据的第一个红绿灯信息
     TransV2xSpat2CddSpat(v2xData.spatInfo[0], fusion.spatInfo);
     WirteBack(reinterpret_cast<char*>(&fusion.spatInfo), static_cast<uint16_t>(sizeof(CDDFusion::CDDCurntLaneTrafficLightInfo)));
+	CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_TRAFFIC_LIGHT_INFO, (const char *)(&fusion.spatInfo), sizeof(fusion.spatInfo)});
 }
 
 void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint32_t len)
 {
     if (len != sizeof(V2X::AdasObjVehInfo) * ADAS_OBJ_VEH_INFO_NUM)
     {
+        LOG(INFO) << "--------------------ProcessObjVehiInfo------------------- " ;
+        LOG(INFO) << "len != sizeof(V2X::AdasObjVehInfo) * ADAS_OBJ_VEH_INFO_NUM return " ;
+        LOG(INFO) << "len  " << len;
+        LOG(INFO) << "sizeof(V2X::AdasObjVehInfo) * ADAS_OBJ_VEH_INFO_NUM = " << sizeof(V2X::AdasObjVehInfo) * ADAS_OBJ_VEH_INFO_NUM;
         return ;
     }
 
     CAN::HostVehiclePos& host = DataRepo::GetInstance().GetHostVehicle();
-    // host.latitude = 2099985554;
-    // host.longitude = 2940016624;
-    // host.elevation = 40000;
-    // host.objectHeadingAngle = 0;
-    // host.isHostPosValid = true;
     if (!host.isHostPosValid)
     {
-        return ;
+        //return ;
     }
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     memcpy(&v2xData.objVehicle[0], buf, len);
+    for(int i = 0; i < ADAS_OBJ_VEH_INFO_NUM; i++)
+    {
+        LOG(INFO) << "reveh[" << i << "]--------------------ProcessObjVehiInfo------------------- " ;
+        LOG(INFO) << "1 timeStamp : " << v2xData.objVehicle[i].timeStamp;
+        LOG(INFO) << "2 localId : " << (int)v2xData.objVehicle[i].localId;
+        LOG(INFO) << "3 objectSource : " << (int)v2xData.objVehicle[i].objectSource;
+        LOG(INFO) << "4 vehicleClass : " << (int)v2xData.objVehicle[i].vehicleClass;
+        LOG(INFO) << "5 length : " << v2xData.objVehicle[i].size.length;
+        LOG(INFO) << "6 width : " << v2xData.objVehicle[i].size.width;
+        LOG(INFO) << "7 height : " << (int)v2xData.objVehicle[i].size.height;
+        LOG(INFO) << "8 objectHeadingAngle : " << v2xData.objVehicle[i].objectHeadingAngle;
+        LOG(INFO) << "9 objectYawAngle : " << v2xData.objVehicle[i].objectYawAngle;
+        LOG(INFO) << "10 gear : " << (int)v2xData.objVehicle[i].gear;
+        LOG(INFO) << "11 steeringWheelAngle : " << (int)v2xData.objVehicle[i].steeringWheelAngle;
+        LOG(INFO) << "12 remoteLight : " << (int)v2xData.objVehicle[i].remoteLight;
+        LOG(INFO) << "13 brakePedalStatus : " << (int)v2xData.objVehicle[i].vehicleBrakes.brakePedalStatus;
+        LOG(INFO) << "14 ABS : " << (int)v2xData.objVehicle[i].vehicleBrakes.absBrakes;
+        LOG(INFO) << "15 brakeAppliedStatus : " << (int)v2xData.objVehicle[i].vehicleBrakes.brakeAppliedStatus;
+        LOG(INFO) << "16 brakeBoostApplied : " << (int)v2xData.objVehicle[i].vehicleBrakes.brakeBoostApplied;
+        LOG(INFO) << "16 auxiliaryBrakeStatus : " << (int)v2xData.objVehicle[i].vehicleBrakes.auxiliaryBrakeStatus;
+        LOG(INFO) << "------------------------------------------------------------------ " ;
+    }
 
     CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
 
@@ -137,33 +188,95 @@ void V2xFusionAlgo::ProcessHostVehiMapInfo(uint8_t* buf, uint32_t len)
 {
     if (len != sizeof(V2X::EgoVehMapInfo))
     {
+        LOG(INFO) << "--------------------ProcessHostVehiMapInfo------------------- " ;
+        LOG(INFO) << "len != sizeof(V2X::EgoVehMapInfo) " ;
+        LOG(INFO) << "len  " << len;
         return ;
     }
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     memcpy(&v2xData.egoMap, buf, len);
+
+
+    LOG(INFO) << "--------------------ProcessHostVehiMapInfo------------------- " ;
+    LOG(INFO) << "1 curLink.upstreamNode.RegionId : " << v2xData.egoMap.curLink.upstreamNode.RegionId;
+    LOG(INFO) << "2 curLink.upstreamNode.id : " << v2xData.egoMap.curLink.upstreamNode.id;
+    LOG(INFO) << "3 curLink.downNode : " << v2xData.egoMap.curLink.downNode;
+    LOG(INFO) << "4 curLink.linkWidth : " << v2xData.egoMap.curLink.linkWidth;
+    LOG(INFO) << "5 curLink.speedLimit.minSpeed : " << v2xData.egoMap.curLink.speedLimit.minSpeed;
+    LOG(INFO) << "6 curLink.speedLimit.maxSpeed : " << v2xData.egoMap.curLink.speedLimit.maxSpeed;
+    LOG(INFO) << "7 curLane.laneID : " << (int)v2xData.egoMap.curLane.laneID;
+    LOG(INFO) << "8 curLane.laneWidth : " << v2xData.egoMap.curLane.laneWidth;
+    LOG(INFO) << "9 curLane.maneuvers : " << v2xData.egoMap.curLane.maneuvers;
+    LOG(INFO) << "10 curLane.lanePointNextNo : " << (int)v2xData.egoMap.curLane.lanePointNextNo;
+    LOG(INFO) << "11 downLinksList[0].id : " << (int)v2xData.egoMap.downLinksList[0].id;
+    LOG(INFO) << "12 downLinksList[0].linkWidth : " << v2xData.egoMap.downLinksList[0].linkWidth;
+    LOG(INFO) << "13 downLinksList[0].downLanesList[0].id : " << (int)v2xData.egoMap.downLinksList[0].downLanesList[0].id;
+    LOG(INFO) << "14 downLinksList[0].downLanesList[0].linkWidth : " << v2xData.egoMap.downLinksList[0].downLanesList[0].linkWidth;
+    LOG(INFO) << "15 downLinksList[0].PhaseID : " << (int)v2xData.egoMap.downLinksList[0].PhaseID;
+    LOG(INFO) << "16 downLinksList[0].Azimuth : " << (int)v2xData.egoMap.downLinksList[0].Azimuth;
+    LOG(INFO) << "17 adjacentLane[0].laneID : " << (int)v2xData.egoMap.adjacentLane[0].laneID;
+    LOG(INFO) << "18 adjacentLane[0].laneWidth : " << v2xData.egoMap.adjacentLane[0].laneWidth;
+    LOG(INFO) << "19 adjacentLane[0].maneuvers : " << v2xData.egoMap.adjacentLane[0].maneuvers;
+    LOG(INFO) << "11 downLinksList[1].id : " << (int)v2xData.egoMap.downLinksList[1].id;
+    LOG(INFO) << "12 downLinksList[1].linkWidth : " << v2xData.egoMap.downLinksList[1].linkWidth;
+    LOG(INFO) << "13 downLinksList[1].downLanesList[0].id : " << (int)v2xData.egoMap.downLinksList[1].downLanesList[1].id;
+    LOG(INFO) << "14 downLinksList[1].downLanesList[0].linkWidth : " << v2xData.egoMap.downLinksList[1].downLanesList[1].linkWidth;
+    LOG(INFO) << "15 downLinksList[1].PhaseID : " << (int)v2xData.egoMap.downLinksList[1].PhaseID;
+    LOG(INFO) << "16 downLinksList[1].Azimuth : " << (int)v2xData.egoMap.downLinksList[1].Azimuth;
+    LOG(INFO) << "17 adjacentLane[1].laneID : " << (int)v2xData.egoMap.adjacentLane[1].laneID;
+    LOG(INFO) << "18 adjacentLane[1].laneWidth : " << v2xData.egoMap.adjacentLane[1].laneWidth;
+    LOG(INFO) << "19 adjacentLane[1].maneuvers : " << v2xData.egoMap.adjacentLane[1].maneuvers;
+    LOG(INFO) << "------------------------------------------------------------------ " ;
 }
 
 void V2xFusionAlgo::ProcessObjVehiMapInfo(uint8_t* buf, uint32_t len)
 {
     if (len != sizeof(V2X::ObjVehMapInfo) * ADAS_OBJ_VEH_INFO_NUM)
     {
+        LOG(INFO) << "--------------------ProcessObjVehiMapInfo------------------- " ;
+        LOG(INFO) << "len != sizeof(V2X::ObjVehMapInfo) * ADAS_OBJ_VEH_INFO_NUM " ;
+        LOG(INFO) << "len  " << len;
         return ;
     }
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     memcpy(&v2xData.objMap, buf, len);
+    for(int i= 0; i < ADAS_OBJ_VEH_INFO_NUM; i++)
+    {
+        LOG(INFO) << "rev[" << i <<"]--------------------ProcessObjVehiMapInfo------------------- " ;
+        LOG(INFO) << "1 belongsLink.upstreamNodeId : " << v2xData.objMap[i].belongsLink.upstreamNodeId;
+        LOG(INFO) << "2 belongsLink.downNodeId : " << v2xData.objMap[i].belongsLink.downNodeId;
+        LOG(INFO) << "3 belongsLink.laneID : " << (int)v2xData.objMap[i].belongsLink.laneID;
+        LOG(INFO) << "4 localId : " << (int)v2xData.objMap[i].localId;
+        LOG(INFO) << "------------------------------------------------------------------ " ;
+    }
 }
 
 void V2xFusionAlgo::ProcessGSentryWarningInfo(uint8_t* buf, uint32_t len)
 {
-    if (len != sizeof(V2X::WarningInfo) * ADAS_WARN_INFO_NUM)
+    if (len != sizeof(V2X::WarningInfo) * 3)
     {
+        LOG(INFO) << "--------------------ProcessGSentryWarningInfo------------------- " ;
+        LOG(INFO) << "len != sizeof(V2X::WarningInfo)  return " ;
+        LOG(INFO) << "len  " << len;
         return ;
     }
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
     memcpy(&v2xData.warningInfo, buf, len);
+    for(int i= 0; i < 3; i ++)
+    {
+        LOG(INFO) << "v2vwarning[" << i << "]--------------------ProcessGSentryWarningInfo------------------- " ;
+        LOG(INFO) << "1 warningInfo[0].warningType : " << (int)v2xData.warningInfo[i].warningType;
+        LOG(INFO) << "2 warningInfo[0].level : " << (int)v2xData.warningInfo[i].level;
+        LOG(INFO) << "3 warningInfo[0].remoteLocalId : " << v2xData.warningInfo[i].remoteLocalId;
+        LOG(INFO) << "4 warningInfo[0].remoteBsmId : " << v2xData.warningInfo[i].remoteBsmId;
+        LOG(INFO) << "5 warningInfo[0].objectCollisionTTC : " << v2xData.warningInfo[i].objectCollisionTTC;
+        LOG(INFO) << "------------------------------------------------------------------ " ;
+    }
     TransV2xWarn2CddWarn(v2xData.warningInfo[0], fusion.gSentryWarningInfo);
     WirteBack(reinterpret_cast<char*>(&fusion.gSentryWarningInfo), static_cast<uint16_t>(sizeof(CDDFusion::CDDgSentryWarningInfo)));
+    
+	CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_GSENTRY_WARN, (const char *)(&fusion.gSentryWarningInfo), sizeof(fusion.gSentryWarningInfo)});
 }
 
 
@@ -192,7 +305,7 @@ void V2xFusionAlgo::TransV2xVehi2CddVehi(const V2X::AdasObjVehInfo& raw, const C
                                     raw.accelSet.latitude * V2X_ACCELERATION_DIAMETER, hostHeadRad, dest.De_Yaw_f32);
     dest.De_ax_f32 = acceleration[0];
     dest.De_ay_f32 = acceleration[1];
-    dest.De_source_u32 = 1;
+    dest.De_source_u8 = 1;
     /* 未填充数据 */
     // dest.conf;           gSentry无法获取该信息
     // dest.lifeTime;       gSentry无法获取该信息

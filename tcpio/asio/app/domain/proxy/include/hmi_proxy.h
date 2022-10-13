@@ -24,7 +24,8 @@ public:
     void ProcessRecieveIPCData(MsgType msgType, uint8_t* data, uint16_t len);
     void ProcessRecieveGsentryData(MsgType msgType, uint8_t* data, uint16_t len);
     void ProcessRecievePadData(MsgType msgType, uint8_t* data, uint16_t len);
-    void DoPeriodTask();
+    void DoPeriodTask_200ms();
+    void DoPeriodTask_50ms();
 
 
 private:
@@ -40,9 +41,7 @@ private:
     
     template <typename T>
     void DoServerWrite(T& msg);
-
-    void FillCIPVInfo();
-
+    
     //client
     void HandlegSentryMessage(uint8_t* data, uint16_t len);
     void ProcessCAEBCollisionWarning(json& j);
@@ -67,8 +66,8 @@ private:
     //CACC系统决策上报
     void SendCACCDecisionInfo();
 
-    //CAEB自动紧急制动激活上报
-    void SendCAEBActionInfo(); 
+    //CAEB前向预警决策上报
+    void SendCAEBDecisionInfo(); 
 
     //ADAS系统开关状态上报，系统每次开机需主动上报
     void SendSwitchSettings();
@@ -86,6 +85,7 @@ private:
     PadCAEBStatusFrame pad_CAEBStatus;
     PadSystemErrorVectorFrame pad_SysErrorVec;
     PadEgoVehInfoFrame pad_HostVehInfo;
+    PadEgoVehCIPVInfoFrame pad_HostVehCIPVInfo;
     PadCACCDecisionFrame pad_CACCDecision;
     PadCAEBDecisionFrame pad_CAEBDecision;
     PadSwitchSettingsFrame pad_SwitchSetingInfo;

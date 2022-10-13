@@ -13,6 +13,7 @@
 #include "v2x_data_struct.h"
 #include "cdd_fusion.h"
 #include "event_queue.h"
+#include <glog/logging.h>
 
 using asio::ip::tcp;
 
@@ -21,10 +22,9 @@ class AdasAsioTcpClient
 {
 public:
     AdasAsioTcpClient(asio::io_context& io_context, MsgType type, std::string ipAddr, std::string port)
-    : io_context_(io_context), socket_(io_context), timer(io_context), msgType(type), isConnected(false)
+    : io_context_(io_context), socket_(io_context), timer(io_context), msgType(type), isConnected(false),
+      ip(ipAddr), port_(port), reconnect_count(0)
     {
-        tcp::resolver resolver(io_context_);
-        endpoints_ = resolver.resolve(ipAddr, port);
     }
 
     void close()
@@ -34,18 +34,13 @@ public:
 
     void start()
     {
-        do_connect(endpoints_);
+        do_connect();
     }
 
     void write(const WriteMsg& msg)
     {
         asio::post(io_context_, [this, msg]()
         {
-            if (!isConnected.load())
-            {
-                return ;
-            }
-
             bool write_in_progress = !writeMsgs.empty();
             writeMsgs.push_back(msg);
             if (!write_in_progress)
@@ -56,42 +51,77 @@ public:
     }
 
 private:
-    void do_connect(const tcp::resolver::results_type& endpoints)
+    void do_connect()
     {
+        tcp::resolver resolver(io_context_);
+        auto endpoints = resolver.resolve(ip, port_);
+
         asio::async_connect(socket_, endpoints,
             [this](std::error_code ec, tcp::endpoint)
             {
+                // 防止多线程进行多次重连
+                if (isConnected.load())
+                {
+                    return ;
+                }
+
                 if (!ec)
                 {
-                    timer.cancel();
                     doReadHeader();
                     isConnected.store(true);
+                    reconnect_count = 0;
+                    timer.cancel();
+                    LOG(INFO) << "connected!!  IP:" << socket_.remote_endpoint().address() << "  Port: " << socket_.remote_endpoint().port();
                 }
                 else
                 {
-                    // std::cout << "Connect error(line:80) : " << ec.message() << ", trying to reconnecting in every 1s" << std::endl;
-                    timer.expires_after(std::chrono::seconds(1));
-                    timer.async_wait(std::bind(&AdasAsioTcpClient::do_connect, this, endpoints_));
+                    if (reconnect_count > 20)
+                    {
+                        LOG(INFO) << "try connection 20 times, stop retry!!";
+                        return ;
+                    }
+                    LOG(INFO) << "connection failed, bs will retry in 30s";
+                    timer.expires_after(std::chrono::seconds(30));
+                    timer.async_wait(std::bind(&AdasAsioTcpClient::do_connect, this));
+                    reconnect_count++;
                 }
             });
     }
 
     void do_write()
     {
-        socket_.async_write_some(
-            asio::buffer(writeMsgs.front().Data(), writeMsgs.front().BodyLength()),
-            [this](std::error_code ec, std::size_t /*length*/)
-            {
-                if (!ec)
+        // 连接状态：通过异步写操作，写入成功，则继续写入写消息队列中的内容；
+		//				  写入失败，且失败原因是broken_pipe或connection_aborted，则重置连接状态为false，并进行重连。
+		//				  无论写入成功失败，均丢弃该条消息，且继续尝试写入队列其他信息，防止消息积压。
+						  
+        // 未连接状态： 丢弃该条消息，且继续尝试写入队列其他信息，防止消息积压。
+        if (isConnected.load())
+        {
+            socket_.async_write_some(
+                asio::buffer(writeMsgs.front().Data(), writeMsgs.front().BodyLength()),
+                [this](std::error_code ec, std::size_t /*length*/)
                 {
-                    // std::cout << "client write : " << writeMsgs.front().Data() << std::endl;
+                    if(ec.value() == EPIPE  || ec.value() == ECONNABORTED)
+                    {
+                        LOG(INFO) << "write fail reason: " << ec.message();
+                        isConnected.store(false);
+                        socket_.close();
+                        do_connect();
+                    }
                     writeMsgs.pop_front();
                     if (!writeMsgs.empty())
                     {
                         do_write();
                     }
-                }
-            });
+                    
+                });
+            return ;
+        }
+        writeMsgs.pop_front();
+        if (!writeMsgs.empty())
+        {
+            do_write();
+        }
     }
 
     void doReadHeader()
@@ -134,9 +164,11 @@ private:
     ReadMsg readMsg;
     std::deque<WriteMsg> writeMsgs;
     asio::steady_timer timer;
-    tcp::resolver::results_type endpoints_;
     MsgType msgType;
     std::atomic_bool isConnected;
+    std::string ip;
+    std::string port_;
+    uint32_t reconnect_count;
 };
 
 

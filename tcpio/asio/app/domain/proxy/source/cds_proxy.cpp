@@ -17,7 +17,9 @@ const std::map<MsgType, size_t> CdsProxy_MessageDefinition = {
 
 CdsProxy::CdsProxy(asio::io_context& ioService, short port) : IProxy(ioService, MsgType::CDS), server(ioService, MsgType::CDS, port)
 {
-
+    memset(&cds_CanData, 0, sizeof(cds_CanData));
+    cds_CanData.brakePedalStatus = 1;
+    cds_CanData.brakeAppliedStatus = 2;
 }
 
 void CdsProxy::Init()
@@ -44,7 +46,7 @@ void CdsProxy::ProcessIncomingMessage(MsgType msgType, uint8_t* data, uint16_t l
 	{
 	case MsgType::IPC_CAN: {
 			cds_CanData = *((IPC_CAN_Data *)(data));
-			// std::cout << "antiLockBrakeStatus  " << cds_CanData.antiLockBrakeStatus << std::endl;
+			// std::cout << "CDS: vehicleSpeed  " << cds_CanData.vehicleSpeed << std::endl;
 		}
 		break;
 	default:
@@ -57,7 +59,7 @@ void CdsProxy::SendperiodMessage()
     std::string candata = base64_encode((const unsigned char*)&cds_CanData, sizeof(IPC_CAN_Data));
     json data;
     data["Data"] = candata.c_str();
-    // std::cout << " json data['Data'] = " << data.dump() << std::endl;
+    // LOG(INFO) << " json data['Data'] = " << data.dump() << std::endl;
     addMsgHeadAndSend(data.dump().c_str(), data.dump().size());
     
 }
@@ -69,14 +71,14 @@ void CdsProxy::addMsgHeadAndSend(const char* data, unsigned int len)
         
     head.head0 = 0x00;
     head.head1 = 0xff;
+
+    // 预留    
+    // head.msgtype = 0x01;
+    // head.format = 0x01;
+    // head.timestamp = getSytemTime();  
+    // head.msgid = 1;       
         
-    head.msgtype = 0x01;
-    head.format = 0x01;
-    head.timestamp = getSytemTime();
-        
-    head.msgid = 1;       
-        
-    head.datalen = len;
+    head.datalen = htonl(len);
         
     char sendbuf[1024];
     memset(sendbuf, 0, sizeof(sendbuf));
@@ -85,7 +87,7 @@ void CdsProxy::addMsgHeadAndSend(const char* data, unsigned int len)
 
     
     DoServerWrite(sendbuf, sizeof(MsgHead_t) + len);
-    // std::cout<<"addMsgHeadAndSend over,buf len="<<(sizeof(MsgHead_t))<<"+"<<len<<"="<<(sizeof(MsgHead_t) + len)<<std::endl;      
+    // std::cout<<"cdsproxy->addMsgHeadAndSend over,buf len="<<(sizeof(MsgHead_t))<<"+"<<len<<"="<<(sizeof(MsgHead_t) + len)<<std::endl;      
        
  }
 

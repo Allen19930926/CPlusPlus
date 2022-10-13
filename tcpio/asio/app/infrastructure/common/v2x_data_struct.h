@@ -215,9 +215,9 @@ struct GSentryStatus
 /* EV_GSENTRY_ADAS_CALC_MAPINFO_REPORT */
 struct MapAddResult
 {
-    uint16_t  offsetTolink;     /* 本车行驶偏移道路中心线距离左负右正, 取值-2000~2001，单位0.01m */
-    uint16_t  offsetTolane;     /* 本车行驶偏移道路中心线距离左负右正, 取值-2000~2001，单位0.01m */
-    uint32_t  distToNode;       /* 本车距离驶向路口的距离(到停止线距离), 取值0~100001，单位0.01m */
+    int16_t  offsetTolink;     /* 本车行驶偏移道路中心线距离左负右正, 取值-2000~2001，单位0.01m */
+    int16_t  offsetTolane;     /* 本车行驶偏移道路中心线距离左负右正, 取值-2000~2001，单位0.01m */
+    int32_t  distToNode;       /* 本车距离驶向路口的距离(到停止线距离), 取值0~100001，单位0.01m */
     bool      isAtAcross;       /* 是否在路口（车辆中心点过停止线）True：在路口；False：不在路口 */
 };
 

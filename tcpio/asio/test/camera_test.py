@@ -47,7 +47,7 @@ class TestClassCameraProxy:
 
         log.info(f"STEP2: recieve arranged camera obstacles info ")
 
-        all_object_vehicles = com_client.recv_once(MsgType.CDD_CAMERA)
+        all_object_vehicles = com_client.recv_once(MsgType.IPC_OBJ_INFO)
 
         # 循环校验有效障碍物
         for number in range(20, 20 + camera_data.obstacle_num):
@@ -81,7 +81,7 @@ class TestClassCameraProxy:
 
         log.info(f"STEP2: recieve arranged camera obstacles info ")
         # 把消息头部数据丢掉
-        all_object_vehicles = com_client.recv_once(MsgType.CDD_CAMERA)
+        all_object_vehicles = com_client.recv_once(MsgType.IPC_OBJ_INFO)
         assert all_object_vehicles.object_vehicles[20].De_ID_u8 == camera_vehicle_data.obstacles[3].id
         assert all_object_vehicles.object_vehicles[20].De_dx_f32  == camera_vehicle_data.obstacles[3].world_info.position.x
         assert all_object_vehicles.object_vehicles[20].De_dy_f32  == camera_vehicle_data.obstacles[3].world_info.position.y
@@ -116,7 +116,7 @@ class TestClassCameraProxy:
         time.sleep(0.5)
 
         log.info(f"STEP2: recieve arranged camera obstacles info ")
-        all_object_vehicles = com_client.recv_once(MsgType.CDD_CAMERA)
+        all_object_vehicles = com_client.recv_once(MsgType.IPC_OBJ_INFO)
         for number in range(21, 40):
             pre_id = all_object_vehicles.object_vehicles[number - 1].De_ID_u8
             pre_dx = all_object_vehicles.object_vehicles[number - 1].De_dx_f32

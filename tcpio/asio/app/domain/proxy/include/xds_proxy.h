@@ -21,21 +21,15 @@ private:
 
 
     void WriteXYZ(float acc_x, float acc_y, float acc_z, float gyro_x, float fyro_y, float fyro_z, float pitchAngle, float rollAngle, float headingAngle, float velSpd);
-    void WriteSTD(float latitude, float longtitude, float locatHeight, float locat);
+    void WriteSTD(double latitude, double longtitude, float locatHeight, float locat);
     void WriteGPS(int gpsFlagPos, int numSV, int gpsFlagHead, int gpsAge, int carStatus, int status);
     void WriteUTC(int year, int month, int day, int hour, int min, int sec, int msec);  
 
 private:
     AdasAsioTcpServer<XdsTcpMessage, XdsTcpMessage> server;
-    IPC_GNSS_Acc acc;
-    IPC_GNSS_Gyro gyro;
-    IPC_GNSS_HeadingPitchRoll headingpitchroll;
-    IPC_GNSS_HeightAndTime heightandtime;
-    IPC_GNSS_LatitudeLongitude latitudelongitude;
-    IPC_GNSS_Speed speed;
-    IPC_GNSS_DataInfo datainfo;
-    IPC_GNSS_Std std;
+    IPC_GNSS_Data gnssData;
     IPC_GNSS_UTC utc;
+    float vehSpeedMs;
 };
 
 #endif
