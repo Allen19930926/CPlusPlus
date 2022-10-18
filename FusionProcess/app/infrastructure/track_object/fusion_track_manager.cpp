@@ -41,23 +41,23 @@ void FusionTrackManager::CreateOneTrack(const SensorObject& sensor_object)
         return ;
     }
     FusionTrack track;
-    track.track_id = GetNewTrackId();
-    track.time_stamp = sensor_object.time_stamp;
-    track.fusion_status = 1 << sensor_object.sensor_type;
-    track.coasting_age = 0;
-    track.is_dead = 0;
-    track.track_duration = 0;
-    track.object_type = sensor_object.object_type;
-    track.cipv = sensor_object.cipv;
-    track.yaw = sensor_object.yaw;
-    track.yaw_rate = sensor_object.yaw_rate;
-    track.size = sensor_object.size;
-    track.position = sensor_object.position;
-    track.pos_variance = sensor_object.pos_variance;
-    track.velocity = sensor_object.velocity;
-    track.vel_variance = sensor_object.vel_variance;
-    track.acceleration = sensor_object.acceleration;
-    track.acc_variance = sensor_object.acc_variance;
+    track.track_id          = GetNewTrackId();
+    track.time_stamp        = sensor_object.time_stamp;
+    track.fusion_status     = 1 << sensor_object.sensor_type;
+    track.coasting_age      = 0;
+    track.is_dead           = 0;
+    track.track_duration    = 0;
+    track.object_type       = sensor_object.object_type;
+    track.cipv              = sensor_object.cipv;
+    track.yaw               = sensor_object.yaw;
+    track.yaw_rate          = sensor_object.yaw_rate;
+    track.size              = sensor_object.size;
+    track.position          = sensor_object.position;
+    track.pos_variance      = sensor_object.pos_variance;
+    track.velocity          = sensor_object.velocity;
+    track.vel_variance      = sensor_object.vel_variance;
+    track.acceleration      = sensor_object.acceleration;
+    track.acc_variance      = sensor_object.acc_variance;
 
     // todo  init kf data
 
