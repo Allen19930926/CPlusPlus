@@ -6,25 +6,41 @@ FusionTrackManager::FusionTrackManager() : track_id_generator(std::chrono::stead
 {
 }
 
-void FusionTrackManager::GetFusionTracksOfSensor(const SensorType type, std::vector<uint32_t>& track_index)
+void FusionTrackManager::GetSingleSensorTracks(const SensorType type, std::vector<uint32_t>& single_track_index, std::vector<uint32_t>& fused_track_index)
 {
-    track_index.clear();
+    single_track_index.clear();
+    fused_track_index.clear();
     uint8_t bit_flag = static_cast<uint8_t>(type);
 
     for (uint32_t i=0; i<track_list.size(); i++)
     {
         if (track_list[i].fusion_status & (1 << bit_flag))
         {
-            track_index.emplace_back(i);
+            single_track_index.emplace_back(i);
         }
     }
 }
 
-void FusionTrackManager::CreateNewTracks(std::vector<SensorObject>&  unassigned_objects)
+std::vector<uint32_t> FusionTrackManager::GetFusionTracksOfSensor(const SensorType type)
 {
-    for (const auto& sensor_object : unassigned_objects)
+    std::vector<uint32_t>  sensor_index;
+    uint8_t bit_flag = static_cast<uint8_t>(type);
+
+    for (uint32_t i=0; i<track_list.size(); i++)
     {
-        CreateOneTrack(sensor_object);
+        if (track_list[i].fusion_status & (1 << bit_flag))
+        {
+            sensor_index.emplace_back(i);
+        }
+    }
+    return sensor_index;
+}
+
+void FusionTrackManager::CreateNewTracks(const SensorFrame& sensor_list, const std::vector<uint32_t>& unassigned_objects_idx)
+{
+    for (const auto index : unassigned_objects_idx)
+    {
+        CreateOneTrack(sensor_list.sensors[index]);
     }
 }
 

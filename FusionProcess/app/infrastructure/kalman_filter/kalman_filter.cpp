@@ -1,4 +1,6 @@
 #include "kalman_filter.h"
+#include "sensor_object.h"
+#include "fusion_track.h"
 
 KalmanFilter::KalmanFilter()
 {

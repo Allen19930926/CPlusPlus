@@ -17,6 +17,7 @@ struct alignas(16) SensorObject
     uint32_t            time_stamp;            /* 时间戳 */
     uint32_t            life_time;             /*  */
     uint32_t            cipv;                  /* 车辆/骑车人被选为cipv flag，若有cipv则置1，若没有cipv则置0 */
+    uint32_t            sensor_type;
     uint8_t             id;                    /* 观测对象ID，如cameraid、radarid等 */
     uint8_t             measurement_status;    /* 测量状态，可能传感器有融合，如RSU可融合后再传递 */
     uint8_t             object_type;           /* 目标类别，如车辆、行人等 */
@@ -38,10 +39,6 @@ struct alignas(16) SensorObject
 
 struct alignas(16) SensorFrame
 {
-    SensorFrame() = default;
-    SensorFrame(SensorFrame&& rvalue) : time_stamp(rvalue.time_stamp),sensor_type(rvalue.sensor_type),sensors(rvalue.sensors)
-    {
-    }
     uint32_t    time_stamp;
     SensorType  sensor_type;
     std::vector<SensorObject> sensors;

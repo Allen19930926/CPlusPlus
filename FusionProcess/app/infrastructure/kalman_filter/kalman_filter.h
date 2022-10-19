@@ -3,9 +3,16 @@
 
 #include <Eigen/Dense>
 
+class SensorObject;
+class FusionTrack;
+
 class KalmanFilter
 {
+public:
     KalmanFilter();
+    void Predict(const uint32_t time_diff, FusionTrack& track);
+    void UpdateWithMeas(const uint32_t time_diff, const SensorObject& meas, FusionTrack& track);
+    void UpdateWithoutMeas(const uint32_t time_diff, FusionTrack& track);
 private:
     Eigen::Matrix3d A;
 };

@@ -68,6 +68,7 @@
         "hash_map": "cpp",
         "hash_set": "cpp",
         "slist": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "random": "cpp"
     }
 }

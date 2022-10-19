@@ -15,7 +15,7 @@ public:
         return manager;
     }
     void AddSensorMeasurements(const SensorFrame& frame);
-    bool QueryLatestFrames(const uint32_t time_stamp, std::vector<SensorFrame>& frames);
+    void QueryLatestFrames(const uint32_t time_stamp, std::vector<SensorFrame>& frames);
     uint32_t GetCacheFrameNum(const SensorType sensorName);
     void Clear();
     bool IsTargetSensor(const SensorFrame& frame);

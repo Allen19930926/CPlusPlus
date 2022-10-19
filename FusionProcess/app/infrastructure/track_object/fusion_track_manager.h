@@ -3,29 +3,31 @@
 
 #include "fusion_track.h"
 #include <random>
-// #include <vector>
+
+struct SensorFrame;
 
 class FusionTrackManager
 {
 public:
-    FusionTrackManager& GetInstance()
+    static FusionTrackManager& GetInstance()
     {
         static FusionTrackManager mgr;
         return mgr;
     }
 
-    void GetFusionTracksOfSensor(const SensorType type, std::vector<uint32_t>& track_index);
-    void CreateNewTracks(std::vector<SensorObject>&  unassigned_objects);
+    std::vector<uint32_t> GetFusionTracksOfSensor(const SensorType type);
+    void GetSingleSensorTracks(const SensorType type, std::vector<uint32_t>& single_track_index, std::vector<uint32_t>& fused_track_index);
+    void CreateNewTracks(const SensorFrame& sensor_list, const std::vector<uint32_t>& unassigned_objects_idx);
     void RemoveDeadTracks();
-
-public:
-    std::vector<FusionTrack> track_list;
 
 private:
     FusionTrackManager();
     ~FusionTrackManager() {}
     void CreateOneTrack(const SensorObject& sensor_object);
     uint32_t GetNewTrackId();
+
+public:
+    std::vector<FusionTrack> track_list;
 
 private:
     std::mt19937 track_id_generator;

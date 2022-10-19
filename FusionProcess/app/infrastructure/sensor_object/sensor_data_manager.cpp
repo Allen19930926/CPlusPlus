@@ -26,7 +26,7 @@ void SensorDataManager::AddSensorMeasurements(const SensorFrame& frame)
     pair->second.AddFrame(frame);
 }
 
-bool SensorDataManager::QueryLatestFrames(const uint32_t time_stamp, std::vector<SensorFrame>& frames)
+void SensorDataManager::QueryLatestFrames(const uint32_t time_stamp, std::vector<SensorFrame>& frames)
 {
     frames.clear();
 
@@ -39,7 +39,6 @@ bool SensorDataManager::QueryLatestFrames(const uint32_t time_stamp, std::vector
 
     std::sort(frames.begin(), frames.end(), [](const SensorFrame& lhs, const SensorFrame& rhs) { return lhs.time_stamp < rhs.time_stamp; });
 
-    return true;
 }
 
 uint32_t SensorDataManager::GetCacheFrameNum(const SensorType sensor_type)

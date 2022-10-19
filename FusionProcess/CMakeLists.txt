@@ -23,7 +23,7 @@ include_directories(
     app/infrastructure/tcp
     app/infrastructure/common
     app/domain/infrastructure/kalman_filters
-    app/domain/data_association/KM_algorithm
+    app/domain/data_association
 )
 
 link_directories(

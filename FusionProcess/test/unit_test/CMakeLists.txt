@@ -24,12 +24,15 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/app fusion)
 
 SET(SRC_LIST main.cpp)
 aux_source_directory(${PROJECT_SOURCE_DIR}/test/unit_test/domain FT_FILES)
+aux_source_directory(${PROJECT_SOURCE_DIR}/test/unit_test/infrastructure/kalman_filter FT_FILES)
 aux_source_directory(${PROJECT_SOURCE_DIR}/test/unit_test/infrastructure/sensor_object FT_FILES)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/dependencies/gtest/include
-    ${PROJECT_SOURCE_DIR}/app/domain/data_association/KM_algorithm
-    ${PROJECT_SOURCE_DIR}/app/infrastructure/sensor_object/
+    ${PROJECT_SOURCE_DIR}/app/domain/data_association
+    ${PROJECT_SOURCE_DIR}/app/infrastructure/sensor_object
+    ${PROJECT_SOURCE_DIR}/app/infrastructure/track_object
+    ${PROJECT_SOURCE_DIR}/app/infrastructure/kalman_filter
 )
 
 link_directories(

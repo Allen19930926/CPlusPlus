@@ -5,7 +5,7 @@
 class SensorAdapter
 {
 public:
-    static SensorFrame&& Transformation(uint8_t* data);
+    static bool Transformation(uint8_t* data, SensorFrame& frame);
 };
 
 #endif /* A62F6944_1391_4313_B16C_7558850948D8 */

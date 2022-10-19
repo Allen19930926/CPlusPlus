@@ -53,4 +53,10 @@ struct alignas(16) FusionTrack
 
 };
 
+struct TrackMatchPair
+{
+    uint32_t track_idx;
+    uint32_t object_idx;
+};
+
 #endif /* A1368429_4ADE_4930_BDEB_451B238EB8EC */

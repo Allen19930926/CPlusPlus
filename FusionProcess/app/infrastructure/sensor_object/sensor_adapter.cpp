@@ -1,18 +1,26 @@
 #include "sensor_adapter.h"
 #include "ipc_data.h"
 
-SensorFrame&& SensorAdapter::Transformation(uint8_t* data)
+bool SensorAdapter::Transformation(uint8_t* data, SensorFrame& frame)
 {
-    SensorFrame dest;
     CDD_Fusion_ObjInfo_Array40&  src = *reinterpret_cast<CDD_Fusion_ObjInfo_Array40*>(data);
-    dest.time_stamp  = src[0].De_Timestamp_u32;
-    dest.sensor_type = static_cast<SensorType>(src[0].De_source_u8);
+    frame.sensors.clear();
+
+    bool res = false;
+    frame.time_stamp  = src[0].De_Timestamp_u32;
+    frame.sensor_type = static_cast<SensorType>(src[0].De_source_u8);
     for (uint32_t i=0; i<20; i++)
     {
+        if (src[i].De_life_time_u32 == 0)
+        {
+            break;
+        }
+        res = true;
         SensorObject obj;
         obj.time_stamp            	= src[i].De_Timestamp_u32;
         obj.id            			= src[i].De_ID_u8;
         obj.conf            		= src[i].De_conf_f32;
+        obj.sensor_type             = src[i].De_source_u8;
         obj.life_time            	= src[i].De_life_time_u32;
         obj.yaw           		 	= src[i].De_Yaw_f32;
         obj.conf_yaw            	= src[i].De_conf_yaw_f32;
@@ -37,8 +45,8 @@ SensorFrame&& SensorAdapter::Transformation(uint8_t* data)
         obj.moving_status           = src[i].De_ObjectMovingStatus_u8;
         obj.ettc            		= src[i].De_ettc_f32;
         obj.cipv            		= src[i].De_CIPV_u8;
-        dest.sensors.push_back(obj);
+        frame.sensors.push_back(obj);
     }
-    return std::move(dest);
+    return res;
 }
 
