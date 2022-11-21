@@ -1,0 +1,108 @@
+\hypertarget{classSensorDataManager}{}\section{Sensor\+Data\+Manager Class Reference}
+\label{classSensorDataManager}\index{Sensor\+Data\+Manager@{Sensor\+Data\+Manager}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classSensorDataManager_aa77c1102b15426f743e63277af2731c2}{Add\+Sensor\+Measurements} (const Sensor\+Frame \&frame)
+\begin{DoxyCompactList}\small\item\em 添加当前帧所有的传感器数据到\+Sensor\+Manager \end{DoxyCompactList}\item 
+void \hyperlink{classSensorDataManager_ab08f7ee7b52dc79ae4ac201a7cb8ef74}{Query\+Latest\+Frames} (const uint32\+\_\+t time\+\_\+stamp, std\+::vector$<$ Sensor\+Frame $>$ \&frames)
+\begin{DoxyCompactList}\small\item\em 获取所有传感器类型的最近一帧数据，按照时间和类型排序 \end{DoxyCompactList}\item 
+uint32\+\_\+t \hyperlink{classSensorDataManager_a6775031f1005a7be711ecc75686ee092}{Get\+Cache\+Frame\+Num} (const Sensor\+Type sensor\+Name)
+\begin{DoxyCompactList}\small\item\em 查询某类传感器缓存的数据帧数量 \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classSensorDataManager_a684637d9eeef7404a8ad31dc28724704}\label{classSensorDataManager_a684637d9eeef7404a8ad31dc28724704}} 
+void \hyperlink{classSensorDataManager_a684637d9eeef7404a8ad31dc28724704}{Clear} ()
+\begin{DoxyCompactList}\small\item\em 置0操作，供测试用例使用 \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classSensorDataManager_ae170a745e8de5b9efa93234b98f159b3}\label{classSensorDataManager_ae170a745e8de5b9efa93234b98f159b3}} 
+static \hyperlink{classSensorDataManager}{Sensor\+Data\+Manager} \& {\bfseries Get\+Instance} ()
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classSensorDataManager_a89bfa8160e9b4e8a8e510d1ca121229d}\label{classSensorDataManager_a89bfa8160e9b4e8a8e510d1ca121229d}} 
+std\+::unordered\+\_\+map$<$ Sensor\+Type, \hyperlink{classSensor}{Sensor} $>$ {\bfseries sensors}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classSensorDataManager_a90a06eeb7f654dcf4b8e2bc6cad34c39}{Is\+Target\+Sensor} (const Sensor\+Frame \&frame)
+\begin{DoxyCompactList}\small\item\em 查询该传感器类型，是否为可缓存类型 \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classSensorDataManager_aa77c1102b15426f743e63277af2731c2}\label{classSensorDataManager_aa77c1102b15426f743e63277af2731c2}} 
+\index{Sensor\+Data\+Manager@{Sensor\+Data\+Manager}!Add\+Sensor\+Measurements@{Add\+Sensor\+Measurements}}
+\index{Add\+Sensor\+Measurements@{Add\+Sensor\+Measurements}!Sensor\+Data\+Manager@{Sensor\+Data\+Manager}}
+\subsubsection{\texorpdfstring{Add\+Sensor\+Measurements()}{AddSensorMeasurements()}}
+{\footnotesize\ttfamily void Sensor\+Data\+Manager\+::\+Add\+Sensor\+Measurements (\begin{DoxyParamCaption}\item[{const Sensor\+Frame \&}]{frame }\end{DoxyParamCaption})}
+
+
+
+添加当前帧所有的传感器数据到\+Sensor\+Manager 
+
+
+\begin{DoxyParams}{Parameters}
+{\em frame} & 待添加的传感器数据帧 \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classSensorDataManager_a6775031f1005a7be711ecc75686ee092}\label{classSensorDataManager_a6775031f1005a7be711ecc75686ee092}} 
+\index{Sensor\+Data\+Manager@{Sensor\+Data\+Manager}!Get\+Cache\+Frame\+Num@{Get\+Cache\+Frame\+Num}}
+\index{Get\+Cache\+Frame\+Num@{Get\+Cache\+Frame\+Num}!Sensor\+Data\+Manager@{Sensor\+Data\+Manager}}
+\subsubsection{\texorpdfstring{Get\+Cache\+Frame\+Num()}{GetCacheFrameNum()}}
+{\footnotesize\ttfamily uint32\+\_\+t Sensor\+Data\+Manager\+::\+Get\+Cache\+Frame\+Num (\begin{DoxyParamCaption}\item[{const Sensor\+Type}]{sensor\+Name }\end{DoxyParamCaption})}
+
+
+
+查询某类传感器缓存的数据帧数量 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sensor\+Name} & 查询的传感器类型 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+缓存数量 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classSensorDataManager_a90a06eeb7f654dcf4b8e2bc6cad34c39}\label{classSensorDataManager_a90a06eeb7f654dcf4b8e2bc6cad34c39}} 
+\index{Sensor\+Data\+Manager@{Sensor\+Data\+Manager}!Is\+Target\+Sensor@{Is\+Target\+Sensor}}
+\index{Is\+Target\+Sensor@{Is\+Target\+Sensor}!Sensor\+Data\+Manager@{Sensor\+Data\+Manager}}
+\subsubsection{\texorpdfstring{Is\+Target\+Sensor()}{IsTargetSensor()}}
+{\footnotesize\ttfamily bool Sensor\+Data\+Manager\+::\+Is\+Target\+Sensor (\begin{DoxyParamCaption}\item[{const Sensor\+Frame \&}]{frame }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+查询该传感器类型，是否为可缓存类型 
+
+
+\begin{DoxyParams}{Parameters}
+{\em frame} & 查询的传感器类型 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+查询结果 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classSensorDataManager_ab08f7ee7b52dc79ae4ac201a7cb8ef74}\label{classSensorDataManager_ab08f7ee7b52dc79ae4ac201a7cb8ef74}} 
+\index{Sensor\+Data\+Manager@{Sensor\+Data\+Manager}!Query\+Latest\+Frames@{Query\+Latest\+Frames}}
+\index{Query\+Latest\+Frames@{Query\+Latest\+Frames}!Sensor\+Data\+Manager@{Sensor\+Data\+Manager}}
+\subsubsection{\texorpdfstring{Query\+Latest\+Frames()}{QueryLatestFrames()}}
+{\footnotesize\ttfamily void Sensor\+Data\+Manager\+::\+Query\+Latest\+Frames (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{time\+\_\+stamp,  }\item[{std\+::vector$<$ Sensor\+Frame $>$ \&}]{frames }\end{DoxyParamCaption})}
+
+
+
+获取所有传感器类型的最近一帧数据，按照时间和类型排序 
+
+
+\begin{DoxyParams}{Parameters}
+{\em time\+\_\+stamp} & 截止时间戳 \\
+\hline
+{\em frames} & 获取的结果 \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+app/infrastructure/sensor\+\_\+object/sensor\+\_\+data\+\_\+manager.\+h\item 
+app/infrastructure/sensor\+\_\+object/sensor\+\_\+data\+\_\+manager.\+cpp\end{DoxyCompactItemize}

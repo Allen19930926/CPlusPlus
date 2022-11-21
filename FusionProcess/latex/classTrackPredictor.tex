@@ -1,0 +1,135 @@
+\hypertarget{classTrackPredictor}{}\section{Track\+Predictor Class Reference}
+\label{classTrackPredictor}\index{Track\+Predictor@{Track\+Predictor}}
+
+
+Collaboration diagram for Track\+Predictor\+:
+% FIG 0
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classTrackPredictor_a2ffc9dfb459f575642e081f8c9f6786c}{Predict} (const uint32\+\_\+t timestamp, Sensor\+Type type, const std\+::vector$<$ uint32\+\_\+t $>$ \&track\+\_\+index\+\_\+list)
+\begin{DoxyCompactList}\small\item\em 将列表中的融合轨迹同步到当前时间帧，并进行运动补偿 \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classTrackPredictor_a6fc935b0f86973ef65d66e0a5eead445}{Predict\+One\+Track} (const uint32\+\_\+t timestamp, const float yaw\+\_\+rate, Fusion\+Track \&track)
+\begin{DoxyCompactList}\small\item\em 单个融合轨迹时间同步 \end{DoxyCompactList}\item 
+void \hyperlink{classTrackPredictor_ad8a50ac75ddc8ba88127e7ef831d00ad}{Predict\+Fused\+Traj} (const uint32\+\_\+t time\+\_\+diff, const float yaw\+\_\+rate, Fusion\+Track \&track)
+\begin{DoxyCompactList}\small\item\em 融合轨迹时间同步 \end{DoxyCompactList}\item 
+void \hyperlink{classTrackPredictor_aec638c16c309f9b125c8510f78a3412a}{Predict\+Sensor\+Traj} (const uint32\+\_\+t time\+\_\+diff, const float yaw\+\_\+rate, Fusion\+Track \&track)
+\begin{DoxyCompactList}\small\item\em 传感器轨迹时间同步 \end{DoxyCompactList}\item 
+void \hyperlink{classTrackPredictor_abe38cd4b4a8bc34f947a53e1b89c36fe}{Compensate\+Ego\+Motion} (const uint32\+\_\+t time\+\_\+diff, const float yaw\+\_\+rate, Fusion\+Track\+Kf\+Data \&kf\+\_\+data)
+\begin{DoxyCompactList}\small\item\em 对预测轨迹进行运动补偿，补偿角速度带来的位置速度偏移 \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classTrackPredictor_a97a294b636ef9746206a33ab769bc9e1}\label{classTrackPredictor_a97a294b636ef9746206a33ab769bc9e1}} 
+\hyperlink{classKalmanFilter}{Kalman\+Filter} {\bfseries kf\+\_\+filter}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classTrackPredictor_abe38cd4b4a8bc34f947a53e1b89c36fe}\label{classTrackPredictor_abe38cd4b4a8bc34f947a53e1b89c36fe}} 
+\index{Track\+Predictor@{Track\+Predictor}!Compensate\+Ego\+Motion@{Compensate\+Ego\+Motion}}
+\index{Compensate\+Ego\+Motion@{Compensate\+Ego\+Motion}!Track\+Predictor@{Track\+Predictor}}
+\subsubsection{\texorpdfstring{Compensate\+Ego\+Motion()}{CompensateEgoMotion()}}
+{\footnotesize\ttfamily void Track\+Predictor\+::\+Compensate\+Ego\+Motion (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{time\+\_\+diff,  }\item[{const float}]{yaw\+\_\+rate,  }\item[{Fusion\+Track\+Kf\+Data \&}]{kf\+\_\+data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+对预测轨迹进行运动补偿，补偿角速度带来的位置速度偏移 
+
+
+\begin{DoxyParams}{Parameters}
+{\em time\+\_\+diff} & 时间差 \\
+\hline
+{\em yaw\+\_\+rate} & 自车角速度 \\
+\hline
+{\em kf\+\_\+data} & 轨迹 \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classTrackPredictor_a2ffc9dfb459f575642e081f8c9f6786c}\label{classTrackPredictor_a2ffc9dfb459f575642e081f8c9f6786c}} 
+\index{Track\+Predictor@{Track\+Predictor}!Predict@{Predict}}
+\index{Predict@{Predict}!Track\+Predictor@{Track\+Predictor}}
+\subsubsection{\texorpdfstring{Predict()}{Predict()}}
+{\footnotesize\ttfamily bool Track\+Predictor\+::\+Predict (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{timestamp,  }\item[{Sensor\+Type}]{type,  }\item[{const std\+::vector$<$ uint32\+\_\+t $>$ \&}]{track\+\_\+index\+\_\+list }\end{DoxyParamCaption})}
+
+
+
+将列表中的融合轨迹同步到当前时间帧，并进行运动补偿 
+
+
+\begin{DoxyParams}{Parameters}
+{\em timestamp} & 当前时间帧 \\
+\hline
+{\em type} & 当前帧传感器类型 \\
+\hline
+{\em track\+\_\+index\+\_\+list} & 待更新融合轨迹列表 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+时间同步是否执行 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classTrackPredictor_ad8a50ac75ddc8ba88127e7ef831d00ad}\label{classTrackPredictor_ad8a50ac75ddc8ba88127e7ef831d00ad}} 
+\index{Track\+Predictor@{Track\+Predictor}!Predict\+Fused\+Traj@{Predict\+Fused\+Traj}}
+\index{Predict\+Fused\+Traj@{Predict\+Fused\+Traj}!Track\+Predictor@{Track\+Predictor}}
+\subsubsection{\texorpdfstring{Predict\+Fused\+Traj()}{PredictFusedTraj()}}
+{\footnotesize\ttfamily void Track\+Predictor\+::\+Predict\+Fused\+Traj (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{time\+\_\+diff,  }\item[{const float}]{yaw\+\_\+rate,  }\item[{Fusion\+Track \&}]{track }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+融合轨迹时间同步 
+
+
+\begin{DoxyParams}{Parameters}
+{\em time\+\_\+diff} & 时间差 \\
+\hline
+{\em yaw\+\_\+rate} & 自车角速度 \\
+\hline
+{\em track} & 融合轨迹跟踪器 \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classTrackPredictor_a6fc935b0f86973ef65d66e0a5eead445}\label{classTrackPredictor_a6fc935b0f86973ef65d66e0a5eead445}} 
+\index{Track\+Predictor@{Track\+Predictor}!Predict\+One\+Track@{Predict\+One\+Track}}
+\index{Predict\+One\+Track@{Predict\+One\+Track}!Track\+Predictor@{Track\+Predictor}}
+\subsubsection{\texorpdfstring{Predict\+One\+Track()}{PredictOneTrack()}}
+{\footnotesize\ttfamily void Track\+Predictor\+::\+Predict\+One\+Track (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{timestamp,  }\item[{const float}]{yaw\+\_\+rate,  }\item[{Fusion\+Track \&}]{track }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+单个融合轨迹时间同步 
+
+
+\begin{DoxyParams}{Parameters}
+{\em timestamp} & 当前时间帧 \\
+\hline
+{\em yaw\+\_\+rate} & 自车角速度 \\
+\hline
+{\em track} & 融合轨迹跟踪器 \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classTrackPredictor_aec638c16c309f9b125c8510f78a3412a}\label{classTrackPredictor_aec638c16c309f9b125c8510f78a3412a}} 
+\index{Track\+Predictor@{Track\+Predictor}!Predict\+Sensor\+Traj@{Predict\+Sensor\+Traj}}
+\index{Predict\+Sensor\+Traj@{Predict\+Sensor\+Traj}!Track\+Predictor@{Track\+Predictor}}
+\subsubsection{\texorpdfstring{Predict\+Sensor\+Traj()}{PredictSensorTraj()}}
+{\footnotesize\ttfamily void Track\+Predictor\+::\+Predict\+Sensor\+Traj (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{time\+\_\+diff,  }\item[{const float}]{yaw\+\_\+rate,  }\item[{Fusion\+Track \&}]{track }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+传感器轨迹时间同步 
+
+
+\begin{DoxyParams}{Parameters}
+{\em time\+\_\+diff} & 时间差 \\
+\hline
+{\em yaw\+\_\+rate} & 自车角速度 \\
+\hline
+{\em track} & 融合轨迹跟踪器 \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+app/domain/track\+\_\+prediction/track\+\_\+predictor.\+h\item 
+app/domain/track\+\_\+prediction/track\+\_\+predictor.\+cpp\end{DoxyCompactItemize}

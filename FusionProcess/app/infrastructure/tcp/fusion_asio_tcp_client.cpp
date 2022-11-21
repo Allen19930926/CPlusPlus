@@ -1,21 +1,21 @@
 #include "fusion_asio_tcp_client.h"
-#include "log_debug.h"
+#include "infrastructure/common/log_debug.h"
 #include "glog/logging.h"
 
 namespace
 {
-    DefaultChatMessage  aliveMsg("keep alive");
+    DefaultChatMessage aliveMsg("keep alive");
 }
 
 FusionAsioTcpClient::FusionAsioTcpClient(asio::io_context& io_context, std::string ipAddr, std::string port)
     : io_context_(io_context), socket_(io_context), reconnectTimer(io_context), aliveTimer(io_context),
-      isConnected(false), ip(ipAddr), port_(port), reconnectCount(0)
+    isConnected(false), ip(ipAddr), port_(port), reconnectCount(0)
 {
 }
 
 void FusionAsioTcpClient::close()
 {
-    asio::post(io_context_,[this](){socket_.close();});
+    asio::post(io_context_, [this]() {socket_.close(); });
 }
 
 void FusionAsioTcpClient::start()
@@ -42,7 +42,7 @@ void FusionAsioTcpClient::do_connect()
             // 防止多线程进行多次重连
             if (isConnected.load())
             {
-                return ;
+                return;
             }
 
             if (!ec)
@@ -58,7 +58,7 @@ void FusionAsioTcpClient::do_connect()
                 if (reconnectCount > 20)
                 {
                     LOG(INFO) << "try connection 20 times, stop retry!!";
-                    return ;
+                    return;
                 }
                 LOG(INFO) << "connection failed, bs will retry in 30s";
                 reconnectTimer.expires_after(std::chrono::seconds(30));
@@ -71,40 +71,41 @@ void FusionAsioTcpClient::do_connect()
 void FusionAsioTcpClient::doReadHeader()
 {
     asio::async_read(socket_, asio::buffer(readMsg.Data(), FusionChatMessage::HeaderLength),
-            [this](std::error_code ec, std::size_t length)
+        [this](std::error_code ec, std::size_t length)
+        {
+            CDebugFun::PrintBuf(reinterpret_cast<uint8_t*>(readMsg.Data()), FusionChatMessage::HeaderLength);
+            if (!ec && readMsg.DecodeHeader())
             {
-                CDebugFun::PrintBuf(reinterpret_cast<uint8_t*>(readMsg.Data()), FusionChatMessage::HeaderLength);
-                if (!ec && readMsg.DecodeHeader())
-                {
-                    doReadBody();
-                }
-            });
+                doReadBody();
+            }
+        });
 }
 
 void FusionAsioTcpClient::doReadBody()
 {
     asio::async_read(socket_, asio::buffer(readMsg.Body(), readMsg.BodyLength()),
-            [this](std::error_code ec, std::size_t length)
+        [this](std::error_code ec, std::size_t length)
+        {
+            if (!ec)
             {
-                if (!ec)
-                {
-                    // call fuse_frame func
-                    doReadHeader();
-                }
-            });
+                // call fuse_frame func
+                fuse_system.Fuse(reinterpret_cast<uint8_t*> (readMsg.Body()), readMsg.BodyLength());
+                doReadHeader();
+            }
+        });
 }
 
 void FusionAsioTcpClient::write(const DefaultChatMessage& msg)
 {
     asio::post(io_context_, [this, msg]()
-    {
-        bool write_in_progress = !writeMsgs.empty();
-        writeMsgs.push_back(msg);
-        if (!write_in_progress)
         {
-            do_write();
-        }
-    });
+            bool write_in_progress = !writeMsgs.empty();
+            writeMsgs.push_back(msg);
+            if (!write_in_progress)
+            {
+                do_write();
+            }
+        });
 }
 
 void FusionAsioTcpClient::do_write()
@@ -112,7 +113,7 @@ void FusionAsioTcpClient::do_write()
     // 连接状态：通过异步写操作，写入成功，则继续写入写消息队列中的内容；
     //                       写入失败，且失败原因是broken_pipe或connection_aborted，则重置连接状态为false，并进行重连。
     //                       无论写入成功失败，均丢弃该条消息，且继续尝试写入队列其他信息，防止消息积压。
-                        
+
     // 未连接状态： 丢弃该条消息，且继续尝试写入队列其他信息，防止消息积压。
     if (isConnected.load())
     {
@@ -120,7 +121,7 @@ void FusionAsioTcpClient::do_write()
             asio::buffer(writeMsgs.front().Data(), writeMsgs.front().BodyLength()),
             [this](std::error_code ec, std::size_t /*length*/)
             {
-                if(ec.value() == EPIPE  || ec.value() == ECONNABORTED)
+                if (ec.value() == EPIPE || ec.value() == ECONNABORTED)
                 {
                     LOG(INFO) << "write fail reason: " << ec.message();
                     isConnected.store(false);
@@ -132,9 +133,9 @@ void FusionAsioTcpClient::do_write()
                 {
                     do_write();
                 }
-                
+
             });
-        return ;
+        return;
     }
     writeMsgs.pop_front();
     if (!writeMsgs.empty())

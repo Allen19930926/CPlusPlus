@@ -1,6 +1,8 @@
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
+set(CMAKE_HOST_SYSTEM_PROCESSOR aarch64)
+
 # set(tools /usr)
 set(tools /home/dev/bin/gcc-linaro-6.5.0-2018.12-x86_64_aarch64-linux-gnu)
 set(CMAKE_C_COMPILER ${tools}/bin/aarch64-linux-gnu-gcc)

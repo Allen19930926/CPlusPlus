@@ -5,9 +5,10 @@
 #include "asio/steady_timer.hpp"
 #include <string>
 #include <functional>
-#include "fusion_chat_message.h"
 #include <queue>
-#include "default_chat_message.h"
+#include "application/fusion_system.h"
+#include "infrastructure/common/fusion_chat_message.h"
+#include "infrastructure/common/default_chat_message.h"
 
 using asio::ip::tcp;
 
@@ -37,6 +38,7 @@ private:
     std::string ip;
     std::string port_;
     uint32_t reconnectCount;
+    FusionSystem fuse_system;
 };
 
 #endif /* C5CF927E_9DE0_47DA_85F1_E5A9DEE64D22 */

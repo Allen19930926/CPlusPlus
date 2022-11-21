@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(post-fusion)
-
-LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/dependencies/cmake)
-find_package(Eigen3 REQUIRED)
-find_package(glog REQUIRED)
+project(fusion)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,24 +9,59 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 OPTION(FT_TEST "complie control to remove hobot files" OFF)
 
-add_definitions("-Wall -g")
+if(CMAKE_HOST_WIN32)
+    message(STATUS "current plantform: window")
+    add_definitions(-D GLOG_NO_ABBREVIATED_SEVERITIES)
+elseif(CMAKE_HOST_UNIX)
+    message(STATUS "current platnform: unix")
+    add_definitions("-Wall -g")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -fno-exceptions -fexceptions")
+endif()
 
-add_subdirectory(app)
+message(STATUS "current FS_TEST state is: ${FT_TEST}")
 
-SET(SRC_LIST stand_alone/main.cpp)
 
+# 设置全局可以引用的头文件目录
 include_directories(
-    app/infrastructure/tcp
-    app/infrastructure/common
-    app/domain/infrastructure/kalman_filters
-    app/domain/data_association
+    ${PROJECT_SOURCE_DIR}/app
+    ${PROJECT_SOURCE_DIR}/dependencies/include
 )
 
-link_directories(
-    ${GLOG_LIBRARIES}
-)
+# 为跨平台不通用的库文件单独添加头文件目录
+if(CMAKE_HOST_WIN32)
+    include_directories(dependencies/cross_platform/window/include)
+elseif(CMAKE_HOST_UNIX)
+    if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "aarch64")
+        include_directories(dependencies/cross_platform/aarch64/include)
+    else()
+        include_directories(dependencies/cross_platform/linux/include)
+    endif()
+endif()
 
-ADD_EXECUTABLE(post-fusion  ${SRC_LIST})
+    
+if (NOT (FT_TEST EQUAL 2))
+    include_directories(app/infrastructure/tcp)
+endif()
 
-target_link_libraries(post-fusion -lpthread fusion_bussiness glog)
+# 设置全局可以添加的依赖库目录
+link_directories(${PROJECT_SOURCE_DIR}/dependencies/lib)
+# 为跨平台不通用的库文件单独添加库文件目录
+if(CMAKE_HOST_WIN32)
+    link_directories(dependencies/cross_platform/window/lib)
+elseif(CMAKE_HOST_UNIX)
+    if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "aarch64")
+        link_directories(dependencies/cross_platform/aarch64/lib)
+    else()
+        link_directories(dependencies/cross_platform/linux/lib)
+    endif()
+endif()
 
+# 设置子目录
+add_subdirectory(app)
+add_subdirectory(fusion_main)
+# add_subdirectory(unit_test)
+
+if(CMAKE_HOST_WIN32)
+    # add_dependencies(fusion_unit_test fusion_app)
+    add_dependencies(fusion_main fusion_app)
+endif()

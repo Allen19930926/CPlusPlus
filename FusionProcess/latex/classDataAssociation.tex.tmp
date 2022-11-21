@@ -1,0 +1,42 @@
+\hypertarget{classDataAssociation}{}\section{Data\+Association Class Reference}
+\label{classDataAssociation}\index{Data\+Association@{Data\+Association}}
+
+
+Collaboration diagram for Data\+Association\+:
+% FIG 0
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classDataAssociation_a44624f1c50b0a4646cf6a6d4718687d4}\label{classDataAssociation_a44624f1c50b0a4646cf6a6d4718687d4}} 
+void {\bfseries Associate} (const Sensor\+Frame \&frame, const vector$<$ uint32\+\_\+t $>$ \&sensor\+\_\+track\+\_\+index\+\_\+list)
+\item 
+\mbox{\Hypertarget{classDataAssociation_ac2d41507af660c09a85701dfcc2608e2}\label{classDataAssociation_ac2d41507af660c09a85701dfcc2608e2}} 
+const std\+::vector$<$ Track\+Match\+Pair $>$ \& {\bfseries Get\+Match\+Result} ()
+\item 
+\mbox{\Hypertarget{classDataAssociation_aab566c0adcc0974696226f9ddf598904}\label{classDataAssociation_aab566c0adcc0974696226f9ddf598904}} 
+const std\+::vector$<$ uint32\+\_\+t $>$ \& {\bfseries Get\+Unmatched\+Tracks} ()
+\item 
+\mbox{\Hypertarget{classDataAssociation_a7682f74d99ddc5b318db1276dd54e326}\label{classDataAssociation_a7682f74d99ddc5b318db1276dd54e326}} 
+const std\+::vector$<$ uint32\+\_\+t $>$ \& {\bfseries Get\+Unmatched\+Objects} ()
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classDataAssociation_aa773a9ddd189b25f7dabf7131a44cfdb}\label{classDataAssociation_aa773a9ddd189b25f7dabf7131a44cfdb}} 
+\hyperlink{classKMAlgorithm}{K\+M\+Algorithm} {\bfseries km\+\_\+matcher}
+\item 
+\mbox{\Hypertarget{classDataAssociation_a42fa344a523e7983f2443d390e702128}\label{classDataAssociation_a42fa344a523e7983f2443d390e702128}} 
+std\+::vector$<$ Track\+Match\+Pair $>$ {\bfseries match\+\_\+result}
+\item 
+\mbox{\Hypertarget{classDataAssociation_ac19f173e030c91b7a99adf836cafe8fd}\label{classDataAssociation_ac19f173e030c91b7a99adf836cafe8fd}} 
+std\+::vector$<$ uint32\+\_\+t $>$ {\bfseries unmatched\+\_\+tracks\+\_\+index}
+\item 
+\mbox{\Hypertarget{classDataAssociation_adab2c26530f35d35cc534029889132b3}\label{classDataAssociation_adab2c26530f35d35cc534029889132b3}} 
+std\+::vector$<$ uint32\+\_\+t $>$ {\bfseries unmatched\+\_\+objects\+\_\+index}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+app/domain/data\+\_\+association/data\+\_\+association.\+h\item 
+app/domain/data\+\_\+association/data\+\_\+association.\+cpp\end{DoxyCompactItemize}

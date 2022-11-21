@@ -29,7 +29,7 @@ void Sensor::QueryLatestFrame(const uint32_t time_stamp, std::vector<SensorFrame
 // 队列保持先进先出，不一定准确按照时间排序。当队列已满时，先抛出队头元素（大概率是较早时间的数据），再添加本帧元素
 void Sensor::AddFrame(const SensorFrame& frame)
 {
-    if (!IsSpecificType(frame.sensor_type))
+    if (sensor_type != frame.sensor_type)
     {
         LOG(WARNING) << "The frame(" << static_cast<uint32_t>(frame.sensor_type)
                      << ") is not the same type(" << static_cast<uint32_t>(sensor_type) << ")";
@@ -42,3 +42,8 @@ void Sensor::AddFrame(const SensorFrame& frame)
     frames_.emplace_back(frame);
 }
 
+void Sensor::Clear()
+{
+    frames_.clear();
+    latestQueryTime = 0;
+}

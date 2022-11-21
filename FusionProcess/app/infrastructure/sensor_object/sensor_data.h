@@ -8,22 +8,31 @@
 class Sensor
 {
 public:
-    /// @brief constructor func
-    /// @param type 
     Sensor(const SensorType type): sensor_type(type), latestQueryTime(0) {}
-    /// @brief query and get sensor frames since latestQueryTime
-    /// @param time_stamp 
-    /// @param queryFrames
+
+    /**
+     * @brief 获取该传感器类型的最近一帧数据
+     * @param time_stamp 截止时间戳
+     * @param queryFrames 获取的结果
+     */
     void QueryLatestFrame(const uint32_t time_stamp, std::vector<SensorFrame>& queryFrames);
-    /// @brief Add new frame to deque. if cached frame number is greater than maxCachedFrameNum , then will drop oldest frame data
-    /// @param frame 
+
+    /**
+     * @brief 添加传感器数据帧，如果缓存数量超过门限，则丢弃最旧的数据帧，再进行添加
+     * @param frame 传感器数据帧
+     */
     void AddFrame(const SensorFrame& frame);
-    /// @brief judge whether class type is the same as input sensor type
-    /// @param type 
-    /// @return whether class type is the same as input sensor type
-    bool IsSpecificType(const SensorType type) {return type == sensor_type;}
+    
+    /**
+     * @brief 获取已缓存传感器数据帧数量
+     * @return 缓存数量
+     */
     uint32_t GetCachedFrameNum() {return frames_.size();}
-    void Clear() {frames_.clear();}
+
+    /**
+     * @brief 置0操作，供测试用例使用
+     */
+    void Clear();
 private:
     SensorType  sensor_type;
     uint32_t    latestQueryTime;

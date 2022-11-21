@@ -22,6 +22,11 @@ void SensorDataManager::AddSensorMeasurements(const SensorFrame& frame)
         return ;
     }
 
+    if (frame.sensors.empty())
+    {
+        return ;
+    }
+
     auto pair = sensors.find(frame.sensor_type);
     pair->second.AddFrame(frame);
 }
@@ -37,7 +42,16 @@ void SensorDataManager::QueryLatestFrames(const uint32_t time_stamp, std::vector
         frames.insert(frames.end(), eachSensorFrames.begin(), eachSensorFrames.end());
     }
 
-    std::sort(frames.begin(), frames.end(), [](const SensorFrame& lhs, const SensorFrame& rhs) { return lhs.time_stamp < rhs.time_stamp; });
+    auto sensor_frame_compare = [](const SensorFrame& lhs, const SensorFrame& rhs)
+                                {
+                                        if (lhs.time_stamp != rhs.time_stamp)
+                                        {
+                                            return lhs.time_stamp < rhs.time_stamp; 
+                                        }
+                                        return lhs.sensor_type < rhs.sensor_type; 
+                                };
+
+    std::sort(frames.begin(), frames.end(), sensor_frame_compare);
 
 }
 

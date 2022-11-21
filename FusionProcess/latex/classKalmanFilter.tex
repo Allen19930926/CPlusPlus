@@ -1,0 +1,96 @@
+\hypertarget{classKalmanFilter}{}\section{Kalman\+Filter Class Reference}
+\label{classKalmanFilter}\index{Kalman\+Filter@{Kalman\+Filter}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classKalmanFilter_a9c2e4175624640575fd1d0148eaef943}{Predict} (const uint32\+\_\+t n\+Time\+Gap, Fusion\+Track\+Kf\+Data \&x\+Tracker\+Data)
+\begin{DoxyCompactList}\small\item\em 卡尔曼滤波预测 \end{DoxyCompactList}\item 
+void \hyperlink{classKalmanFilter_a15ba39687fe9374e6f129923dde63c8a}{Update} (const Sensor\+Object \&x\+Measure\+Obj, Fusion\+Track\+Kf\+Data \&x\+Tracker\+Data)
+\begin{DoxyCompactList}\small\item\em 卡尔曼滤波更新（带测量值） \end{DoxyCompactList}\item 
+void \hyperlink{classKalmanFilter_a6732a1548fd88786a44edd76854913b2}{Update} (Fusion\+Track\+Kf\+Data \&x\+Tracker\+Data)
+\begin{DoxyCompactList}\small\item\em 卡尔曼滤波更新（不带测量值） \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classKalmanFilter_ace6e5df8d84cf4d282dea04d09bae532}\label{classKalmanFilter_ace6e5df8d84cf4d282dea04d09bae532}} 
+Kf\+Matrix {\bfseries B}
+\item 
+\mbox{\Hypertarget{classKalmanFilter_a3527ccf295e0b72d39dfb9ae7e0c4415}\label{classKalmanFilter_a3527ccf295e0b72d39dfb9ae7e0c4415}} 
+Kf\+Matrix {\bfseries Q}
+\item 
+\mbox{\Hypertarget{classKalmanFilter_aa75c2b64a7552fa19012defbbd4feeaa}\label{classKalmanFilter_aa75c2b64a7552fa19012defbbd4feeaa}} 
+Kf\+Vector {\bfseries u}
+\item 
+\mbox{\Hypertarget{classKalmanFilter_a14821e11ca44c685b2bb9890da76498f}\label{classKalmanFilter_a14821e11ca44c685b2bb9890da76498f}} 
+Kf\+Matrix {\bfseries H}
+\item 
+\mbox{\Hypertarget{classKalmanFilter_a36a58d0f74271c121ea1dd08905104d4}\label{classKalmanFilter_a36a58d0f74271c121ea1dd08905104d4}} 
+Kf\+Matrix {\bfseries H\+\_\+T}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classKalmanFilter_a9c2e4175624640575fd1d0148eaef943}\label{classKalmanFilter_a9c2e4175624640575fd1d0148eaef943}} 
+\index{Kalman\+Filter@{Kalman\+Filter}!Predict@{Predict}}
+\index{Predict@{Predict}!Kalman\+Filter@{Kalman\+Filter}}
+\subsubsection{\texorpdfstring{Predict()}{Predict()}}
+{\footnotesize\ttfamily void Kalman\+Filter\+::\+Predict (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{n\+Time\+Gap,  }\item[{Fusion\+Track\+Kf\+Data \&}]{x\+Tracker\+Data }\end{DoxyParamCaption})}
+
+
+
+卡尔曼滤波预测 
+
+
+\begin{DoxyParams}{Parameters}
+{\em const} & uint32\+\_\+t n\+Time\+Gap 时间间隔 \\
+\hline
+{\em Fusion\+Track\+Kf\+Data} & \& x\+Tracker\+Data 融合对象 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{classKalmanFilter_a15ba39687fe9374e6f129923dde63c8a}\label{classKalmanFilter_a15ba39687fe9374e6f129923dde63c8a}} 
+\index{Kalman\+Filter@{Kalman\+Filter}!Update@{Update}}
+\index{Update@{Update}!Kalman\+Filter@{Kalman\+Filter}}
+\subsubsection{\texorpdfstring{Update()}{Update()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void Kalman\+Filter\+::\+Update (\begin{DoxyParamCaption}\item[{const Sensor\+Object \&}]{x\+Measure\+Obj,  }\item[{Fusion\+Track\+Kf\+Data \&}]{x\+Tracker\+Data }\end{DoxyParamCaption})}
+
+
+
+卡尔曼滤波更新（带测量值） 
+
+
+\begin{DoxyParams}{Parameters}
+{\em const} & Sensor\+Object \& x\+Measure\+Obj 测量对象 \\
+\hline
+{\em Fusion\+Track\+Kf\+Data} & \& x\+Tracker\+Data 融合对象 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{classKalmanFilter_a6732a1548fd88786a44edd76854913b2}\label{classKalmanFilter_a6732a1548fd88786a44edd76854913b2}} 
+\index{Kalman\+Filter@{Kalman\+Filter}!Update@{Update}}
+\index{Update@{Update}!Kalman\+Filter@{Kalman\+Filter}}
+\subsubsection{\texorpdfstring{Update()}{Update()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void Kalman\+Filter\+::\+Update (\begin{DoxyParamCaption}\item[{Fusion\+Track\+Kf\+Data \&}]{x\+Tracker\+Data }\end{DoxyParamCaption})}
+
+
+
+卡尔曼滤波更新（不带测量值） 
+
+
+\begin{DoxyParams}{Parameters}
+{\em Fusion\+Track\+Kf\+Data} & \& x\+Tracker\+Data 融合对象 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+app/infrastructure/kalman\+\_\+filter/kalman\+\_\+filter.\+h\item 
+app/infrastructure/kalman\+\_\+filter/kalman\+\_\+filter.\+cpp\end{DoxyCompactItemize}
