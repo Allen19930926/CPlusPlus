@@ -10,13 +10,8 @@ namespace
     float ego_vehi_yaw_rate = 0;
 }
 
-bool TrackPredictor::Predict(const uint32_t timestamp, SensorType type, const std::vector<uint32_t>& track_index_list)
+bool TrackPredictor::Predict(const uint32_t timestamp, SensorType type)
 {
-    if (track_index_list.size() == 0)
-    {
-        LOG(ERROR) << "There is no track to predict!!";
-        return false;
-    }
 
     std::vector<FusionTrack>& track_list = FusionTrackManager::GetInstance().track_list;
 
@@ -26,9 +21,9 @@ bool TrackPredictor::Predict(const uint32_t timestamp, SensorType type, const st
         return false;
     }
 
-	for (const auto track_idx : track_index_list)
+	for (auto& track : track_list)
 	{
-        PredictOneTrack(timestamp, ego_vehi_yaw_rate, track_list[track_idx]);
+        PredictOneTrack(timestamp, ego_vehi_yaw_rate, track);
 	}
     return true;
 }

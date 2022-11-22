@@ -20,24 +20,15 @@ ACCESS_PRIVATE_FUN(TrackPredictor, void(const uint32_t , const float , FusionTra
 ACCESS_PRIVATE_FUN(TrackPredictor, void(const uint32_t , const float , FusionTrackKfData& ), CompensateEgoMotion);
 
 
-TEST_F(TrackPreditionTest, predict_with_no_index_test)
-{
-    std::vector<uint32_t>  sensor_track_idx;
-    ASSERT_FALSE(preditor.Predict(0, SensorType::V2X, sensor_track_idx));
-}
-
 TEST_F(TrackPreditionTest, predict_with_no_track_test)
 {
-    std::vector<uint32_t>  sensor_track_idx;
-    sensor_track_idx.push_back(0);
-    ASSERT_FALSE(preditor.Predict(0, SensorType::V2X, sensor_track_idx));
+    ASSERT_FALSE(preditor.Predict(0, SensorType::V2X));
 }
 
 TEST_F(TrackPreditionTest, predict_test)
 {
-    std::vector<uint32_t>  sensor_track_idx {0,2,5,8};
     mocker.MockCreateTracks(10, SensorType::V2X);
-    ASSERT_TRUE(preditor.Predict(0, SensorType::V2X, sensor_track_idx));
+    ASSERT_TRUE(preditor.Predict(0, SensorType::V2X));
 }
 
 TEST_F(TrackPreditionTest, predict_motion_compensation_success_test)

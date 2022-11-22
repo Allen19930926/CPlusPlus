@@ -48,7 +48,7 @@ void FusionSystem::FuseFrame(const SensorFrame& sensor_list)
     std::vector<uint32_t> track_index_list = FusionTrackManager::GetInstance().
         GetFusionTracksOfSensor(sensor_list.sensor_type);
 
-    predictor.Predict(sensor_list.time_stamp, sensor_list.sensor_type, track_index_list);
+    predictor.Predict(sensor_list.time_stamp, sensor_list.sensor_type);
 
     matcher.Associate(sensor_list, track_index_list);
 

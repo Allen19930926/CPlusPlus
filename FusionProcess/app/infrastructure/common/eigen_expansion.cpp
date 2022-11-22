@@ -1,6 +1,6 @@
 #include "eigen_expansion.h"
 
-void EigenExpansion::RemoveSpecRowAndCol(Eigen::MatrixXf& matrix, uint32_t row, uint32_t col)
+void EigenExpansion::RemoveSpecRowAndCol(Eigen::MatrixXd& matrix, uint32_t row, uint32_t col)
 {
     if (matrix.rows() == 0 || matrix.cols() == 0)
     {

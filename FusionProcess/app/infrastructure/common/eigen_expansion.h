@@ -12,7 +12,7 @@ public:
      * @param row 行
      * @param col 列
      */
-    static void RemoveSpecRowAndCol(Eigen::MatrixXf& matrix, uint32_t row, uint32_t col);
+    static void RemoveSpecRowAndCol(Eigen::MatrixXd& matrix, uint32_t row, uint32_t col);
 };
 
 #endif /* C5B36BA6_0447_4448_B202_C2C5BF9D1EFC */

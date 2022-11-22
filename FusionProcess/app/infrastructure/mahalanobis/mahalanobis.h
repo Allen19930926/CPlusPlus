@@ -52,6 +52,6 @@ public:
     /// @param row_track_idx 作为行向量的track索引列表
     /// @param col_track_idx 作为列向量的track索引列表
     /// @return 返回值N阶马氏距离方阵， n为row_track_idx， m为col_track_idx容量， N=max(n,m), 未计算部分取float_max
-    static Eigen::MatrixXf GetTrackTrackMahalDistance(const std::vector<FusionTrack> track_list, const std::vector<uint32_t> row_track_idx, const std::vector<uint32_t> col_track_idx);
+    static Eigen::MatrixXd GetTrackTrackMahalDistance(const std::vector<FusionTrack> track_list, const std::vector<uint32_t> row_track_idx, const std::vector<uint32_t> col_track_idx);
 };
 #endif // !__MAHALANOBIS_H__

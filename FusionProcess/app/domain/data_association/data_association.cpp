@@ -15,6 +15,9 @@ namespace
 
 void DataAssociation::Associate(const SensorFrame& frame, const std::vector<uint32_t>& sensor_track_index_list)
 {
+    match_result.clear();
+    unmatched_tracks_index.clear();
+    unmatched_objects_index.clear();
     uint32_t track_num = static_cast<uint32_t>(sensor_track_index_list.size());
     uint32_t object_num = static_cast<uint32_t>(frame.sensors.size());
     if (track_num == 0)
@@ -28,11 +31,13 @@ void DataAssociation::Associate(const SensorFrame& frame, const std::vector<uint
     }
     if (object_num == 0)
     {
+        LOG(ERROR) << "There is no object to associate!!";
+        for (uint32_t i=0; i<sensor_track_index_list.size(); i++)
+        {
+            unmatched_tracks_index.push_back(sensor_track_index_list[i]);
+        }
         return;
     }
-    match_result.clear();
-    unmatched_tracks_index.clear();
-    unmatched_objects_index.clear();
 
     DoIdAssign(frame, sensor_track_index_list);
     // 对未匹配上的 ID 做匈牙利匹配

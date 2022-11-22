@@ -16,7 +16,7 @@ public:
      * @param track_index_list 待更新融合轨迹列表
      * @return 时间同步是否执行
      */
-    bool Predict(const uint32_t timestamp, SensorType type, const std::vector<uint32_t>& track_index_list);
+    bool Predict(const uint32_t timestamp, SensorType type);
 private:
     /**
      * @brief 单个融合轨迹时间同步

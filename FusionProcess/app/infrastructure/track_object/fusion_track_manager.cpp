@@ -104,43 +104,47 @@ uint32_t FusionTrackManager::GetNewTrackId()
 
 void FusionTrackManager::FuseSameTracks(const SensorType cur_type)
 {
-    // std::vector<uint32_t> single_object_track_index;
-    // std::vector<uint32_t> lack_object_track_index;
-    // GetIntegratableTracksBySensor(cur_type, single_object_track_index, lack_object_track_index);
-    // if (lack_object_track_index.empty())
-    // {
-    //     LOG(INFO) << "there is tracks need to fuse this sensor data!";
-    //     return;
-    // }
+    std::vector<uint32_t> single_object_track_index;
+    std::vector<uint32_t> lack_object_track_index;
+    GetIntegratableTracksBySensor(cur_type, single_object_track_index, lack_object_track_index);
+    if (lack_object_track_index.empty())
+    {
+        LOG(INFO) << "there is tracks need to fuse this sensor data!";
+        return;
+    }
 
-    // Eigen::MatrixXf mal_dist = DistCalcInterface::GetTrackTrackMahalDistance(track_list, lack_object_track_index, single_object_track_index);
+    Eigen::MatrixXd mal_dist = DistCalcInterface::GetTrackTrackMahalDistance(track_list, lack_object_track_index, single_object_track_index);
 
-    // if (mal_dist.minCoeff() >= SAME_TRACK_JUDGE_GATE)
-    // {
-    //     LOG(INFO) << "there is no tracks aims to same object!";
-    //     return;
-    // }
+    if (mal_dist.minCoeff() >= SAME_TRACK_JUDGE_GATE)
+    {
+        LOG(INFO) << "there is no tracks aims to same object!";
+        return;
+    }
 
-    // Eigen::MatrixXf::Index row;
-    // Eigen::MatrixXf::Index col;
-    // std::vector<uint32_t> erase_id;
-    // while (mal_dist.minCoeff(&row, &col) < SAME_TRACK_JUDGE_GATE && mal_dist.rows() != 0)
-    // {
-    //     FuseOneSameTrack(lack_object_track_index[static_cast<uint32_t>(row)],
-    //         single_object_track_index[static_cast<uint32_t>(col)], cur_type);
+    Eigen::MatrixXf::Index row;
+    Eigen::MatrixXf::Index col;
+    std::vector<uint32_t> erase_id;
+    while ( mal_dist.rows() > 0 && mal_dist.cols() > 0)
+    {
+        if (mal_dist.minCoeff(&row, &col) >= SAME_TRACK_JUDGE_GATE)
+        {
+            break;
+        }
+        FuseOneSameTrack(lack_object_track_index[static_cast<uint32_t>(row)],
+            single_object_track_index[static_cast<uint32_t>(col)], cur_type);
 
-    //     erase_id.emplace_back(track_list[single_object_track_index[static_cast<uint32_t>(col)]].track_id);
+        erase_id.emplace_back(track_list[single_object_track_index[static_cast<uint32_t>(col)]].track_id);
 
-    //     EigenExpansion::RemoveSpecRowAndCol(mal_dist, static_cast<uint32_t>(row), static_cast<uint32_t>(col));
-    //     lack_object_track_index.erase(lack_object_track_index.begin() + row);
-    //     single_object_track_index.erase(single_object_track_index.begin() + col);
-    // }
+        EigenExpansion::RemoveSpecRowAndCol(mal_dist, static_cast<uint32_t>(row), static_cast<uint32_t>(col));
+        lack_object_track_index.erase(lack_object_track_index.begin() + row);
+        single_object_track_index.erase(single_object_track_index.begin() + col);
+    }
 
-    // auto rm_cond = [&erase_id](const FusionTrack& track)
-    // {
-    //     return std::find(erase_id.begin(), erase_id.end(), track.track_id) !=  erase_id.end(); 
-    // };
-    // track_list.erase(std::remove_if(track_list.begin(), track_list.end(), rm_cond), track_list.end());
+    auto rm_cond = [&erase_id](const FusionTrack& track)
+    {
+        return std::find(erase_id.begin(), erase_id.end(), track.track_id) !=  erase_id.end(); 
+    };
+    track_list.erase(std::remove_if(track_list.begin(), track_list.end(), rm_cond), track_list.end());
 }
 
 void FusionTrackManager::GetIntegratableTracksBySensor(const SensorType type, std::vector<uint32_t>& single_track_index, std::vector<uint32_t>& fused_track_index)
