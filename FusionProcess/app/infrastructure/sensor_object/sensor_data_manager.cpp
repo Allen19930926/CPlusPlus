@@ -1,6 +1,13 @@
 #include "sensor_data_manager.h"
 #include <unordered_map>
 #include <glog/logging.h>
+#include <mutex>
+
+namespace
+{
+    std::mutex sensor_lck;
+}
+
 
 SensorDataManager::SensorDataManager()
 {
@@ -27,6 +34,7 @@ void SensorDataManager::AddSensorMeasurements(const SensorFrame& frame)
         return ;
     }
 
+    std::lock_guard<std::mutex> lck_guard(sensor_lck);
     auto pair = sensors.find(frame.sensor_type);
     pair->second.AddFrame(frame);
 }
@@ -35,11 +43,14 @@ void SensorDataManager::QueryLatestFrames(const uint32_t time_stamp, std::vector
 {
     frames.clear();
 
-    for (auto& pair : sensors)
     {
-        std::vector<SensorFrame> eachSensorFrames;
-        pair.second.QueryLatestFrame(time_stamp, eachSensorFrames);
-        frames.insert(frames.end(), eachSensorFrames.begin(), eachSensorFrames.end());
+        std::lock_guard<std::mutex> lck_guard(sensor_lck);
+        for (auto& pair : sensors)
+        {
+            std::vector<SensorFrame> eachSensorFrames;
+            pair.second.QueryLatestFrame(time_stamp, eachSensorFrames);
+            frames.insert(frames.end(), eachSensorFrames.begin(), eachSensorFrames.end());
+        }
     }
 
     auto sensor_frame_compare = [](const SensorFrame& lhs, const SensorFrame& rhs)

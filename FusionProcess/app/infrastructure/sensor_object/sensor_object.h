@@ -4,7 +4,7 @@
 #include <Eigen/Dense>
 #include <vector>
 
-enum class SensorType : uint8_t
+enum SensorType : uint32_t
 {
     CAMERA = 0,
     V2X,

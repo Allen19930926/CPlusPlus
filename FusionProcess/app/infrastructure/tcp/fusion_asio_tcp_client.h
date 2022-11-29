@@ -6,11 +6,12 @@
 #include <string>
 #include <functional>
 #include <queue>
-#include "application/fusion_system.h"
 #include "infrastructure/common/fusion_chat_message.h"
 #include "infrastructure/common/default_chat_message.h"
 
 using asio::ip::tcp;
+
+using ReadCB =  std::function<void(FusionChatMessage)>;
 
 class FusionAsioTcpClient
 {
@@ -18,6 +19,7 @@ public:
     FusionAsioTcpClient(asio::io_context& io_context, std::string ipAddr, std::string port);
     void close();
     void start();
+    void set_read_cb(ReadCB read_cb);
 
 private:
     void keep_alive();
@@ -38,7 +40,7 @@ private:
     std::string ip;
     std::string port_;
     uint32_t reconnectCount;
-    FusionSystem fuse_system;
+    ReadCB read_call_back;
 };
 
 #endif /* C5CF927E_9DE0_47DA_85F1_E5A9DEE64D22 */

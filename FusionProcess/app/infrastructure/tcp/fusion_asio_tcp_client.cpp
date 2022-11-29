@@ -24,6 +24,11 @@ void FusionAsioTcpClient::start()
     keep_alive();
 }
 
+void FusionAsioTcpClient::set_read_cb(ReadCB read_cb)
+{
+    read_call_back = read_cb;
+}
+
 void FusionAsioTcpClient::keep_alive()
 {
     write(aliveMsg);
@@ -89,7 +94,7 @@ void FusionAsioTcpClient::doReadBody()
             if (!ec)
             {
                 // call fuse_frame func
-                fuse_system.Fuse(reinterpret_cast<uint8_t*> (readMsg.Body()), readMsg.BodyLength());
+                read_call_back(std::move(readMsg));
                 doReadHeader();
             }
         });

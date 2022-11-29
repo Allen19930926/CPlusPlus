@@ -92,6 +92,7 @@ typedef struct
   VAR(Boolean, TYPEDEF) De_CIPV_u8;
 } CDD_Fusion_ObjInfo_BUS;
 
+typedef VAR(CDD_Fusion_ObjInfo_BUS, TYPEDEF) CDD_Fusion_ObjInfo_Array20[20];
 typedef VAR(CDD_Fusion_ObjInfo_BUS, TYPEDEF) CDD_Fusion_ObjInfo_Array40[40];
 
 typedef struct

@@ -175,7 +175,12 @@ void DataAssociation::DoKahnMunkresMatch(const SensorFrame& frame)
                                 track.vel_variance(0,0),  track.vel_variance(1,1),
                                 track.acc_variance(0,0),  track.vel_variance(1,1);
             KfMatrix co_variance = co_variance_vec.asDiagonal();
-            cost_matrix(i, j) = Mahalanobis::GetMahalDistance(object_state_vec, track_state_vec, co_variance);
+            double mahal_dist = Mahalanobis::GetMahalDistance(object_state_vec, track_state_vec, co_variance);
+            if (mahal_dist >= mahal_dist_threshold)
+            {
+                continue;
+            }
+            cost_matrix(i, j) = mahal_dist;
         }
     }
 

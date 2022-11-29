@@ -35,6 +35,21 @@ void Sensor::AddFrame(const SensorFrame& frame)
                      << ") is not the same type(" << static_cast<uint32_t>(sensor_type) << ")";
         return ;
     }
+
+    // 理论上使用多态更符合编码原则，但是这里改动会比较大，先插入一段只属于camera的合并流程
+    if (sensor_type == SensorType::CAMERA)
+    {
+        if (!frames_.empty())
+        {
+            SensorFrame& last_frame = frames_.back();
+            if (last_frame.time_stamp == frame.time_stamp)
+            {
+                last_frame.sensors.insert(last_frame.sensors.end(), frame.sensors.begin(), frame.sensors.end());
+                return ;
+            }
+        }
+    }
+
     if (frames_.size() >= maxCachedFrameNum)
     {
         frames_.pop_front();

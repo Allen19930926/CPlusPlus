@@ -1,4 +1,4 @@
-#include "application/fusion_system.h"
+#include "application/fuse_system/fusion_system.h"
 #include "infrastructure/track_object/fusion_track_manager.h"
 #include "infrastructure/common/ipc_data.h"
 

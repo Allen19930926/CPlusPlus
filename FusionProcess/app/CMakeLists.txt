@@ -9,7 +9,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${PROJECT_SOURCE_DIR}/../dependencies
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR}/../dependencies/lib)
 
 # 添加工程源文件
-aux_source_directory(application SRC_LIST)
+aux_source_directory(application/fuse_system SRC_LIST)
 aux_source_directory(domain/data_association SRC_LIST)
 aux_source_directory(domain/track_prediction SRC_LIST)
 aux_source_directory(domain/track_update SRC_LIST)
@@ -22,7 +22,9 @@ aux_source_directory(infrastructure/hungarian SRC_LIST)
 
 if (NOT (FT_TEST EQUAL 2))
     include_directories(infrastructure/tcp)
-    aux_source_directory(${PROJECT_SOURCE_DIR}/infrastructure/tcp SRC_LIST)
+    aux_source_directory(application/data_reciever SRC_LIST)
+    aux_source_directory(domain/data_preprocessor SRC_LIST)
+    aux_source_directory(infrastructure/tcp SRC_LIST)
 endif()
 
 # 递归查找文件夹下的所有 .h 文件并保存到 HEADER_FILES

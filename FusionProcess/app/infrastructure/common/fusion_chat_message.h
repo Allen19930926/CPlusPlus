@@ -1,8 +1,8 @@
 #ifndef E3DF7E56_B5EC_46DD_B5F2_D19B8AC0EB70
 #define E3DF7E56_B5EC_46DD_B5F2_D19B8AC0EB70
 
-#include <string>
-#include <cstring>
+#include <memory>
+#include <vector>
 
 struct FusionChatHeader
 {
@@ -12,44 +12,51 @@ struct FusionChatHeader
     uint32_t bodyLength;
 };
 
+struct FusionChatBody
+{
+    FusionChatBody(uint32_t length) : body(length, 0) {}
+    std::vector<char> body;
+};
+
 class FusionChatMessage {
 public:
-    static constexpr std::size_t HeaderLength = 16;
-    static constexpr std::size_t MaxBodyLength = 1024 * 10;
+    static constexpr uint32_t HeaderLength = 16;
+    static constexpr uint32_t MaxBodyLength = 1024 * 10;
 
-    FusionChatMessage() : bodyLength(0) {}
-
-    FusionChatMessage(const char* buf , const uint16_t len)
+    FusionChatMessage()
     {
-        if (len < HeaderLength + MaxBodyLength)
-        {
-            memcpy(dataBuffer, buf, len);
-            bodyLength = len;
-        }
+        head_ptr = std::make_shared<FusionChatHeader>();
+        body_ptr = std::make_shared<FusionChatBody>(0);
     }
 
-    char *Data() { return dataBuffer; }
+    FusionChatMessage(FusionChatMessage&& r_value)
+    {
+        FusionChatMessage();
+        head_ptr.swap(r_value.head_ptr);
+        body_ptr.swap(r_value.body_ptr);
+    }
 
-    std::size_t Length() const { return HeaderLength + bodyLength; }
+    char *Data() { return reinterpret_cast<char*>(head_ptr.get()); }
 
-    char *Body() { return dataBuffer + HeaderLength; }
+    char *Body() { return body_ptr->body.data(); }
 
-    const int BodyLength() { return bodyLength; }
+    const int BodyLength() { return head_ptr->bodyLength; }
+
+    const FusionChatHeader& Header() {return *head_ptr;}
 
     bool DecodeHeader()
     {
-        const FusionChatHeader& head = *reinterpret_cast<FusionChatHeader*>(&dataBuffer);
-        if (head.bodyLength >= MaxBodyLength)
+        if (head_ptr->bodyLength >= MaxBodyLength)
         {
             return false;
         }
-        bodyLength = head.bodyLength;
+        body_ptr = std::make_shared<FusionChatBody>(head_ptr->bodyLength);
         return true;
     }
 
 protected:
-    char dataBuffer[HeaderLength + MaxBodyLength];
-    std::size_t bodyLength;
+    std::shared_ptr<FusionChatHeader> head_ptr;
+    std::shared_ptr<FusionChatBody> body_ptr;
 };
 
 #endif /* E3DF7E56_B5EC_46DD_B5F2_D19B8AC0EB70 */
