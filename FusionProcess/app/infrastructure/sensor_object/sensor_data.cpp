@@ -21,9 +21,8 @@ void Sensor::QueryLatestFrame(const uint32_t time_stamp, std::vector<SensorFrame
             continue;
         }
         queryFrames.push_back(frames_[i]);
+        latestQueryTime = std::max(latestQueryTime, frames_[i].time_stamp);
     }
-
-    latestQueryTime = time_stamp;
 }
 
 // 队列保持先进先出，不一定准确按照时间排序。当队列已满时，先抛出队头元素（大概率是较早时间的数据），再添加本帧元素

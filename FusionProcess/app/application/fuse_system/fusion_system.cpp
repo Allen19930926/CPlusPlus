@@ -4,28 +4,15 @@
 #include "infrastructure/sensor_object/sensor_adapter.h"
 
 #include "fusion_system.h"
+#include <chrono>
 
-void FusionSystem::Fuse(uint8_t* data, uint16_t len)
+
+void FusionSystem::Fuse()
 {
-    if (len != sizeof(CDD_Fusion_ObjInfo_Array40))
-    {
-        LOG(ERROR) << "datalen mismatch!!";
-        return;
-    }
-
-    // 目前传输的数据，v2x和camera是在一起，并且紧排列。造成代码存在冗余，后期待优化。
-    SensorFrame v2x_frame, camera_frame;
-    if (SensorAdapter::Transformation(data, v2x_frame, camera_frame))
-    {
-        LOG(ERROR) << "Add frame failed, no sensor frame data!!";
-        return;
-    }
-
-    AddSensorFrame(v2x_frame);
-    AddSensorFrame(camera_frame);
+    uint64_t time_stamp = GetCurrentTime();
 
     std::vector<SensorFrame> frames;
-    GetLatestFrames(camera_frame.time_stamp, frames);  // 后期需要考虑，track和sensor时间间隔过大问题
+    GetLatestFrames(time_stamp, frames);  // 后期需要考虑，track和sensor时间间隔过大问题
 
     for (const auto& frame : frames)
     {
@@ -77,4 +64,17 @@ void FusionSystem::RemoveLostTracks()
 void FusionSystem::FuseSameTracks(const SensorType type)
 {
     FusionTrackManager::GetInstance().FuseSameTracks(type);
+}
+
+uint64_t FusionSystem::GetCurrentTime()
+{
+    // 获取操作系统当前时间点（精确到微秒）
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::microseconds> tpMicro
+        = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
+    // (微秒精度的)时间点 => (微秒精度的)时间戳
+    time_t totalMicroSeconds = tpMicro.time_since_epoch().count();
+
+    uint64_t currentTime = ((uint64_t)totalMicroSeconds)/1000;
+
+    return currentTime;
 }

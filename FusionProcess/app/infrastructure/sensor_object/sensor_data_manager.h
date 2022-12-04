@@ -49,6 +49,7 @@ private:
     ~SensorDataManager();
 
 public:
+    bool recv_new_data;
     std::unordered_map<SensorType, Sensor> sensors;
 };
 

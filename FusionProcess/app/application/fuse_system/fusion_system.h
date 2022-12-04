@@ -17,11 +17,8 @@ public:
      *2. 将接收的当前帧所有的传感器数据存储到SensorManager管理，并获取所有传感器类型的最近一帧数据，按照时间和类型排序
      *3. 逐帧融合传感器数据
      *4. 发布可信的轨迹点状态信息
-     * @param data 外部传递的传感器信息
-     * @param len  消息长度
      */
-    void Fuse(uint8_t* data, uint16_t len);
-    void Fuse(){}
+    void Fuse();
 private:
     /**
      * @brief 添加当前帧所有的传感器数据到SensorManager，进行存储和管理
@@ -59,6 +56,8 @@ private:
      * @param type 当前帧数据传感器类型
      */
     void FuseSameTracks(const SensorType type);
+
+    uint64_t GetCurrentTime();
 
 private:
     TrackPredictor  predictor;

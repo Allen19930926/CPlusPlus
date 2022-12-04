@@ -83,31 +83,24 @@ TEST_F(SensorDataManagerTest, query_lastest_frames_with_different_time_test)
     frame.sensor_type = SensorType::CAMERA;
     frame.time_stamp = 13487432;
     frame.sensors.push_back(null_obj);
+
     for (uint32_t i = 0; i < 20; i++)
     {
         frame.time_stamp++;
         manager->AddSensorMeasurements(frame);
     }
+    ASSERT_EQ(uint32_t(10), manager->GetCacheFrameNum(SensorType::CAMERA));
+
+    std::vector<SensorFrame> res;
     frame.time_stamp = 1000;
     for (uint32_t i = 0; i < 4; i++)
     {
         frame.time_stamp -= 200;
         manager->AddSensorMeasurements(frame);
     }
-
-    ASSERT_EQ(uint32_t(10), manager->GetCacheFrameNum(SensorType::CAMERA));
-
-    std::vector<SensorFrame> res;
-    manager->QueryLatestFrames(800, res);
+    manager->QueryLatestFrames(1000, res);
     ASSERT_EQ(uint32_t(4), res.size());
 
-    res.clear();
-    manager->QueryLatestFrames(0xFFFFFFFF, res);
-    ASSERT_EQ(uint32_t(6), res.size());
-
-    res.clear();
-    manager->QueryLatestFrames(800, res);
-    ASSERT_EQ(uint32_t(0), res.size());
 }
 
 TEST_F(SensorDataManagerTest, query_lastest_frames_with_different_type_test)

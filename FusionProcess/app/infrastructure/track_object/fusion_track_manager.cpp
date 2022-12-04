@@ -109,7 +109,7 @@ void FusionTrackManager::FuseSameTracks(const SensorType cur_type)
     GetIntegratableTracksBySensor(cur_type, single_object_track_index, lack_object_track_index);
     if (lack_object_track_index.empty())
     {
-        LOG(INFO) << "there is tracks need to fuse this sensor data!";
+        LOG(INFO) << "there is no tracks need to fuse this sensor data!";
         return;
     }
 

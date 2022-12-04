@@ -9,7 +9,7 @@ namespace
 }
 
 
-SensorDataManager::SensorDataManager()
+SensorDataManager::SensorDataManager() : recv_new_data(false)
 {
     sensors.emplace(std::make_pair(SensorType::CAMERA      ,   Sensor(SensorType::CAMERA)));
     sensors.emplace(std::make_pair(SensorType::V2X         ,   Sensor(SensorType::V2X)));
@@ -35,6 +35,7 @@ void SensorDataManager::AddSensorMeasurements(const SensorFrame& frame)
     }
 
     std::lock_guard<std::mutex> lck_guard(sensor_lck);
+    recv_new_data = true;
     auto pair = sensors.find(frame.sensor_type);
     pair->second.AddFrame(frame);
 }
@@ -45,6 +46,11 @@ void SensorDataManager::QueryLatestFrames(const uint32_t time_stamp, std::vector
 
     {
         std::lock_guard<std::mutex> lck_guard(sensor_lck);
+        if (!recv_new_data)
+        {
+            return ;
+        }
+        recv_new_data = false;
         for (auto& pair : sensors)
         {
             std::vector<SensorFrame> eachSensorFrames;
