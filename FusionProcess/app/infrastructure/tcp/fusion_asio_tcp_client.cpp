@@ -7,9 +7,9 @@ namespace
     DefaultChatMessage aliveMsg("keep alive");
 }
 
-FusionAsioTcpClient::FusionAsioTcpClient(asio::io_context& io_context, std::string ipAddr, std::string port)
+FusionAsioTcpClient::FusionAsioTcpClient(asio::io_context& io_context, std::string ipAddr, std::string port, ReadCB cb)
     : io_context_(io_context), socket_(io_context), reconnectTimer(io_context), aliveTimer(io_context),
-    isConnected(false), ip(ipAddr), port_(port), reconnectCount(0)
+    isConnected(false), ip(ipAddr), port_(port), reconnectCount(0), read_call_back(cb)
 {
 }
 
@@ -22,11 +22,6 @@ void FusionAsioTcpClient::start()
 {
     do_connect();
     keep_alive();
-}
-
-void FusionAsioTcpClient::set_read_cb(ReadCB read_cb)
-{
-    read_call_back = read_cb;
 }
 
 void FusionAsioTcpClient::keep_alive()

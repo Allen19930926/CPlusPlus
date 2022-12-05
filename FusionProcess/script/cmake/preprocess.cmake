@@ -13,7 +13,7 @@ if(CMAKE_HOST_WIN32)
 elseif(CMAKE_HOST_UNIX)
     message(STATUS "current platnform: unix")
     add_definitions("-Wall -g")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -fno-exceptions")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
 endif()
 
 message(STATUS "current FT_TEST state is: ${FT_TEST}")

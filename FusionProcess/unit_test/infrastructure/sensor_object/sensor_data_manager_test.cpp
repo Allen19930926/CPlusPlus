@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include <glog/logging.h>
 
+#include "infrastructure/common/fusion_tools.h"
 #include "infrastructure/sensor_object/sensor_data_manager.h"
 
 struct SensorDataManagerTest : testing::Test
@@ -81,25 +82,25 @@ TEST_F(SensorDataManagerTest, query_lastest_frames_with_different_time_test)
     SensorFrame frame;
     SensorObject null_obj;
     frame.sensor_type = SensorType::CAMERA;
-    frame.time_stamp = 13487432;
     frame.sensors.push_back(null_obj);
-
+    frame.time_stamp = FusionTool::GetCurrentTime();
     for (uint32_t i = 0; i < 20; i++)
-    {
-        frame.time_stamp++;
-        manager->AddSensorMeasurements(frame);
-    }
-    ASSERT_EQ(uint32_t(10), manager->GetCacheFrameNum(SensorType::CAMERA));
-
-    std::vector<SensorFrame> res;
-    frame.time_stamp = 1000;
-    for (uint32_t i = 0; i < 4; i++)
     {
         frame.time_stamp -= 200;
         manager->AddSensorMeasurements(frame);
     }
-    manager->QueryLatestFrames(1000, res);
-    ASSERT_EQ(uint32_t(4), res.size());
+    ASSERT_EQ(uint32_t(10), manager->GetCacheFrameNum(SensorType::CAMERA));
+
+    frame.time_stamp = 13487432;
+    for (uint32_t i = 0; i < 5; i++)
+    {
+        frame.time_stamp++;
+        manager->AddSensorMeasurements(frame);
+    }
+
+    std::vector<SensorFrame> res;
+    manager->QueryLatestFrames(frame.time_stamp, res);
+    ASSERT_EQ(uint32_t(5), res.size());
 
 }
 

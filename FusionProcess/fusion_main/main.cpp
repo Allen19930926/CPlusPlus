@@ -15,7 +15,7 @@ void DoPeriodFusionTask(asio::steady_timer* timer, uint32_t interval)
 void StartIoThread()
 {
     asio::io_context io_context;
-    DataReciever  data_reciever(io_context, "192.168.198.131", "35243");
+    DataReciever  data_reciever(io_context, "192.168.198.131", "35243", 56842);
     data_reciever.Start();
     io_context.run();
 }

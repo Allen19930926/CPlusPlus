@@ -1,15 +1,15 @@
 #include <glog/logging.h>
 
 #include "infrastructure/common/ipc_data.h"
+#include "infrastructure/common/fusion_tools.h"
 #include "infrastructure/sensor_object/sensor_adapter.h"
 
 #include "fusion_system.h"
-#include <chrono>
 
 
 void FusionSystem::Fuse()
 {
-    uint64_t time_stamp = GetCurrentTime();
+    uint64_t time_stamp = FusionTool::GetCurrentTime();
 
     std::vector<SensorFrame> frames;
     GetLatestFrames(time_stamp, frames);  // 后期需要考虑，track和sensor时间间隔过大问题
@@ -66,15 +66,3 @@ void FusionSystem::FuseSameTracks(const SensorType type)
     FusionTrackManager::GetInstance().FuseSameTracks(type);
 }
 
-uint64_t FusionSystem::GetCurrentTime()
-{
-    // 获取操作系统当前时间点（精确到微秒）
-    std::chrono::time_point<std::chrono::system_clock, std::chrono::microseconds> tpMicro
-        = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
-    // (微秒精度的)时间点 => (微秒精度的)时间戳
-    time_t totalMicroSeconds = tpMicro.time_since_epoch().count();
-
-    uint64_t currentTime = ((uint64_t)totalMicroSeconds)/1000;
-
-    return currentTime;
-}

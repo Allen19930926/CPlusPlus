@@ -2,7 +2,7 @@
 #include <glog/logging.h>
 #include <queue>
 #include "infrastructure/mahalanobis/mahalanobis.h"
-#include "infrastructure/common/eigen_expansion.h"
+#include "infrastructure/common/fusion_tools.h"
 
 namespace
 {
@@ -135,7 +135,7 @@ void FusionTrackManager::FuseSameTracks(const SensorType cur_type)
 
         erase_id.emplace_back(track_list[single_object_track_index[static_cast<uint32_t>(col)]].track_id);
 
-        EigenExpansion::RemoveSpecRowAndCol(mal_dist, static_cast<uint32_t>(row), static_cast<uint32_t>(col));
+        FusionTool::RemoveSpecRowAndCol(mal_dist, static_cast<uint32_t>(row), static_cast<uint32_t>(col));
         lack_object_track_index.erase(lack_object_track_index.begin() + row);
         single_object_track_index.erase(single_object_track_index.begin() + col);
     }

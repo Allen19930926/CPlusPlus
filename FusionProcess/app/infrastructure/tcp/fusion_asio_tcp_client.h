@@ -16,10 +16,9 @@ using ReadCB =  std::function<void(FusionChatMessage)>;
 class FusionAsioTcpClient
 {
 public:
-    FusionAsioTcpClient(asio::io_context& io_context, std::string ipAddr, std::string port);
+    FusionAsioTcpClient(asio::io_context& io_context, std::string ipAddr, std::string port, ReadCB cb);
     void close();
     void start();
-    void set_read_cb(ReadCB read_cb);
 
 private:
     void keep_alive();
