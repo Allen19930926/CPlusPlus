@@ -40,6 +40,7 @@ struct alignas(16) SensorObject
 struct alignas(16) SensorFrame
 {
     uint32_t    time_stamp;
+    uint32_t    is_fused;
     SensorType  sensor_type;
     std::vector<SensorObject> sensors;
 };

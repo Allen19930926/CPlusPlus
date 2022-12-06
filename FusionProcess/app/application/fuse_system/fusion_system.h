@@ -21,17 +21,10 @@ public:
     void Fuse();
 private:
     /**
-     * @brief 添加当前帧所有的传感器数据到SensorManager，进行存储和管理
-     * @param frame 当前帧所有的传感器数据
-     */
-
-    void AddSensorFrame(const SensorFrame& frame);
-    /**
      * @brief 获取所有传感器类型的最近一帧数据
-     * @param time_stamp 截止时间戳
      * @param frames 获取的结果
      */
-    void GetLatestFrames(const uint32_t time_stamp, std::vector<SensorFrame>& frames);
+    void GetLatestFrames(std::vector<SensorFrame>& frames);
 
     /**
      * @brief 融合一帧传感器数据

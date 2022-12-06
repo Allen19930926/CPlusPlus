@@ -6,7 +6,7 @@ namespace
     const uint8_t  maxCachedFrameNum = 10;
 }
 
-void Sensor::QueryLatestFrame(const uint32_t time_stamp, std::vector<SensorFrame>& queryFrames)
+void Sensor::QueryLatestFrame(std::vector<SensorFrame>& queryFrames)
 {
     if (frames_.size() == 0)
     {
@@ -14,14 +14,20 @@ void Sensor::QueryLatestFrame(const uint32_t time_stamp, std::vector<SensorFrame
         return ;
     }
 
-    for (uint32_t i=0; i<frames_.size(); i++)
+    auto latest_rule = [](const SensorFrame& frame1, const SensorFrame& frame2)
+                                {
+                                    return frame1.time_stamp < frame2.time_stamp;
+                                };
+
+    auto iter = std::max_element(frames_.begin(), frames_.end(), latest_rule);
+    SensorFrame& latest_frame = *iter;
+
+    // 有可能融合周期内没有新的传感器数据，取到的是上一周期使用的传感器帧，这种情况应该获取失败
+    if (latest_frame.is_fused == 0)
     {
-        if (frames_[i].time_stamp > time_stamp || frames_[i].time_stamp <= latestQueryTime)
-        {
-            continue;
-        }
-        queryFrames.push_back(frames_[i]);
-        latestQueryTime = std::max(latestQueryTime, frames_[i].time_stamp);
+        latest_frame.is_fused = 1;
+        queryFrames.push_back(latest_frame);
+        latest_fuse_time = latest_frame.time_stamp;
     }
 }
 
@@ -59,5 +65,5 @@ void Sensor::AddFrame(const SensorFrame& frame)
 void Sensor::Clear()
 {
     frames_.clear();
-    latestQueryTime = 0;
+    latest_fuse_time = 0;
 }

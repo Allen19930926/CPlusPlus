@@ -40,7 +40,7 @@ void SensorDataManager::AddSensorMeasurements(const SensorFrame& frame)
     pair->second.AddFrame(frame);
 }
 
-void SensorDataManager::QueryLatestFrames(const uint32_t time_stamp, std::vector<SensorFrame>& frames)
+void SensorDataManager::QueryLatestFrames(std::vector<SensorFrame>& frames)
 {
     frames.clear();
 
@@ -54,7 +54,7 @@ void SensorDataManager::QueryLatestFrames(const uint32_t time_stamp, std::vector
         for (auto& pair : sensors)
         {
             std::vector<SensorFrame> eachSensorFrames;
-            pair.second.QueryLatestFrame(time_stamp, eachSensorFrames);
+            pair.second.QueryLatestFrame(eachSensorFrames);
             frames.insert(frames.end(), eachSensorFrames.begin(), eachSensorFrames.end());
         }
     }

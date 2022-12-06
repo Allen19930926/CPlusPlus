@@ -20,7 +20,6 @@ void StartIoThread()
     io_context.run();
 }
 
-
 void StartPeriodThread()
 {
     asio::io_context io;

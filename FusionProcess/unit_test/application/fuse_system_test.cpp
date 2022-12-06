@@ -8,28 +8,11 @@
 #include "stub/stub.h"
 #include "stub/addr_pri.h"
 
-uint64_t timestamp;
-
-void SetCurrentTime(uint64_t time)
-{
-    timestamp = time;
-}
-
-uint64_t GetCurrentTime()
-{
-    return timestamp;
-}
 
 struct FusionSystemTest : testing::Test
 {
-    void SetUp() override
-    {
-        stub.set(ADDR(FusionTool, GetCurrentTime), GetCurrentTime);
-    }
-
     void TearDown() override
     {
-        timestamp = 0;
         FusionTrackManager::GetInstance().Clear();
         SensorDataManager::GetInstance().Clear();
     }
@@ -42,7 +25,6 @@ struct FusionSystemTest : testing::Test
 
 public:
     FusionSystem sys;
-    Stub stub;
 };
 
 
@@ -60,6 +42,7 @@ TEST_F(FusionSystemTest, create_one_track_test)
     SensorFrame frame;
     SensorObject obj;
     frame.sensor_type = SensorType::V2X;
+    frame.is_fused = 0;
     obj.time_stamp = 1;
     obj.life_time = 2;
     obj.id = 25;
@@ -73,11 +56,10 @@ TEST_F(FusionSystemTest, create_one_track_test)
     frame.time_stamp = obj.time_stamp;
     frame.sensors.push_back(obj);
     SensorDataManager::GetInstance().AddSensorMeasurements(frame);
-    SetCurrentTime(obj.time_stamp);
 
     Fuse();
     const std::vector<FusionTrack>& track_list = FusionTrackManager::GetInstance().track_list;
-    ASSERT_EQ(1, track_list.size());
+    ASSERT_EQ(uint32_t(1), track_list.size());
 
     const FusionTrack& track = track_list[0];
     ASSERT_EQ(obj.id, track.sensor_trajetories[1].sensor_id);
@@ -90,6 +72,7 @@ TEST_F(FusionSystemTest, keep_one_track_by_id_test)
     SensorFrame frame;
     SensorObject obj;
     frame.sensor_type = SensorType::V2X;
+    frame.is_fused = 0;
     obj.time_stamp = 1;
     obj.life_time = 2;
     obj.id = 25;
@@ -103,11 +86,10 @@ TEST_F(FusionSystemTest, keep_one_track_by_id_test)
     frame.time_stamp = obj.time_stamp;
     frame.sensors.push_back(obj);
     SensorDataManager::GetInstance().AddSensorMeasurements(frame);
-    SetCurrentTime(obj.time_stamp);
 
     Fuse();
     const std::vector<FusionTrack>& track_list = FusionTrackManager::GetInstance().track_list;
-    ASSERT_EQ(1, track_list.size());
+    ASSERT_EQ(uint32_t(1), track_list.size());
 
     const FusionTrack& track = track_list[0];
     ASSERT_EQ(obj.id, track.sensor_trajetories[1].sensor_id);
@@ -121,9 +103,8 @@ TEST_F(FusionSystemTest, keep_one_track_by_id_test)
     frame.time_stamp = obj.time_stamp;
     frame.sensors.push_back(obj);
     SensorDataManager::GetInstance().AddSensorMeasurements(frame);
-    SetCurrentTime(obj.time_stamp);
     Fuse();
-    ASSERT_EQ(1, track_list.size());
+    ASSERT_EQ(uint32_t(1), track_list.size());
 
     ASSERT_EQ(obj.id, track.sensor_trajetories[1].sensor_id);
     ASSERT_EQ(obj.position(0), track.position(0));
@@ -137,6 +118,7 @@ TEST_F(FusionSystemTest, keep_one_track_by_KM_test)
     SensorFrame frame;
     SensorObject obj;
     frame.sensor_type = SensorType::V2X;
+    frame.is_fused = 0;
     obj.time_stamp = 1;
     obj.life_time = 2;
     obj.id = 25;
@@ -150,11 +132,10 @@ TEST_F(FusionSystemTest, keep_one_track_by_KM_test)
     frame.time_stamp = obj.time_stamp;
     frame.sensors.push_back(obj);
     SensorDataManager::GetInstance().AddSensorMeasurements(frame);
-    SetCurrentTime(obj.time_stamp);
 
     Fuse();
     const std::vector<FusionTrack>& track_list = FusionTrackManager::GetInstance().track_list;
-    ASSERT_EQ(1, track_list.size());
+    ASSERT_EQ(uint32_t(1), track_list.size());
 
     const FusionTrack& track = track_list[0];
     ASSERT_EQ(obj.id, track.sensor_trajetories[1].sensor_id);
@@ -170,10 +151,9 @@ TEST_F(FusionSystemTest, keep_one_track_by_KM_test)
     frame.time_stamp = obj.time_stamp;
     frame.sensors.push_back(obj);
     SensorDataManager::GetInstance().AddSensorMeasurements(frame);
-    SetCurrentTime(obj.time_stamp);
 
     Fuse();
-    ASSERT_EQ(1, track_list.size());
+    ASSERT_EQ(uint32_t(1), track_list.size());
 
     ASSERT_EQ(obj.id, track.sensor_trajetories[1].sensor_id);
     ASSERT_NEAR(obj.position(0), track.position(0), 0.05);
@@ -187,6 +167,7 @@ TEST_F(FusionSystemTest, one_track_go_dead_test)
     SensorFrame frame;
     SensorObject obj;
     frame.sensor_type = SensorType::V2X;
+    frame.is_fused = 0;
     obj.time_stamp = 1;
     obj.life_time = 2;
     obj.id = 25;
@@ -200,11 +181,10 @@ TEST_F(FusionSystemTest, one_track_go_dead_test)
     frame.time_stamp = obj.time_stamp;
     frame.sensors.push_back(obj);
     SensorDataManager::GetInstance().AddSensorMeasurements(frame);
-    SetCurrentTime(obj.time_stamp);
 
     Fuse();
     const std::vector<FusionTrack>& track_list = FusionTrackManager::GetInstance().track_list;
-    ASSERT_EQ(1, track_list.size());
+    ASSERT_EQ(uint32_t(1), track_list.size());
 
     const FusionTrack& track = track_list[0];
     ASSERT_EQ(obj.id, track.sensor_trajetories[1].sensor_id);
@@ -220,22 +200,19 @@ TEST_F(FusionSystemTest, one_track_go_dead_test)
     frame.time_stamp = obj.time_stamp;
     frame.sensors.push_back(obj);
     SensorDataManager::GetInstance().AddSensorMeasurements(frame);
-    SetCurrentTime(frame.time_stamp);
 
     Fuse();
-    ASSERT_EQ(2, track_list.size());
-
-    frame.time_stamp++;
-    SetCurrentTime(frame.time_stamp);
-    SensorDataManager::GetInstance().AddSensorMeasurements(frame);
-    Fuse();
-    ASSERT_EQ(2, track_list.size());
+    ASSERT_EQ(uint32_t(2), track_list.size());
 
     frame.time_stamp++;
-    SetCurrentTime(frame.time_stamp);
     SensorDataManager::GetInstance().AddSensorMeasurements(frame);
     Fuse();
-    ASSERT_EQ(1, track_list.size());
+    ASSERT_EQ(uint32_t(2), track_list.size());
+
+    frame.time_stamp++;
+    SensorDataManager::GetInstance().AddSensorMeasurements(frame);
+    Fuse();
+    ASSERT_EQ(uint32_t(1), track_list.size());
 }
 
 TEST_F(FusionSystemTest, one_track_with_two_sensors_test)
@@ -244,6 +221,7 @@ TEST_F(FusionSystemTest, one_track_with_two_sensors_test)
     SensorFrame frame;
     SensorObject obj;
     frame.sensor_type = SensorType::V2X;
+    frame.is_fused = 0;
     obj.time_stamp = 1;
     obj.life_time = 2;
     obj.id = 25;
@@ -257,11 +235,10 @@ TEST_F(FusionSystemTest, one_track_with_two_sensors_test)
     frame.time_stamp = obj.time_stamp;
     frame.sensors.push_back(obj);
     SensorDataManager::GetInstance().AddSensorMeasurements(frame);
-    SetCurrentTime(obj.time_stamp);
 
     Fuse();
     const std::vector<FusionTrack>& track_list = FusionTrackManager::GetInstance().track_list;
-    ASSERT_EQ(1, track_list.size());
+    ASSERT_EQ(uint32_t(1), track_list.size());
 
     const FusionTrack& track = track_list[0];
     ASSERT_EQ(obj.id, track.sensor_trajetories[1].sensor_id);
@@ -280,9 +257,8 @@ TEST_F(FusionSystemTest, one_track_with_two_sensors_test)
     frame.time_stamp = obj.time_stamp;
     frame.sensors.push_back(obj);
     SensorDataManager::GetInstance().AddSensorMeasurements(frame);
-    SetCurrentTime(obj.time_stamp);
     Fuse();
-    ASSERT_EQ(1, track_list.size());
+    ASSERT_EQ(uint32_t(1), track_list.size());
     ASSERT_EQ(3, track.fusion_status);
 }
 

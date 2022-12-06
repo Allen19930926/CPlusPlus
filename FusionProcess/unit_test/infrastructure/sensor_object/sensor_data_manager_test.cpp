@@ -27,6 +27,7 @@ TEST_F(SensorDataManagerTest, add_frame_success_with_differenr_type_test)
     SensorObject null_obj;
     frame.sensor_type = SensorType::CAMERA;
     frame.time_stamp = 13487432;
+    frame.is_fused = 0;
     frame.sensors.push_back(null_obj);
     manager->AddSensorMeasurements(frame);
 
@@ -47,6 +48,7 @@ TEST_F(SensorDataManagerTest, add_frame_success_with_differenr_time_test)
     SensorObject null_obj;
     frame.sensor_type = SensorType::CAMERA;
     frame.time_stamp = 13487432;
+    frame.is_fused = 0;
     frame.sensors.push_back(null_obj);
     manager->AddSensorMeasurements(frame);
 
@@ -65,6 +67,7 @@ TEST_F(SensorDataManagerTest, add_frame_fail_and_target_frame_judge_test)
     SensorObject null_obj;
     frame.sensor_type = SensorType::MAX;
     frame.time_stamp = 13487432;
+    frame.is_fused = 0;
     frame.sensors.push_back(null_obj);
     manager->AddSensorMeasurements(frame);
 
@@ -83,12 +86,17 @@ TEST_F(SensorDataManagerTest, query_lastest_frames_with_different_time_test)
     SensorObject null_obj;
     frame.sensor_type = SensorType::CAMERA;
     frame.sensors.push_back(null_obj);
-    frame.time_stamp = FusionTool::GetCurrentTime();
+    frame.time_stamp = 10000;
+    frame.is_fused = 0;
     for (uint32_t i = 0; i < 20; i++)
     {
         frame.time_stamp -= 200;
         manager->AddSensorMeasurements(frame);
     }
+    std::vector<SensorFrame> res;
+    manager->QueryLatestFrames(res);
+    ASSERT_EQ(uint32_t(1), res.size());
+    ASSERT_EQ(uint32_t(7800), res[0].time_stamp);
     ASSERT_EQ(uint32_t(10), manager->GetCacheFrameNum(SensorType::CAMERA));
 
     frame.time_stamp = 13487432;
@@ -98,9 +106,10 @@ TEST_F(SensorDataManagerTest, query_lastest_frames_with_different_time_test)
         manager->AddSensorMeasurements(frame);
     }
 
-    std::vector<SensorFrame> res;
-    manager->QueryLatestFrames(frame.time_stamp, res);
-    ASSERT_EQ(uint32_t(5), res.size());
+    res.clear();
+    manager->QueryLatestFrames(res);
+    ASSERT_EQ(uint32_t(1), res.size());
+    ASSERT_EQ(frame.time_stamp, res[0].time_stamp);
 
 }
 
@@ -112,6 +121,7 @@ TEST_F(SensorDataManagerTest, query_lastest_frames_with_different_type_test)
     // camera frame: 20, 21, 22, 23, 24, 25, 26, 27, 28, 29
     frame.sensor_type = SensorType::CAMERA;
     frame.time_stamp = 10;
+    frame.is_fused = 0;
     frame.sensors.push_back(null_obj);
     for (uint32_t i = 0; i < 20; i++, frame.time_stamp++)
     {
@@ -129,12 +139,12 @@ TEST_F(SensorDataManagerTest, query_lastest_frames_with_different_type_test)
     ASSERT_EQ(uint32_t(10), manager->GetCacheFrameNum(SensorType::CAMERA));
 
     std::vector<SensorFrame> res;
-    manager->QueryLatestFrames(30, res);
+    manager->QueryLatestFrames(res);
 
-    // res expect: 20, 21, 22, 23, 24, 25(c), 25(v), 26, 27, 27, 28, 29, 29
-    ASSERT_EQ(uint32_t(13), res.size());
-    ASSERT_EQ(SensorType::CAMERA, res[5].sensor_type);
-    ASSERT_EQ(SensorType::V2X,    res[6].sensor_type);
+    // res expect: 25(c), 25(v)
+    ASSERT_EQ(uint32_t(2), res.size());
+    ASSERT_EQ(SensorType::CAMERA, res[0].sensor_type);
+    ASSERT_EQ(SensorType::V2X,    res[1].sensor_type);
 }
 
 TEST_F(SensorDataManagerTest, get_cached_frame_num_test)
@@ -143,6 +153,7 @@ TEST_F(SensorDataManagerTest, get_cached_frame_num_test)
     SensorObject null_obj;
     frame.sensor_type = SensorType::CAMERA;
     frame.time_stamp = 13487432;
+    frame.is_fused = 0;
     frame.sensors.push_back(null_obj);
     manager->AddSensorMeasurements(frame);
 

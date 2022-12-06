@@ -8,14 +8,14 @@
 class Sensor
 {
 public:
-    Sensor(const SensorType type): sensor_type(type), latestQueryTime(0) {}
+    Sensor(const SensorType type): sensor_type(type), latest_fuse_time(0) {}
 
     /**
      * @brief 获取该传感器类型的最近一帧数据
      * @param time_stamp 截止时间戳
      * @param queryFrames 获取的结果
      */
-    void QueryLatestFrame(const uint32_t time_stamp, std::vector<SensorFrame>& queryFrames);
+    void QueryLatestFrame(std::vector<SensorFrame>& queryFrames);
 
     /**
      * @brief 添加传感器数据帧，如果缓存数量超过门限，则丢弃最旧的数据帧，再进行添加
@@ -35,7 +35,7 @@ public:
     void Clear();
 private:
     SensorType  sensor_type;
-    uint32_t    latestQueryTime;
+    uint32_t    latest_fuse_time;
     std::deque<SensorFrame> frames_;
 };
 

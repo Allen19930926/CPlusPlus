@@ -21,10 +21,9 @@ public:
 
     /**
      * @brief 获取所有传感器类型的最近一帧数据，按照时间和类型排序
-     * @param time_stamp 截止时间戳
      * @param frames 获取的结果
      */
-    void QueryLatestFrames(const uint32_t time_stamp, std::vector<SensorFrame>& frames);
+    void QueryLatestFrames(std::vector<SensorFrame>& frames);
 
     /**
      * @brief 查询某类传感器缓存的数据帧数量

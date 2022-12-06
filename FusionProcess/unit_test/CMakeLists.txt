@@ -8,7 +8,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${ROOT_DIR}/out)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${ROOT_DIR}/out)
 
 include(${ROOT_DIR}/script/cmake/preprocess.cmake)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-function")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -Wno-unused-function")
 
 # 递归查找文件夹下的 *.cpp 文件保存到 TEST_SRC_FILES
 file(GLOB_RECURSE TEST_SRC_FILES "*.cpp")

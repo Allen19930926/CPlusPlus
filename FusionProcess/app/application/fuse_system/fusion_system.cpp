@@ -12,7 +12,7 @@ void FusionSystem::Fuse()
     uint64_t time_stamp = FusionTool::GetCurrentTime();
 
     std::vector<SensorFrame> frames;
-    GetLatestFrames(time_stamp, frames);  // 后期需要考虑，track和sensor时间间隔过大问题
+    GetLatestFrames(frames);  // 后期需要考虑，track和sensor时间间隔过大问题
 
     for (const auto& frame : frames)
     {
@@ -20,14 +20,9 @@ void FusionSystem::Fuse()
     }
 }
 
-void FusionSystem::AddSensorFrame(const SensorFrame& frame)
+void FusionSystem::GetLatestFrames(std::vector<SensorFrame>& frames)
 {
-    SensorDataManager::GetInstance().AddSensorMeasurements(frame);
-}
-
-void FusionSystem::GetLatestFrames(const uint32_t time_stamp, std::vector<SensorFrame>& frames)
-{
-    SensorDataManager::GetInstance().QueryLatestFrames(time_stamp, frames);
+    SensorDataManager::GetInstance().QueryLatestFrames(frames);
 }
 
 void FusionSystem::FuseFrame(const SensorFrame& sensor_list)
