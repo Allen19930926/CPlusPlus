@@ -52,13 +52,8 @@ TEST_F(SensorDataTest, add_frame_fail_test)
     ASSERT_EQ(uint32_t(0), sensor->GetCachedFrameNum());
 }
 
-TEST_F(SensorDataTest, query_frame_with_null_deque_test)
+TEST_F(SensorDataTest, query_frame_with_null_input_test)
 {
-    SensorFrame frame;
-    frame.sensor_type = SensorType::CAMERA;
-    frame.time_stamp = 12468431;
-    frame.is_fused = 0;
-
     std::vector<SensorFrame> queryFrame;
     sensor->QueryLatestFrame(queryFrame);
 

@@ -29,11 +29,6 @@ void SensorDataManager::AddSensorMeasurements(const SensorFrame& frame)
         return ;
     }
 
-    if (frame.sensors.empty())
-    {
-        return ;
-    }
-
     std::lock_guard<std::mutex> lck_guard(sensor_lck);
     recv_new_data = true;
     auto pair = sensors.find(frame.sensor_type);

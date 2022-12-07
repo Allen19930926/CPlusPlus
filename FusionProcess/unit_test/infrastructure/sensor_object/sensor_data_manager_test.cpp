@@ -55,9 +55,6 @@ TEST_F(SensorDataManagerTest, add_frame_success_with_differenr_time_test)
     frame.time_stamp = 13487433;
     manager->AddSensorMeasurements(frame);
 
-    frame.sensor_type = SensorType::FRONT_RADAR;
-    manager->AddSensorMeasurements(frame);
-
     ASSERT_EQ(uint32_t(2), manager->GetCacheFrameNum(SensorType::CAMERA));
 }
 
@@ -69,10 +66,6 @@ TEST_F(SensorDataManagerTest, add_frame_fail_and_target_frame_judge_test)
     frame.time_stamp = 13487432;
     frame.is_fused = 0;
     frame.sensors.push_back(null_obj);
-    manager->AddSensorMeasurements(frame);
-
-    frame.sensor_type = SensorType::CAMERA;
-    frame.sensors.clear();
     manager->AddSensorMeasurements(frame);
 
     ASSERT_EQ(uint32_t(0), manager->GetCacheFrameNum(SensorType::CAMERA));
@@ -159,5 +152,43 @@ TEST_F(SensorDataManagerTest, get_cached_frame_num_test)
 
     ASSERT_EQ(uint32_t(1), manager->GetCacheFrameNum(SensorType::CAMERA));
     ASSERT_EQ(uint32_t(0), manager->GetCacheFrameNum(SensorType::MAX));
+}
+
+TEST_F(SensorDataManagerTest, 10000_10001_query_frames_with_no_cached_frames_test)
+{
+    std::vector<SensorFrame> frames;
+    manager->QueryLatestFrames(frames);
+    ASSERT_EQ(uint32_t(0), frames.size());
+}
+
+TEST_F(SensorDataManagerTest, 10004_query_frames_with_no_cached_object_test)
+{
+    SensorFrame frame;
+    frame.sensor_type = SensorType::CAMERA;
+    frame.time_stamp = 13487432;
+    frame.is_fused = 0;
+    manager->AddSensorMeasurements(frame);
+
+    std::vector<SensorFrame> frames;
+    manager->QueryLatestFrames(frames);
+    ASSERT_EQ(uint32_t(1), frames.size());
+    ASSERT_EQ(uint32_t(0), frames[0].sensors.size());
+}
+
+TEST_F(SensorDataManagerTest, 10003_10005_query_frames_with_error_object_attr_test)
+{
+    SensorFrame frame;
+    SensorObject obj;
+    frame.sensor_type = SensorType::CAMERA;
+    frame.time_stamp = 13487432;
+    frame.is_fused = 0;
+    obj.position << 0xffffffff, 0xffffffff;
+    frame.sensors.push_back(obj);
+    manager->AddSensorMeasurements(frame);
+
+    std::vector<SensorFrame> frames;
+    manager->QueryLatestFrames(frames);
+    ASSERT_EQ(uint32_t(1), frames.size());
+    ASSERT_EQ(uint32_t(1), frames[0].sensors.size());
 }
 
