@@ -21,7 +21,7 @@ struct SensorDataManagerTest : testing::Test
     SensorDataManager* manager;
 };
 
-TEST_F(SensorDataManagerTest, add_frame_success_with_differenr_type_test)
+TEST_F(SensorDataManagerTest, 10006_add_frame_success_with_differenr_type_test)
 {
     SensorFrame frame;
     SensorObject null_obj;
@@ -42,7 +42,7 @@ TEST_F(SensorDataManagerTest, add_frame_success_with_differenr_type_test)
     ASSERT_EQ(uint32_t(1), manager->GetCacheFrameNum(SensorType::FRONT_RADAR));
 }
 
-TEST_F(SensorDataManagerTest, add_frame_success_with_differenr_time_test)
+TEST_F(SensorDataManagerTest, 10007_add_frame_success_with_differenr_time_test)
 {
     SensorFrame frame;
     SensorObject null_obj;
@@ -58,7 +58,7 @@ TEST_F(SensorDataManagerTest, add_frame_success_with_differenr_time_test)
     ASSERT_EQ(uint32_t(2), manager->GetCacheFrameNum(SensorType::CAMERA));
 }
 
-TEST_F(SensorDataManagerTest, add_frame_fail_and_target_frame_judge_test)
+TEST_F(SensorDataManagerTest, 10008_add_frame_fail_and_target_frame_judge_test)
 {
     SensorFrame frame;
     SensorObject null_obj;
@@ -73,7 +73,7 @@ TEST_F(SensorDataManagerTest, add_frame_fail_and_target_frame_judge_test)
     ASSERT_EQ(uint32_t(0), manager->GetCacheFrameNum(SensorType::FRONT_RADAR));
 }
 
-TEST_F(SensorDataManagerTest, query_lastest_frames_with_different_time_test)
+TEST_F(SensorDataManagerTest, 10007_10009_query_lastest_frames_with_different_time_test)
 {
     SensorFrame frame;
     SensorObject null_obj;
