@@ -28,6 +28,7 @@ enum class HMI_PAD_TAG_DEF: int {
   HMI_TAG_PAD_CACC_DECISION_REP = 2005, // ADAS系统上报CACC系统决策数据请求
   HMI_TAG_PAD_CAEB_CAEB_REP = 2006, // ADAS系统上报CAEB预警信息及CAEB激活报警碰撞信息请求
   HMI_TAG_PAD_SWITCH_SETTING_REP = 2007, // ADAS系统上报CAEB自动紧急制动信息
+  HMI_TAG_PAD_V2X_OBJ_REP = 2008, // ADAS系统上报v2x原车信息
   HMI_TAG_PAD_CACC_ON_REQ = 3001, // 客户端开启CACC功能请求
   HMI_TAG_PAD_CACC_ON_RESP = 3002, // 客户端开启CACC功能响应
   HMI_TAG_PAD_CACC_OFF_REQ = 3003, // 客户端关闭CACC功能请求
@@ -154,6 +155,23 @@ struct PadSystemErrorVectorFrame{
   NLOHMANN_DEFINE_TYPE_INTRUSIVE(PadSystemErrorVectorFrame, tag, data);
 };
 
+struct RemoteVehicleInfo {
+  std::string vehicleId;
+  double speed;
+  double acceleration;
+  double latitude;
+  double longitude;
+	double heading;
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(RemoteVehicleInfo, vehicleId, speed, acceleration, latitude, longitude, heading);
+};
+struct PadV2XEgoVehInfoFrame {
+	int tag;
+	struct data {
+    std::vector<RemoteVehicleInfo> remoteVehicleInfo;
+		NLOHMANN_DEFINE_TYPE_INTRUSIVE(data, remoteVehicleInfo);
+	}data;
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(PadV2XEgoVehInfoFrame, tag, data)
+};
 
 struct PadEgoVehInfoFrame {
 	int tag;

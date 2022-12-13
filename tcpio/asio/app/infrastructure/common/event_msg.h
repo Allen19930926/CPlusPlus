@@ -3,7 +3,7 @@
 
 #include <cstring>
 #include <iostream>
-
+#include "glog/logging.h"
 enum class MsgType : uint32_t
 {
     V2X,
@@ -46,8 +46,19 @@ struct EventMessage
     {
         if (data_ != nullptr)
         {
-            data = new uint8_t[msglen];
-            memcpy(data, data_, msglen);
+            if (isJsonStringWithTag(data_, len)) // ��tag�ַ����ݣ�������\0'��
+            {
+                data = new uint8_t[msglen + 1];
+                memset(data, 0, msglen + 1);
+                memcpy(data, data_, msglen);
+               // LOG(INFO) << "EventMessage parameter construct!!!";
+               // LOG(INFO) << " data_(input): " <<  data_ << "   data(output): " << data; 
+            }
+            else  // ����������
+            {
+                data = new uint8_t[msglen];
+                memcpy(data, data_, msglen);
+            }
         }
     }
 
@@ -57,8 +68,19 @@ struct EventMessage
         // std::cout << "reference construct" << std::endl;
         if (ref.data != nullptr)
         {
-            data = new uint8_t[msglen];
-            memcpy(data, ref.data, msglen);
+            if (isJsonStringWithTag((const char*)ref.data, ref.msglen))
+            {
+                data = new uint8_t[msglen + 1];
+                memset(data, 0, msglen + 1);
+                memcpy(data, ref.data, msglen);
+               // LOG(INFO) << "EventMessage copy construct!!!";
+               // LOG(INFO) << " ref.data(input): " <<  ref.data << "   data(output): " << data;
+            }
+            else
+            {
+                data = new uint8_t[msglen];
+                memcpy(data, ref.data, msglen);
+            }
         }
     }
 
@@ -74,6 +96,15 @@ struct EventMessage
     }
 
     EventMessage operator=(const EventMessage& ref) = delete;
+private:
+    bool isJsonStringWithTag(const char* param, const uint16_t len)
+    {
+        if (nullptr != param && len > 0)
+        {
+            return (std::string(param).find("tag") != std::string::npos) ? true : false;
+        }
+        return false;
+    }
 public:
     MsgType msgType;
     uint16_t msglen;

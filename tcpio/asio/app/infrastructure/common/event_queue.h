@@ -5,6 +5,8 @@
 #include <mutex>
 #include <condition_variable>
 #include "event_msg.h"
+#include <chrono>
+#include <glog/logging.h>
 
 template<typename T>
 class EventQueue
@@ -26,11 +28,18 @@ public:
     T wait_and_get_front()
     {
         std::unique_lock<std::mutex> lck(mtx);
-        cv.wait(lck, [this]{return !eventQueue.empty();});
-        T res = eventQueue.front();
-        eventQueue.pop();
-        // std::cout << "before construct" << std::endl;
-        return std::move(res);
+        bool meet_cond = cv.wait_for(lck, std::chrono::milliseconds(1000), [this]{return !eventQueue.empty();});
+        if (meet_cond)
+        {
+            T res = eventQueue.front();
+            eventQueue.pop();
+            return std::move(res);
+        }
+        else
+        {
+            LOG(ERROR) << "event thread wait time out!!, event queue size is " << eventQueue.size();
+            return T(MsgType::INVALID, nullptr, 0);
+        }
     }
 private:
     EventQueue() = default;

@@ -1,104 +1,207 @@
 #ifndef C1F171C1_DCAD_43AA_A19A_966988C389AB
 #define C1F171C1_DCAD_43AA_A19A_966988C389AB
 
-#include <map>
-#include "ipc_data.h"
 #include "iproxy.h"
-#include "hmi_message.h" 
 #include "hmi_tcp_message.h"
-#include "nlohmann/json.hpp"
 #include "ipc_data.h"
 #include "hmi_pad_data.h"
-
-
+#include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
-
 
 class HmiProxy : public IProxy
 {
 public:
     HmiProxy(asio::io_context& ioService, std::string clientIp, std::string clientPort, short listenPort);
     ~HmiProxy() = default;
-
+    /**
+     * @name: ProcessRecieveIPCData
+     * @msg: handle ipc_msg
+     * @param {MsgType} msgType
+     * @param {uint8_t*} data
+     * @param {uint16_t} len
+     * @return {void}
+     */
     void ProcessRecieveIPCData(MsgType msgType, uint8_t* data, uint16_t len);
+    /**
+     * @name: ProcessRecieveGsentryData
+     * @msg: handle gSentry(HMI)_msg
+     * @param {MsgType} msgType
+     * @param {uint8_t*} data
+     * @param {uint16_t} len
+     * @return {void}
+     */
     void ProcessRecieveGsentryData(MsgType msgType, uint8_t* data, uint16_t len);
+    /**
+     * @name: ProcessRecievePadData
+     * @msg: handle PAD_msg
+     * @param {MsgType} msgType
+     * @param {uint8_t*} data
+     * @param {uint16_t} len
+     * @return {void}
+     */
     void ProcessRecievePadData(MsgType msgType, uint8_t* data, uint16_t len);
+    /**
+     * @name: DoPeriodTask_200ms
+     * @msg: do task at intervals of 200ms
+     * @return {void}
+     */
     void DoPeriodTask_200ms();
+    /**
+     * @name: DoPeriodTask_50ms
+     * @msg: do task at intervals of 50ms
+     * @return {void}
+     */
     void DoPeriodTask_50ms();
 
-
 private:
+    /**
+     * @name: Init
+     * @msg: hmiproxy module init
+     * @return {void}
+     */
     virtual void Init() override;
+    /**
+     * @name: KeepAlive
+     * @msg: register keepalive_function
+     * @param {uint32_t} interval: interval time(ms)
+     * @return {void}
+     */
     void KeepAlive(const uint32_t interval);
-    std::string ConstructServerAliveMsg();
+    /**
+     * @name: SendClientAliveMsg
+     * @msg: client send keepalive_package to gSentry(HMI)
+     * @return {void}
+     */
     void SendClientAliveMsg();
+    /**
+     * @name: DoClientWrite
+     * @msg: client send data
+     * @param {HmiTcpMessage} msg
+     * @return {void}
+     */
+    void DoClientWrite(HmiTcpMessage& msg);
+    /**
+     * @name: DoServerWrite
+     * @msg: server send data
+     * @param {HmiTcpMessage} msg
+     * @return {void}
+     */
+    void DoServerWrite(HmiTcpMessage& msg);
 
-    virtual void DoClientWrite(const char* buf , const uint16_t len) {}
-    virtual void DoServerWrite(const char* buf , const uint16_t len) {}
-    void DoClientWrite(HmiTcpMessage msg);
-    void DoServerWrite(HmiTcpMessage msg);
+    virtual void DoClientWrite(const char* buf , const uint16_t len) override {}
+    virtual void DoServerWrite(const char* buf , const uint16_t len) override {}
     
     template <typename T>
     void DoServerWrite(T& msg);
     
-    //client
+    /**
+     * @name: HandlegSentryMessage
+     * @msg: handle gsentry(HMI)_data
+     * @param {uint8_t*} data
+     * @param {uint16_t} len
+     * @return {void}
+     */
     void HandlegSentryMessage(uint8_t* data, uint16_t len);
+    /**
+     * @name: ProcessCAEBCollisionWarning
+     * @msg: select FCW of V2V eventtype and delete FCW type
+     * @param {json&} j
+     * @return {void}
+     */
     void ProcessCAEBCollisionWarning(json& j);
 
-    //server
+    /**
+     * @name: HandlePadMessage
+     * @msg: handle PAD_data
+     * @param {uint8_t*} data
+     * @param {uint16_t} len
+     * @return {void}
+     */
     void HandlePadMessage(uint8_t* data, uint16_t len);
+    /**
+     * @name: HandleRecieveIPCRespMsg
+     * @msg: receive IPC_msg and send to PAD
+     * @return {void}
+     */
     void HandleRecieveIPCRespMsg();
-    void DoResponseError(HMI_PAD_TAG_DEF reqTag, int error);
-
-    //CACC功能状态上报,状态改变时上报
+    /**
+     * @name: DoResponseError
+     * @msg: handle error or timeout response and send to PAD
+     * @param {HMI_PAD_TAG_DEF} reqTag
+     * @param {int} error
+     * @return {*}
+     */
+    void DoResponseError(HMI_PAD_TAG_DEF reqTag, const int error);
+    /**
+     * @name: SendCACCStatus
+     * @msg: send CACC status when status change
+     * @return {void}
+     */
     void SendCACCStatus();
-
-    //CAEB功能状态上报,状态改变时上报
+    /**
+     * @name: SendCAEBStatus
+     * @msg: send CAEB status when status change
+     * @return {void}
+     */
     void SendCAEBStatus();
-
-    //系统故障状态上报，有故障时50ms上报一次，无故障时发送空消息告诉hmi故障清除
+    /**
+     * @name: SendSysErrorStatus
+     * @msg: send system error at intervals of 50ms, send NULL when no error
+     * @return {void}
+     */
     void SendSysErrorStatus();
-
-    //本车数据上报，周期性50ms定时上报
-    void SendPadEgoVehInfo();
-
-    //CACC系统决策上报
+    /**
+     * @name: SendHostVeh_CIPVInfo
+     * @msg: send host Veh and CIPV info at intervals of 200ms
+     * @return {void}
+     */
+    void SendHostVeh_CIPVInfo();
+    /**
+     * @name: SendCACCDecisionInfo
+     * @msg: send CACC decision when event happen
+     * @return {void}
+     */
     void SendCACCDecisionInfo();
-
-    //CAEB前向预警决策上报
+    /**
+     * @name: SendCAEBDecisionInfo
+     * @msg: send CAEB decision at intervals of 50ms
+     * @return {void}
+     */
     void SendCAEBDecisionInfo(); 
-
-    //ADAS系统开关状态上报，系统每次开机需主动上报
+    /**
+     * @name: SendSwitchSettings
+     * @msg: send switchSetting Info when system start for the first time
+     * @return {void}
+     */
     void SendSwitchSettings();
-
-    unsigned long getTimestamp()
-    {
-	    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    }
+    /**
+     * @name: SendV2XObjVehInfo
+     * @msg: send all V2X obj_Vehs intervals of 200ms
+     * @return {*}
+     */
+    void SendV2XObjVehInfo();
 
 private:
-    AdasAsioTcpServer<HmiTcpMessage, HmiTcpMessage> server;
-    AdasAsioTcpClient<HmiTcpMessage, HmiTcpMessage> client;
+    AdasAsioTcpServer<HmiTcpMessage, HmiTcpMessage> m_Server;
+    AdasAsioTcpClient<HmiTcpMessage, HmiTcpMessage> m_Client;
 
-    PadCACCStatusFrame pad_CACCStatus;
-    PadCAEBStatusFrame pad_CAEBStatus;
-    PadSystemErrorVectorFrame pad_SysErrorVec;
-    PadEgoVehInfoFrame pad_HostVehInfo;
-    PadEgoVehCIPVInfoFrame pad_HostVehCIPVInfo;
-    PadCACCDecisionFrame pad_CACCDecision;
-    PadCAEBDecisionFrame pad_CAEBDecision;
-    PadSwitchSettingsFrame pad_SwitchSetingInfo;
-    IPC_System_Error systemError;
-    
+    PadCACCStatusFrame m_CACCStatus;
+    PadCAEBStatusFrame m_CAEBStatus;
+    PadSystemErrorVectorFrame m_SysErrorVec;
+    PadEgoVehInfoFrame m_HostVehInfo;          // 本车信息
+    PadEgoVehCIPVInfoFrame m_HostVehCIPVInfo;  // 车辆信息上报 2004
+    PadV2XEgoVehInfoFrame m_V2xEgoVehInfo;     // v2x的所有原车
+    PadCACCDecisionFrame m_CACCDecision;
+    PadCAEBDecisionFrame m_CAEBDecision;
+    PadSwitchSettingsFrame m_SwitchSetingInfo;
+    IPC_System_Error m_IPC_systemError;
 
-    FuncCoord_FAM_HMI_Info getMcoreInfo;  //接受M核FCW
-    SignalInput_HMI_BUS sendMcoreInfo;         //发给M核
-    
-    uint32_t counter = 0;               // pad控制类消息计数
+    FuncCoord_FAM_HMI_Info m_FromMcoreInfo;     // 接受M核FCW
+    SignalInput_HMI_BUS m_ToMcoreInfo;          // 发给M核
+    uint32_t m_Counter = 0;                     // pad控制类消息计数
 
-    HMI_PAD_TAG_DEF pendingRequest = HMI_PAD_TAG_DEF::HMI_TAG_INVALID_REQ;  //pad控制类消息
-    bool requestTimeout = false;
-    asio::steady_timer timeoutTimer;
+    HMI_PAD_TAG_DEF m_PendingRequest = HMI_PAD_TAG_DEF::HMI_TAG_INVALID_REQ;  //pad控制类消息
+    asio::steady_timer m_TimeoutTimer;
 };
 #endif /* C1F171C1_DCAD_43AA_A19A_966988C389AB */

@@ -9,6 +9,8 @@
 #include "event_queue.h"
 #include <glog/logging.h>
 
+static void LogOneVehicleInfo(const CDD_Fusion_ObjInfo_Array90& vehicles, const uint32_t num);
+
 namespace
 {
     // 使用小顶堆，遍历所有目标障碍物，按和本车距离进行排序，堆顶为最近障碍物
@@ -46,10 +48,10 @@ namespace
         return lines.right_right;
     }
 
-    uint32_t shrink_to_fit(const CDD_Fusion_ObjInfo_Array40& src, CDD_Fusion_ObjInfo_Array40& dst)
+    uint32_t shrink_to_fit(const CDD_Fusion_ObjInfo_Array90& src, CDD_Fusion_ObjInfo_Array90& dst)
     {
         uint32_t valid_cnt = 0;
-        for (uint32_t i=0; i<40; i++)
+        for (uint32_t i=0; i<90; i++)
         {
             if (src[i].De_life_time_u32 == 0)
             {
@@ -152,55 +154,30 @@ extern ComTcpServer * comTcpServer;
 void CameraFusionAlgo::ExecuteCameraDataFusion()
 {
     std::lock_guard<std::mutex> lck(camera_mtx);
-    std::vector<gohigh::Obstacle> tmpVehiVec;
-    uint32_t i = 0;
-    // 从小顶堆堆顶抛出20个障碍物，按照id从小到大进行排序，id相同则Cyclist (骑车人) > Pedestrian (行人) > VehicleFull (全车框)  > VehicleRear (车尾框)
-    while (i<20 && !nearestVehis.empty())
-    {
-        const auto& objectVehicle = nearestVehis.top();
-        tmpVehiVec.push_back(objectVehicle);
-        i++;
-        nearestVehis.pop();
-    }
 
-    std::sort(tmpVehiVec.begin(), tmpVehiVec.end(), [](gohigh::Obstacle& lhs, gohigh::Obstacle& rhs) 
-    {
-        if (lhs.id != rhs.id)
-        {
-            return lhs.id < rhs.id;
-        }
-        else
-        {
-            return lhs.type > rhs.type;
-        }
-    });
+    std::vector<gohigh::Obstacle> tmpVehiVec = GetObstaclVecFromHeap();
 
-    uint32_t lastId = 0xFFFFFFFF;
     CDDFusion::CddFusionRepo& fusion = DataRepo::GetInstance().GetCddFusionData();
-    memset(&fusion.cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM], 0, sizeof(CDD_Fusion_ObjInfo_BUS)*ADAS_CAMERA_OBJ_VEHI_NUM);
+    memset(&fusion.cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM + ADAS_GSENTRY_VRU_VEHI_NUM], 0, sizeof(CDD_Fusion_ObjInfo_BUS)*ADAS_CAMERA_OBJ_VEHI_NUM);
 
     // 从已排序列表取元素进行填充，id相同只取高级别进行填充
-    i=ADAS_GSENTRY_OBJ_VEHI_NUM;
+    uint32_t i=ADAS_GSENTRY_OBJ_VEHI_NUM + ADAS_GSENTRY_VRU_VEHI_NUM;
     for (const auto& vehicle: tmpVehiVec)
     {
-        if (lastId == vehicle.id)
-        {
-            continue;
-        }
-        lastId = vehicle.id;
         CameraFusionAlgo::TransCamera2CddObstacle(vehicle, fusion.cddObjects[i]);
         i++;
     }
 
-    CDD_Fusion_ObjInfo_Array40  objVehiInfo;
+    CDD_Fusion_ObjInfo_Array90  objVehiInfo;
     memset(&objVehiInfo, 0, sizeof(objVehiInfo));
     uint32_t valid_cnt = shrink_to_fit(fusion.cddObjects, objVehiInfo);
 
     if (valid_cnt == 0)
     {
-        // There is no valid vehicle, no need to send !
+        LOG_EVERY_N(ERROR, 20) << "There is no valid vehicle, no need to send !";
         return ;
     }
+    LogOneVehicleInfo(objVehiInfo, valid_cnt);
 
 #ifdef __x86_64__
     // 这里先不修改，需要和pytest用例一起修改
@@ -210,7 +187,7 @@ void CameraFusionAlgo::ExecuteCameraDataFusion()
     CDD_FUSION_EVENT_QUEUE.push({MsgType::IPC_OBJ_INFO, reinterpret_cast<const char*>(&objVehiInfo), sizeof(objVehiInfo)});
     // LOG(INFO) << "send fusion objects";
 #endif
-
+    memset(&fusion.cddObjects[0], 0, sizeof(CDD_Fusion_ObjInfo_Array90));
     LOG(INFO) << "first three vehicle id: " << uint32_t(objVehiInfo[0].De_ID_u8)
               << "    " << uint32_t(objVehiInfo[1].De_ID_u8) << "    " << uint32_t(objVehiInfo[2].De_ID_u8);
 }
@@ -231,10 +208,10 @@ void CameraFusionAlgo::TransCamera2CddObstacle(const gohigh::Obstacle& camera, C
     cdd.De_yaw_rate_f32             = camera.world_info.yaw_rate;
     cdd.De_dx_f32                   = camera.world_info.position.x;
     cdd.De_dy_f32                   = camera.world_info.position.y;
-    cdd.De_vx_f32                   = camera.world_info.vel_abs_world.vx;
-    cdd.De_vy_f32                   = camera.world_info.vel_abs_world.vy;
-    cdd.De_ax_f32                   = camera.world_info.acc_abs_world.ax;
-    cdd.De_ay_f32                   = camera.world_info.acc_abs_world.ay;
+    cdd.De_vx_f32                   = camera.world_info.vel.vx;
+    cdd.De_vy_f32                   = camera.world_info.vel.vy;
+    cdd.De_ax_f32                   = camera.world_info.acc_ref.ax;
+    cdd.De_ay_f32                   = camera.world_info.acc_ref.ay;
     cdd.De_dxVariance_f32           = camera.world_info.sigma_position[0];
     cdd.De_dyVariance_f32           = camera.world_info.sigma_position[4];
     cdd.De_vxVariance_f32           = camera.world_info.sigma_vel[0];
@@ -247,16 +224,83 @@ void CameraFusionAlgo::TransCamera2CddObstacle(const gohigh::Obstacle& camera, C
     cdd.De_CIPV_u8                  = camera.world_info.cipv;
     cdd.De_ObjectMovingStatus_u8    = camera.world_info.motion_state;
     cdd.De_source_u8                = 0;
+}
 
+void LogOneVehicleInfo(const CDD_Fusion_ObjInfo_Array90& vehicles, const uint32_t num)
+{
+    for (uint32_t i=0; i<num; i++)
+    {
+        const CDD_Fusion_ObjInfo_BUS& vehicle = vehicles[i];
+        LOG(INFO)   << " Log one vehicle info! "
+                    << "\n\tDe_Timestamp_u32 :" << vehicle.De_Timestamp_u32
+                    << "\tDe_ObjectType_u8 :" << static_cast<uint32_t>(vehicle.De_ObjectType_u8)
+                    << "\tDe_ObjectMovingStatus_u8 :" << static_cast<uint32_t>(vehicle.De_ObjectMovingStatus_u8)
+                    << "\tDe_ID_u8 :"         << static_cast<uint32_t>(vehicle.De_ID_u8)
+                    << "\n\tDe_source_u8(0:camera  1:v2x) :"       << static_cast<uint32_t>(vehicle.De_source_u8)
+                    << "\tDe_Yaw_f32 :"       << vehicle.De_Yaw_f32
+                    << "\tDe_CIPV_u8 :"       << static_cast<uint32_t>(vehicle.De_CIPV_u8)
+                    << "\n\tDe_dx_f32 :"      << vehicle.De_dx_f32 << "\tDe_dy_f32 :" << vehicle.De_dy_f32
+                    << "\n\tDe_vx_f32 :"      << vehicle.De_vx_f32 << "\tDe_vy_f32 :" << vehicle.De_vy_f32
+                    << "\n\tDe_ax_f32 :"      << vehicle.De_ax_f32 << "\tDe_ay_f32 :" << vehicle.De_ay_f32;
 
-    LOG(INFO) << " execute fusion transfer one vehicle! "
-              << "\tDe_Timestamp_u32 :" << cdd.De_Timestamp_u32
-              << "\tDe_ObjectType_u8 :" << static_cast<uint32_t>(cdd.De_ObjectType_u8)
-              << "\tDe_ID_u8 :"         << static_cast<uint32_t>(cdd.De_ID_u8)
-              << "\tDe_dx_f32 :"        << cdd.De_dx_f32 << "\tDe_dy_f32 :" << cdd.De_dy_f32;
-    // LOG(INFO) << " fusion.vehicle.De_vx_f32                 = " << cdd.De_vx_f32;
-    // LOG(INFO) << " fusion.vehicle.De_vy_f32                 = " << cdd.De_vy_f32;
-    // LOG(INFO) << " fusion.vehicle.De_ax_f32                 = " << cdd.De_ax_f32;
-    // LOG(INFO) << " fusion.vehicle.De_ay_f32                 = " << cdd.De_ay_f32;
+    }
+}
+
+std::vector<gohigh::Obstacle> CameraFusionAlgo::GetObstaclVecFromHeap()
+{
+    std::vector<gohigh::Obstacle> tmpVehiVec;
+    uint32_t i = 0;
+    uint32_t lastId = 0xFFFFFFFF;
+/*
+    从小顶堆堆顶抛出20个障碍物，id相同视为一个障碍物，按照id、类型和时间进行排序，id从小到大排序， id相同时按照类型和时间从大到小排序。
+    排序结果示例：
+        id           timestamp           type
+        56               200              1  
+        56               100              2   
+        67               200              2 
+        67               200              1  
+        67               100              2   
+        67               100              1 
+    最终输出：
+        id           timestamp           type
+        56               200              1  
+        67               200              2  
+*/
+    while (i<20 && !nearestVehis.empty())
+    {
+        const auto& objectVehicle = nearestVehis.top();
+        tmpVehiVec.push_back(objectVehicle);
+        i = (lastId == objectVehicle.id) ? i : i+1;
+        nearestVehis.pop();
+    }
+
+    std::sort(tmpVehiVec.begin(), tmpVehiVec.end(), [](gohigh::Obstacle& lhs, gohigh::Obstacle& rhs) 
+    {
+        if (lhs.id != rhs.id)
+        {
+            return lhs.id < rhs.id;
+        }
+        else if (lhs.timestamp != rhs.timestamp)
+        {
+            return lhs.timestamp > rhs.timestamp;
+        }
+        else
+        {
+            return lhs.type > rhs.type;
+        }
+    });
+
+    lastId = 0xFFFFFFFF;
+    auto rm_cond = [&lastId](gohigh::Obstacle& vehicle)
+    {
+        if (vehicle.id == lastId)
+        {
+            return true;
+        }
+        lastId = vehicle.id;
+        return false;
+    };
+    tmpVehiVec.erase(std::remove_if(tmpVehiVec.begin(), tmpVehiVec.end(), rm_cond), tmpVehiVec.end());
+    return std::move(tmpVehiVec);
 }
 

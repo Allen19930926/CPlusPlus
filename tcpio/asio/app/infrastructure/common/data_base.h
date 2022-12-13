@@ -7,6 +7,12 @@
 #include "hb_data.h"
 #include <cstring>
 
+struct CalibrateStruct
+{
+    float dx_gnss_to_rear_center;
+    float dy_gnss_to_rear_center;
+};
+
 // DataRepo设计为只有事件IO访问，因为不做互斥
 class DataRepo
 {
@@ -27,6 +33,7 @@ public:
     CDDFusion::CddFusionRepo& GetCddFusionData() {return cddFusionData;}
     CAN::HostVehiclePos& GetHostVehicle() {return host;}
     gohigh::Obstacles& GetCameraObstacles() {return cameraObstacles;}
+    CalibrateStruct& GetCalibrateVariables() {return calibrateVariables;}
 
 private:
     DataRepo() {}
@@ -39,6 +46,7 @@ private:
     V2X::V2xData v2xData;
     gohigh::Obstacles cameraObstacles;
     CDDFusion::CddFusionRepo cddFusionData;
+    CalibrateStruct   calibrateVariables;
 };
 
 #endif /* C90FDE72_D43C_4497_97F1_AAB3FFE76AA2 */

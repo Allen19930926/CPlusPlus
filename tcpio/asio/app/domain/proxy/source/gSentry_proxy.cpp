@@ -11,7 +11,7 @@ GSentryProxy::GSentryProxy(asio::io_context& ioService, string ipAddr, string po
 void GSentryProxy::Init()
 {
     client.start();
-    // KeepAlive(1000);
+    KeepAlive(1000);
 }
 
 void GSentryProxy::KeepAlive(const uint32_t interval)

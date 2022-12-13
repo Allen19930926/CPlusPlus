@@ -1,3 +1,11 @@
+/*
+ * @Descripttion: 
+ * @version: 
+ * @Author: congsir
+ * @Date: 2022-12-01 15:11:10
+ * @LastEditors: 
+ * @LastEditTime: 2022-12-13 13:42:32
+ */
 #ifndef A702986E_DDC3_4805_8E12_20C3BADED655
 #define A702986E_DDC3_4805_8E12_20C3BADED655
 
@@ -10,6 +18,7 @@
 #define  EV_GSENTRY_ADAS_EGOVEHI_MAPINFO_REPORT     0x300
 #define  EV_GSENTRY_ADAS_OBJVEHI_MAPINFO_REPORT     0x301
 #define  EV_GSENTRY_ADAS_WARNING_REPORT             0x302
+#define  EV_GSENTRY_ADAS_ROADPART_REPORT            0x303
 
 /* gSentry send to S32G */
 #define  EV_ADAS_GSENTRY_VEHI_BASIC_INFO_REPORT     0x001

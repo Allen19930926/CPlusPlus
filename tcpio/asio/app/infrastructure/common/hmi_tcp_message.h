@@ -1,3 +1,11 @@
+/*
+ * @Descripttion: 
+ * @version: 
+ * @Author: congsir
+ * @Date: 2022-12-01 15:11:10
+ * @LastEditors: 
+ * @LastEditTime: 2022-12-02 09:41:00
+ */
 #ifndef HMI_TCP_MESSAGE_H
 #define HMI_TCP_MESSAGE_H
 
@@ -11,7 +19,7 @@ public:
 
   HmiTcpMessage() : bodyLength(0) {}
 
-  HmiTcpMessage(const std::string & data) {
+  HmiTcpMessage(const std::string& data) {
     bodyLength = data.length();
     dataBuffer[0] = 0;
     dataBuffer[1] = 0xFF;
@@ -21,7 +29,8 @@ public:
     dataBuffer[5] = static_cast<unsigned char>(bodyLength >> 16);
     dataBuffer[6] = static_cast<unsigned char>(bodyLength >> 8);
     dataBuffer[7] = static_cast<unsigned char>(bodyLength);
-    memcpy(dataBuffer + HeaderLength, data.c_str(), data.length());
+    memset(dataBuffer + HeaderLength, 0, MaxBodyLength);
+    memcpy(dataBuffer + HeaderLength, data.c_str(), data.length() + 1);
   }
 
   const char *Data() const { return dataBuffer; }
@@ -49,7 +58,9 @@ public:
         return false;
       }
       return true;
-    } else {
+    } 
+    else 
+    {
       return false;
     }
   }

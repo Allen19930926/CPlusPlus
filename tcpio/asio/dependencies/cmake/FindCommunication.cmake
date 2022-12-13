@@ -1,6 +1,0 @@
-cmake_minimum_required(VERSION 3.5)
-
-set(COMMUNICATION_LIBRARIES communication)
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Communication DEFAULT_MSG COMMUNICATION_LIBRARIES)

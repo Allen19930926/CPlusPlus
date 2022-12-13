@@ -25,6 +25,7 @@ include_directories(
 )
 
 
+aux_source_directory(${PROJECT_SOURCE_DIR}/infrastructure/common ADAS_FILES)
 aux_source_directory(${PROJECT_SOURCE_DIR}/infrastructure/tcp/source ADAS_FILES)
 aux_source_directory(${PROJECT_SOURCE_DIR}/domain/data_fusion/source ADAS_FILES)
 aux_source_directory(${PROJECT_SOURCE_DIR}/domain/proxy/source ADAS_FILES)

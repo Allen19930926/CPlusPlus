@@ -17,7 +17,7 @@ enum class HMI_GSENTRY_TAG_DEF: int{
   GSENTRY_HMI_OPENONEV2X_RESP = 16,   // pad开启单项V2X功能请求响应
   GSENTRY_HMI_SENCE_RESP = 18,          //pad设置gentry灵敏度请求响应
   GSENTRY_HMI_GSENTRY_STATUS_REQ = 19,  //gsentry上报v2x/gsentry状态请求响应（图标显示需求）
-  GSENTRY_HMI_V2X_STATUS_RESP = 22,     //pad查询v2x/gsentry状态请求响应    
+  GSENTRY_HMI_V2X_STATUS_RESP = 22,     //pad查询v2x/gsentry状态请求响应
   GSENTRY_HMI_V2XSWITCH_STATUS_RESP = 24,    //pad查询gV2X场景开关状态请求响应 
   GSENTRY_HMI_SENSESTATUS_RESP = 26,         //pad获取gentry灵敏度请求响应
 

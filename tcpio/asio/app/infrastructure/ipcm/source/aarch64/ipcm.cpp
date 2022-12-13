@@ -480,6 +480,7 @@ int IpcM::Write(const IpcM_FrameTypes_T frameType, const void* srcAddress, const
 	if (IpcM_MainState != IPCM_RUNNING) {
 		return -1;
 	}
+	LOG(INFO) << "ipcm send frame, type: " << (int)frameType << ", size:" << msgLen;
     IpcM_Send(frameType, srcAddress, msgLen);
     return 0;
 }

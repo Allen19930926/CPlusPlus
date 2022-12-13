@@ -1,9 +1,11 @@
 #include <iostream>
 #include <thread>
+#include "asio/io_context.hpp"
 #include "event_dispatcher.h"
 //#include "event_msg.h"
 #include "event_queue.h"
 #include "hmi_proxy.h"
+#include "ipc_data.h"
 #include "ipc_proxy.h"
 #include "cds_proxy.h"
 #include "xds_proxy.h"
@@ -17,10 +19,15 @@
 #include <glog/logging.h>
 #include <signal.h>
 #include "version.h"
+#include "stdio.h"
+#include <sys/file.h>
+#include "calibration.h"
 
 #define XDS_LISTEN_PORT 35559
 #define HMI_LISTEN_PORT 35553
 #define CDS_LISTEN_PORT 35551
+
+int pid = 0;
 
 // #ifdef __x86_64__
 #include "com_tcp_server.h"
@@ -28,8 +35,14 @@
 ComTcpServer * comTcpServer = NULL;
 // #endif
 
+static Boolean appShutdown = false;
+static asio::io_context ioThread;
+static asio::io_context periodThread;
+
 void TerminateHandler(int s){
-    exit(1); 
+    ioThread.stop();
+    periodThread.stop();
+    // exit(1); 
 }
 
 std::string getHostAddress()
@@ -58,7 +71,7 @@ void DoPeriodCdsTask(asio::steady_timer* timer, uint32_t interval)
     if (CDD_FUSION_PROXY_REPO.GetSpecificProxy(MsgType::CDS, ptr))
     {
         auto proxy(std::dynamic_pointer_cast<CdsProxy>(ptr));
-        proxy->SendperiodMessage();
+        proxy->SendperiodMessage_50ms();
     }
     timer->expires_after(std::chrono::milliseconds(interval));
     timer->async_wait(std::bind(&DoPeriodCdsTask, timer, interval));
@@ -128,7 +141,7 @@ void DoPeriodIpcTask_50ms(asio::steady_timer* timer, uint32_t interval)
 
 void StartIoThread()
 {
-    asio::io_context io;
+    asio::io_context& io = ioThread;
     HmiUdpAddressingServer addressServer(io, HMI_LISTEN_PORT);
     addressServer.start();
 #ifdef __x86_64__
@@ -138,7 +151,7 @@ void StartIoThread()
 #endif
 
     CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<CanProxy>(io, 9000));
-    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<HmiProxy>(io, "127.0.0.1", "5000", HMI_LISTEN_PORT));
+    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<HmiProxy>(io, "192.168.20.199", "50500", HMI_LISTEN_PORT));
     CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<IpcProxy>(io));
     CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<XdsProxy>(io, XDS_LISTEN_PORT));
     CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<CdsProxy>(io, CDS_LISTEN_PORT));
@@ -156,20 +169,29 @@ void StartIoThread()
     // }
 
     io.run();
+    LOG(INFO) << "Exit IO thread...";
 }
 
 void StartEventThread()
 { 
-    while(true)
+    while(!appShutdown)
     {
         EventMessage&& msg = CDD_FUSION_EVENT_QUEUE.wait_and_get_front();
+        if (msg.data == nullptr && msg.msgType == MsgType::INVALID)
+        {
+            continue;
+        }
         // std::cout << "after construct" << std::endl;
+        LOG(INFO) << "Process Event Message, msgType: " << (int)msg.msgType;
         EventDispatcher::ProcessMessage(msg);
+        LOG(INFO) << "Process Done";
     }
+    LOG(INFO) << "Exit Event thread...";
 }
+
 void StartPeriodThread()
 {
-    asio::io_context io;
+    asio::io_context& io = periodThread;
 
     // 创建定时器，周期发送data数据
     uint32_t interval = 50;
@@ -202,25 +224,85 @@ void StartPeriodThread()
     ipcTimer.async_wait(std::bind(&DoPeriodIpcTask_50ms, &ipcTimer, interval));
 
     io.run();
+    LOG(INFO) << "Exit Period thread...";
+}
+
+bool IsAlreadyRunning()
+{
+    std::string pid_file = Calibration::GetExecutePath() + "/bspid.txt";
+    LOG(INFO) << "pid file path: " << pid_file;
+    int fd = open(pid_file.c_str(), O_RDWR);
+    if (fd == -1)
+    {
+        return true;
+    }
+
+    FILE* file = fdopen(fd, "r+");
+    if (!file)
+    {
+        return true;
+    }
+
+    if (flock(fd, LOCK_EX | LOCK_NB) != 0)
+    {
+        fscanf(file, "%d", &pid);
+        fclose(file);
+        return true;
+    }
+
+    ftruncate(fd, 0);
+    pid = getpid();
+    fprintf(file, "%d", pid);
+    fflush(file);
+    return false;
+
+}
+
+void HandleHotPatchReload(int sig)
+{
+    Calibration::ReloadCaliJson();
+}
+
+void RegisterSignalHandler()
+{
+    Calibration::ReloadCaliJson();
+    signal(SIGUSR1, HandleHotPatchReload);
 }
 
 int main(int argc, char* argv[])
 {
-    // struct sigaction sigIntHandler;
- 
-    // sigIntHandler.sa_handler = TerminateHandler;
-    // sigemptyset(&sigIntHandler.sa_mask);
-    // sigIntHandler.sa_flags = 0;
- 
-    // sigaction(SIGINT, &sigIntHandler, NULL);
-    LOG(INFO) << CDC_1X32_XCP_STATION_ID;
+    if (argc == 2)
+    {
+        std::string str = "--reload";
+        if (str == argv[1] && IsAlreadyRunning())
+        {
+            LOG(INFO) << "pid = " << pid;
+            kill(pid, SIGUSR1);
+        }
+        return 0;
+    }
 
-    fLB::FLAGS_alsologtostderr = true;
+
+    IsAlreadyRunning();
+    RegisterSignalHandler();
+    struct sigaction sigIntHandler;
+ 
+    sigIntHandler.sa_handler = TerminateHandler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+ 
+    sigaction(SIGINT, &sigIntHandler, NULL);
+
+
+    fLB::FLAGS_logtostderr = false;
+    fLB::FLAGS_alsologtostderr = false;
     fLB::FLAGS_log_prefix = true;
-    fLI::FLAGS_logbufsecs = 1;
+    fLI::FLAGS_logbufsecs = 20;
     google::SetLogDestination(google::GLOG_INFO,"bs.log.");
     google::InitGoogleLogging(argv[0]);
     google::InstallFailureSignalHandler();
+    
+    LOG(INFO) << CDC_1X32_XCP_STATION_ID;
     try
     {
         std::thread io(StartIoThread);

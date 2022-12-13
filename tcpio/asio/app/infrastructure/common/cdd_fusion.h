@@ -7,6 +7,7 @@ namespace CDDFusion
 
 #define ADAS_CAMERA_OBJ_VEHI_NUM     20
 #define ADAS_GSENTRY_OBJ_VEHI_NUM    20
+#define ADAS_GSENTRY_VRU_VEHI_NUM    MAX_PARTCIPANT_NUM
 #define CDD_LANE_INFO_NUM       4
 
 struct CDDCurntLaneTrafficLightInfo
@@ -42,6 +43,7 @@ struct CDDgSentryWarningInfo
     uint8_t warningType;
     uint8_t level;
     uint8_t targetID;
+    uint32_t De_reserved_u32;
 };
 
 struct CDDDisToEndLane
@@ -51,7 +53,7 @@ struct CDDDisToEndLane
 
 struct CddFusionRepo
 {
-    CDD_Fusion_ObjInfo_BUS  cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM + ADAS_CAMERA_OBJ_VEHI_NUM];
+    CDD_Fusion_ObjInfo_BUS  cddObjects[ADAS_GSENTRY_OBJ_VEHI_NUM + MAX_PARTCIPANT_NUM + ADAS_CAMERA_OBJ_VEHI_NUM];
     CDDCurntLaneTrafficLightInfo    spatInfo;
     CDD_Fusion_LaneInfo_Array4 laneInfo;
     CDDgSentryWarningInfo gSentryWarningInfo;

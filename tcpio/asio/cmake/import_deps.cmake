@@ -96,6 +96,13 @@ FUNCTION(INSTALL_JSON )
     install(DIRECTORY ${json_path}/ DESTINATION bin)
 ENDFUNCTION(INSTALL_JSON)
 
+FUNCTION(INSTALL_CALI_FILE )
+    file(GLOB pid_file "${PROJECT_SOURCE_DIR}/bspid.txt")
+    file(GLOB cali_file "${PROJECT_SOURCE_DIR}/calibration.json")
+    install(FILES ${pid_file} DESTINATION bin)
+    install(FILES ${cali_file} DESTINATION bin)
+ENDFUNCTION(INSTALL_CALI_FILE)
+
 function(target_link_dep_libraries target access)
   foreach (lib ${ARGN})
     target_link_libraries(${target} ${access} debug "${lib}${DEBUG_POSTFIX}" optimized ${lib})

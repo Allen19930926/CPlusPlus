@@ -11,6 +11,9 @@
 #define ADAS_ADJACENT_LANE_NUM          2
 #define ADAS_WARN_INFO_NUM              3
 
+#define MAX_PARTCIPANT_NUM 50
+#define MAX_CHAR_LENGTH 8
+
 namespace V2X
 {
 /* build-in struct */
@@ -203,6 +206,67 @@ struct BelongsLink
 
 
 
+typedef struct Position_rsm
+{
+    int32_t lat;    ///< 纬度       物理值：-90~90  总线值：-900000000~900000000   分辨率：1e-7度
+    int32_t lon;   ///< 经度       物理值：-180~180  总线值：-179999999~1800000001   分辨率：1e-7度
+    int32_t elevation;  ///< 海拔   物理值：-409.6~6143.9  总线值：-4096~61439  分辨率：0.1m   无效值-4096
+} __attribute__((packed, aligned(1))) Position_rsm_t ;
+
+typedef struct PosConfidence
+{
+    int32_t pos;         ///< 数值描述了95%置信水平的车辆位置精度，理论上只考虑了当前传感器的误差
+    int32_t elevation;   ///< 数值描述了95%置信水平的车辆高程精度，理论上只考虑了当前传感器的误差
+} __attribute__((packed, aligned(1))) PosConfidence_t;
+
+typedef struct Acc_rsm 
+{
+    int16_t longi;      ///< 物理值-50~50 分辨率0.01m/s^2
+    int16_t lat;        ///< 物理值-50~50 分辨率0.01m/s^2
+} __attribute__((packed, aligned(1))) Acc_rsm_t;
+
+typedef struct SizeInfo_rsm
+{
+    uint16_t objectLength;    ///< 车长 单位cm 总线值0~4095 分辨率1cm
+    uint16_t objectWidth;     ///< 车宽 单位cm 总线值0~1023 分辨率1cm  无效值0
+    uint8_t objectHight;      ///< 车高 单位cm 武力值0~635 总线值0~127 分辨率5cm  
+} __attribute__((packed, aligned(1))) SizeInfo_rsm_t;
+
+typedef struct Participant
+{
+    char rsuId[MAX_CHAR_LENGTH];    ///< 交通参与者所属rsu的id
+    uint8_t ptcType;      ///< 路侧单元检测到的交通参与者类型
+                          ///< 0 : unknown    未知 
+                          ///< 1 : motor      机动车
+                          ///< 2 : non-motor  非机动车
+                          ///< 3 : pedestrsin 行人
+                          ///< 4 : rsu
+    uint8_t ptcId;     ///< RSU设置的临时ID，0是RSU本身，1...255代表RSU检测到的交通参与者，RSU中不同参与者的ptcId必须唯一
+    uint8_t source;       ///< 0 : 未知
+                          ///< 1 : RSU
+                          ///< 2 : OBU
+                          ///< 3 : 视频传感器
+                          ///< 4 : 微波雷达传感器
+                          ///< 5 : 地磁线圈传感器
+                          ///< 6 : 激光雷达传感器
+                          ///< 7 : 2类或以上感知数据的融合结果
+                          ///< ... : 预留
+    char id[MAX_CHAR_LENGTH];;         ///< 来自BSM的临时id
+    uint64_t timestamp_ms;  ///< 时间信息，UTC，ms级
+    Position position;
+    PosConfidence_t posConfidence;
+    uint16_t speed_ms;                    ///< 交通参与者的速度大小  物理值： 0~163.82   总线值： 0~8191   无效值：8191  分辨率： 0.02m/s 单位：m/s
+    uint16_t heading;        ///< 交通参与者航向角。运动方向与正北方向顺时针夹角  物理值： 0~359.9875  总线值： 0~28800   分辨率： 0.0125度 单位：度
+    int8_t steeringWheelAngle;    ///< 方向盘转角，右正左负  物理值： -189~189  总线值：-126~127  分辨率：1.5度   单位： 度
+    uint8_t gear;                   ///< 档位信息（0：空挡，1：驻车，2：前进，3：倒车，4~6：预留，7：无效值）
+    uint8_t brakePedalStatus;       ///<刹车踏板状态 0系统不可用 1未被踩下 2被踩下
+    uint8_t remoteLight;            ///< 转向灯信息（0:未打灯；1:左转；2:右转；其他预留）
+    Acc_rsm_t accelSet;
+    SizeInfo_rsm_t size;
+
+}Participant_t;
+
+
 /***************************************** reprot struct *****************************************/
 
 /* EV_GSENTRY_ADAS_PROCESS_STATUS_REPORT */
@@ -362,6 +426,11 @@ struct WarningInfo
     int16_t     objectCollisionTTC; /* 实时碰撞TTC,-100~100,无效值：-1,单位0.01s */
 };
 
+struct RoadPartInfo
+{
+    Participant_t participants[MAX_PARTCIPANT_NUM];
+};
+
 struct V2xData
 {
     GSentryStatus   status;
@@ -373,6 +442,7 @@ struct V2xData
     EgoVehMapInfo   egoMap;
     ObjVehMapInfo   objMap[ADAS_OBJ_VEH_INFO_NUM];
     WarningInfo     warningInfo[ADAS_WARN_INFO_NUM];
+    RoadPartInfo    roadPartInfo;
 };
 
 }

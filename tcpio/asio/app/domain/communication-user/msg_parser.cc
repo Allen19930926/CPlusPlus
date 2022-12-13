@@ -160,12 +160,12 @@ static void ParseObstacles(const ObstacleProto::Obstacles *obstacles, gohigh::Ob
     obs->world_info.acc_ref.ay = obstacle.world_info().acc_ref().ay();
 
 
-    LOG(INFO) << " parse j3 vehicle.De_Timestamp_u32          = " << obs->timestamp;
-    LOG(INFO) << " parse j3 vehicle.De_ID_u8                  = " << obs->id;
-    LOG(INFO) << " parse j3 vehicle.De_dx_f32                 = " << obs->world_info.position.x;
-    LOG(INFO) << " parse j3 vehicle.De_dy_f32                 = " << obs->world_info.position.y;
-    LOG(INFO) << " parse j3 vehicle.De_vx_f32                 = " << obs->world_info.vel_abs_world.vx;
-    LOG(INFO) << " parse j3 vehicle.De_vy_f32                 = " << obs->world_info.vel_abs_world.vx;
+    LOG(INFO) << " parse j3 vehicle.De_Timestamp_u32          = raw:" << obstacle.life_time() << " 32:" << obs->timestamp
+    << "\n\t parse j3 vehicle.De_ID_u8                  = " << obs->id
+    << "\n\t parse j3 vehicle.De_dx_f32                 = " << obs->world_info.position.x
+    << "\n\t parse j3 vehicle.De_dy_f32                 = " << obs->world_info.position.y
+    << "\n\t parse j3 vehicle.De_vx_f32                 = " << obs->world_info.vel_abs_world.vx
+    << "\n\t parse j3 vehicle.De_vy_f32                 = " << obs->world_info.vel_abs_world.vx;
   }
 }
 
@@ -415,6 +415,8 @@ void ParseLineV2Msg(std::shared_ptr<google::protobuf::Message> message,
                                        static_cast<int>(block.meta_size_));
 
   line_v2::Lines *lines = static_cast<line_v2::Lines *>(message.get());
+  if (lines->lines_size() == 0)
+    return;
 
   // std::cout << "LineV2 -> {";
   // std::cout << "Line: [";
@@ -430,18 +432,18 @@ void ParseLineV2Msg(std::shared_ptr<google::protobuf::Message> message,
   // std::cout << "}" << std::endl;
   // std::cout << std::endl;
     auto print = [](const gohigh::Line * const line) {
-      LOG(INFO) << "Line [ id: " << line->id;
-      LOG(INFO) << "valid: " << line->valid;
-      LOG(INFO) << "life_time: " << line->life_time;
-      LOG(INFO) << "type: " << line->type;
-      LOG(INFO) << "conf: " << line->conf;
-      LOG(INFO) << "width: " << line->width ;
-      LOG(INFO) << "start_pt: [" << line->start_pt.x << " " << line->start_pt.y << "]";
-      LOG(INFO) << "y_coeff: [" << line->y_coeff[0] << " " << line->y_coeff[1] << " " << line->y_coeff[2] << " " << line->y_coeff[3] << "]";
-      LOG(INFO) << "color: " << line->color;
-      LOG(INFO) << "marking: " << line->marking;
-      LOG(INFO) << "parsing_conf: " << line->parsing_conf;
-      LOG(INFO) << "rmse: " << line->rmse;
+      LOG(INFO) << "Line [ id: " << line->id
+      << "\n\t valid: " << line->valid
+      << "\n\t life_time: " << line->life_time
+      << "\n\t type: " << line->type
+      << "\n\t conf: " << line->conf
+      << "\n\t width: " << line->width 
+      << "\n\t start_pt: [" << line->start_pt.x << " " << line->start_pt.y << "]"
+      << "\n\t y_coeff: [" << line->y_coeff[0] << " " << line->y_coeff[1] << " " << line->y_coeff[2] << " " << line->y_coeff[3] << "]"
+      << "\n\t color: " << line->color
+      << "\n\t marking: " << line->marking
+      << "\n\t parsing_conf: " << line->parsing_conf
+      << "\n\t rmse: " << line->rmse;
     };
 
   auto out = gohigh::Lines();
@@ -475,6 +477,7 @@ void ParseLineV2Msg(std::shared_ptr<google::protobuf::Message> message,
       case line_v2::LinePosition_RightRight:
           lin = &out.right_right;
           LOG(INFO) << "extrac right_right lane info from J3:";
+          break;
       default:
           continue;
       }

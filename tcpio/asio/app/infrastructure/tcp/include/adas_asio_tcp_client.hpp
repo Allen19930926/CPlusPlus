@@ -71,17 +71,17 @@ private:
                     isConnected.store(true);
                     reconnect_count = 0;
                     timer.cancel();
-                    LOG(INFO) << "connected!!  IP:" << socket_.remote_endpoint().address() << "  Port: " << socket_.remote_endpoint().port();
+                    LOG(INFO) << "connected!!  IP:" << socket_.remote_endpoint().address() << "  Port: " << socket_.remote_endpoint().port() << " MsgType: " << int(msgType);
                 }
                 else
                 {
-                    if (reconnect_count > 20)
+                    if (reconnect_count > 30)
                     {
-                        LOG(INFO) << "try connection 20 times, stop retry!!";
+                        LOG(INFO) << "try connection 30 times, stop retry!!" << " MsgType: " << int(msgType);
                         return ;
                     }
-                    LOG(INFO) << "connection failed, bs will retry in 30s";
-                    timer.expires_after(std::chrono::seconds(30));
+                    LOG(INFO) << "connection " << ip << " failed, bs will retry in 10s" << " MsgType: " << int(msgType);
+                    timer.expires_after(std::chrono::seconds(10));
                     timer.async_wait(std::bind(&AdasAsioTcpClient::do_connect, this));
                     reconnect_count++;
                 }
@@ -97,8 +97,9 @@ private:
         // 未连接状态： 丢弃该条消息，且继续尝试写入队列其他信息，防止消息积压。
         if (isConnected.load())
         {
+            //LOG(INFO) << "writeMsgs.front().Data(): " << writeMsgs.front().Body() << "  writeMsgs.front().BodyLength():" << writeMsgs.front().BodyLength();
             socket_.async_write_some(
-                asio::buffer(writeMsgs.front().Data(), writeMsgs.front().BodyLength()),
+                asio::buffer(writeMsgs.front().Data(), writeMsgs.front().Length()),
                 [this](std::error_code ec, std::size_t /*length*/)
                 {
                     if(ec.value() == EPIPE  || ec.value() == ECONNABORTED)
@@ -143,7 +144,7 @@ private:
                 {
                     if (!ec)
                     {
-                        // std::cout << "client read : " << readMsg.Body() << std::endl;
+                        // std::cout << "client read readMsg.Body(): " << readMsg.Body() << "  readMsg.BodyLength():" << readMsg.BodyLength() << std::endl;
                         if (msgType != MsgType::V2X)
                         {
                             CDD_FUSION_EVENT_QUEUE.push({msgType, readMsg.Body(), static_cast<uint16_t>(readMsg.BodyLength())});

@@ -67,8 +67,17 @@ void XdsProxy::WriteXYZ(float acc_x, float acc_y, float acc_z, float gyro_x, flo
 {
 	static int counter = 0;
 	std::ostringstream oss;
-	oss << "$GNSSINS570,XYZ," <<  acc_x << "," << acc_y << "," << acc_z << "," << gyro_x << "," << fyro_y << "," << fyro_z  << ","
-	    << pitchAngle << "," << rollAngle << "," << headingAngle << "," << velSpd  << "\r\n";
+	oss << "$GNSSINS570,XYZ," 
+		<< std::fixed << std::setprecision(7) << acc_x << "," 
+		<< std::fixed << std::setprecision(7) << acc_y << "," 
+		<< std::fixed << std::setprecision(7) << acc_z << "," 
+		<< std::fixed << std::setprecision(7) << gyro_x << ","  
+		<< std::fixed << std::setprecision(7) << fyro_y << "," 
+		<< std::fixed << std::setprecision(7) << fyro_z  << ","
+	    << std::fixed << std::setprecision(7) << pitchAngle << "," 
+		<< std::fixed << std::setprecision(7) << rollAngle << "," 
+		<< std::fixed << std::setprecision(7) << headingAngle << "," 
+		<< std::fixed << std::setprecision(7) << velSpd  << "\r\n";
 	auto msg = XdsTcpMessage(oss.str());
     server.write(msg);
 	if (counter++ == 20)

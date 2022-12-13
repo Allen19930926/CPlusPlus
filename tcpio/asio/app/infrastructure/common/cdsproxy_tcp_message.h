@@ -8,10 +8,7 @@ class CdsTcpMessage : public DefaultChatMessage {
 public:
     static constexpr std::size_t HeaderLength = 0;
 
-    CdsTcpMessage() : DefaultChatMessage() {
-        
-    }
-
+    CdsTcpMessage() : DefaultChatMessage() {}
     CdsTcpMessage(const char* buf , const uint16_t len)
     {
         memcpy(dataBuffer, buf, len);
@@ -26,7 +23,6 @@ public:
         return true;
     }
 };
-
 
 
 #endif

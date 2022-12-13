@@ -1,1 +1,1 @@
-{"discovery_pattern":1,"participants":[{"id":1,"protocol":"zmq_tcp","link_info":"192.168.233.1:5560","link_type":""}]}
+{"discovery_pattern":1,"participants":[{"id":1,"protocol":"zmq_tcp","link_info":"192.168.78.1:5560","link_type":""}]}

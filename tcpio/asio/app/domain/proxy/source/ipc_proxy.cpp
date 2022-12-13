@@ -34,12 +34,12 @@ void IpcProxy::ProcessIncomingMessage(MsgType msgType, uint8_t * data, uint16_t 
 	auto iter = IpcProxy_MessageDefinition.find(msgType);
 	if (iter == IpcProxy_MessageDefinition.end())
 	{
-		std::cout << "undefined message type" << std::endl;
+		LOG(INFO) << "undefined message type" ;
 		return;
 	}
 	if (iter->second != len)
 	{
-		std::cout << "mismatched message length" << int(msgType) << std::endl;
+		LOG(INFO) << "mismatched message length: " << int(msgType);
 		return;
 	}
 	switch (msgType)

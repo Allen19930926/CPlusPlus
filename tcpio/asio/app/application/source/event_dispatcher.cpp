@@ -16,8 +16,6 @@ extern ComTcpServer * comTcpServer;
 
 void EventDispatcher::ProcessMessage(const EventMessage& msg)
 {
-    // printf ("Msgtype = %s\n", msg.data);
-    // std::cout << "pop:"  << msg.data << std::endl;
 // #ifdef __x86_64__
     // LOG(INFO) << "EventDispatcher::ProcessMessage, msg type: " << static_cast<int>(msg.msgType);
     if (msg.msgType != MsgType::CAMERA)
@@ -91,6 +89,7 @@ void EventDispatcher::ProcessMessage(const EventMessage& msg)
                 auto proxy(std::dynamic_pointer_cast<XdsProxy>(ptr));
                 proxy->ProcessIncomingMessage(msg.msgType, msg.data, msg.msglen);
             }
+            CanFusionAlgo::ProcessRecieveData(msg.msgType, msg.data, msg.msglen);
 
         };break;
         case MsgType::IPC_HMI_INFO:
