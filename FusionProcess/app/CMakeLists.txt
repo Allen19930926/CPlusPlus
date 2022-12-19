@@ -22,9 +22,11 @@ aux_source_directory(infrastructure/hungarian SRC_LIST)
 
 if (NOT (FT_TEST EQUAL 2))
     include_directories(infrastructure/tcp)
-    aux_source_directory(application/data_reciever SRC_LIST)
+    include_directories(infrastructure/udp)
+    aux_source_directory(application/data_receiver SRC_LIST)
     aux_source_directory(domain/data_preprocessor SRC_LIST)
     aux_source_directory(infrastructure/tcp SRC_LIST)
+    aux_source_directory(infrastructure/udp SRC_LIST)
 endif()
 
 # 递归查找文件夹下的所有 .h 文件并保存到 HEADER_FILES

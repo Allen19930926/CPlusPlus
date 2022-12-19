@@ -1,4 +1,4 @@
-#include "application/data_reciever/data_reciever.h"
+#include "application/data_receiver/data_receiver.h"
 #include "application/fuse_system/fusion_system.h"
 #include "glog/logging.h"
 #include <thread>
@@ -15,8 +15,8 @@ void DoPeriodFusionTask(asio::steady_timer* timer, uint32_t interval)
 void StartIoThread()
 {
     asio::io_context io_context;
-    DataReciever  data_reciever(io_context, "192.168.198.131", "35243", 56842);
-    data_reciever.Start();
+    DataReceiver  data_receiver(io_context);
+    data_receiver.Start();
     io_context.run();
 }
 

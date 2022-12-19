@@ -25,4 +25,4 @@ echo ${CMAKE_DIR}
 mkdir -p $BUILD_DIR
 cd $BUILD_DIR
 cmake -DCMAKE_TOOLCHAIN_FILE=$CMAKE_DIR -DCMAKE_BUILD_TYPE=Debug  ../..
-cmake --build .
+cmake --build . -- -j4
