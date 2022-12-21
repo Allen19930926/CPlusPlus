@@ -1,0 +1,17 @@
+# Do not change this file as far as possible.
+# Set local variable to build.properties.local 
+# by reference to build.properties.local.example
+# platform [linux | win | mac | android]
+platform linux
+
+# architecture
+# linux [ x86(default), arm, ... ]
+# android [arm(default), x86 ,mpis, ...]
+
+architecture default
+
+# vendor
+vendor ubuntu
+
+# toolchain
+toolchain gcc5.4.0
