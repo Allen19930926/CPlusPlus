@@ -39,6 +39,10 @@ static Boolean appShutdown = false;
 static asio::io_context ioThread;
 static asio::io_context periodThread;
 
+const std::string GSENTRY_IP = "192.168.20.199";
+const std::string GSENTRY_CONNECT_PORT = "50600";
+const std::string HMI_CONNECT_PORT = "50500";
+
 void TerminateHandler(int s){
     ioThread.stop();
     periodThread.stop();
@@ -145,13 +149,12 @@ void StartIoThread()
     HmiUdpAddressingServer addressServer(io, HMI_LISTEN_PORT);
     addressServer.start();
 #ifdef __x86_64__
-    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<GSentryProxy>(io, getHostAddress(), "50600"));
+    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<GSentryProxy>(io, getHostAddress(), GSENTRY_CONNECT_PORT));
 #else
-    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<GSentryProxy>(io, "192.168.20.199", "50600"));
+    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<GSentryProxy>(io, GSENTRY_IP, GSENTRY_CONNECT_PORT));
 #endif
 
-    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<CanProxy>(io, 9000));
-    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<HmiProxy>(io, "192.168.20.199", "50500", HMI_LISTEN_PORT));
+    CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<HmiProxy>(io, GSENTRY_IP, HMI_CONNECT_PORT, HMI_LISTEN_PORT));
     CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<IpcProxy>(io));
     CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<XdsProxy>(io, XDS_LISTEN_PORT));
     CDD_FUSION_PROXY_REPO.AddProxy(std::make_shared<CdsProxy>(io, CDS_LISTEN_PORT));

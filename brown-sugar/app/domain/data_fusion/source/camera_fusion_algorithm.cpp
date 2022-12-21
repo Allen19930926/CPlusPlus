@@ -51,7 +51,8 @@ namespace
     uint32_t shrink_to_fit(const CDD_Fusion_ObjInfo_Array40& src, CDD_Fusion_ObjInfo_Array40& dst)
     {
         uint32_t valid_cnt = 0;
-        for (uint32_t i=0; i<40; i++)
+        const uint32_t max_cnt = sizeof(CDD_Fusion_ObjInfo_Array40) / sizeof(CDD_Fusion_ObjInfo_BUS);
+        for (uint32_t i=0; i<max_cnt; i++)
         {
             if (src[i].De_life_time_u32 == 0)
             {
@@ -64,15 +65,13 @@ namespace
     }
 }
 
-void CameraFusionAlgo::ProcessJ3CameraData(uint8_t* buf, uint16_t len)
+void CameraFusionAlgo::ProcessJ3CameraData(uint8_t* buf, uint16_t len, uint16_t msgid)
 {
-    if (len == sizeof(gohigh::Obstacles))
+    switch (msgid)
     {
-        return ProcessCameraObstacles(buf, len);
-    }
-    else if(len == sizeof(gohigh::Lines))
-    {
-        return ProcessCameraLines(buf, len);
+        case EV_CAMERA_LINES_MSG:       ProcessCameraLines(buf, len);break;
+        case EV_CAMERA_OBSTACLE_MSG:    ProcessCameraObstacles(buf, len);break;
+        default: break;
     }
 }
 
@@ -301,6 +300,6 @@ std::vector<gohigh::Obstacle> CameraFusionAlgo::GetObstaclVecFromHeap()
         return false;
     };
     tmpVehiVec.erase(std::remove_if(tmpVehiVec.begin(), tmpVehiVec.end(), rm_cond), tmpVehiVec.end());
-    return std::move(tmpVehiVec);
+    return tmpVehiVec;
 }
 

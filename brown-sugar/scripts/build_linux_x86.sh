@@ -11,5 +11,5 @@ mkdir -p $BUILD_DIR
 cd $BUILD_DIR
 cp $SCRIPT_DIR/build.properties.${PLATFORM} $BUILD_DIR/build.properties.local
 cmake -DCMAKE_INSTALL_PREFIX:PATH=$BUILD_DIR/output/ ../..  -DCMAKE_BUILD_TYPE=Debug 
-cmake --build .
+cmake --build . -- -j16
 make install

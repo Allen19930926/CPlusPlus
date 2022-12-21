@@ -2,6 +2,33 @@
 #define EF48505C_E775_45A5_B76D_0E37D4888491
 #include "ipc_data.h"
 
+enum ObjectSource
+{
+    CAMERA_SOURCE = 0,
+    OBU_V2X_SOURCE = 1,
+    RSM_V2X_SOURCE = 2,
+    INVALID_SOURCE = 3
+};
+
+enum ObjectType
+{
+    ObstacleType_VehicleRear = 0,
+    ObstacleType_VehicleFull = 1,
+    ObstacleType_Pedestrian = 2,
+    ObstacleType_Cyclist = 3
+};
+
+enum ObjectMovingStatus
+{
+    MS_INVALID = 0,
+    MS_UNKNOWN = 1,
+    MS_MOVING = 2,
+    MS_STATIONARY = 3,
+    MS_STOPPED = 4,
+    MS_MOVING_SLOWLY = 5,
+    MS_ENUM_SIZE = 6
+};
+
 namespace CDDFusion
 {
 

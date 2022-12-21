@@ -42,7 +42,7 @@ enum class MsgType : uint32_t
 
 struct EventMessage
 {
-    EventMessage(const MsgType type, const char* data_, const uint16_t len):msgType(type), msglen(len), data(nullptr)
+    EventMessage(const MsgType type, const char* data_, const uint16_t len, const uint16_t msgId = 0):msgType(type), msglen(len), msgid(msgId), data(nullptr)
     {
         if (data_ != nullptr)
         {
@@ -51,7 +51,7 @@ struct EventMessage
         }
     }
 
-    EventMessage(const EventMessage& ref):msgType(ref.msgType), msglen(ref.msglen), data(nullptr)
+    EventMessage(const EventMessage& ref):msgType(ref.msgType), msglen(ref.msglen), msgid(ref.msgid), data(nullptr)
     {
 
         // std::cout << "reference construct" << std::endl;
@@ -62,7 +62,7 @@ struct EventMessage
         }
     }
 
-    EventMessage(EventMessage&& ref):msgType(ref.msgType), msglen(ref.msglen), data(ref.data)
+    EventMessage(EventMessage&& ref):msgType(ref.msgType), msglen(ref.msglen), msgid(ref.msgid), data(ref.data)
     {
         // std::cout << "rvalue construct" << std::endl;
         ref.data = nullptr;
@@ -77,6 +77,7 @@ struct EventMessage
 public:
     MsgType msgType;
     uint16_t msglen;
+    uint16_t msgid;
     uint8_t* data;
 };
 

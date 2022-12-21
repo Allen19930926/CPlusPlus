@@ -27,7 +27,7 @@ void EventDispatcher::ProcessMessage(const EventMessage& msg)
     switch(msg.msgType)
     {
         case MsgType::V2X :                     V2xFusionAlgo::ProcessRecieveData(msg.data, msg.msglen); break;
-        case MsgType::CAMERA :                  CameraFusionAlgo::ProcessRecieveData(msg.data, msg.msglen); break;
+        case MsgType::CAMERA :                  CameraFusionAlgo::ProcessRecieveData(msg.data, msg.msglen, msg.msgid); break;
         case MsgType::CAN :                     CanFusionAlgo::ProcessRecieveData(msg.data, msg.msglen); break;
         // case MsgType::HMI :                     HmiFusionAlgo::ProcessRecieveData(msg.data, msg.msglen); break;
         case MsgType::IPC_GNSS_DATA:

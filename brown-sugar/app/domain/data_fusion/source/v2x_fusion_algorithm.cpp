@@ -22,6 +22,10 @@ namespace
     const double CAN_ELEVATION_OFFSET = 10000;
     const double CAN_HEAD_ANGLE_DIAMETER = 0.010986;
     const double CAN_HEAD_ANGLE_OFFSET = 360;
+    const double V2X_ANGLE_DIEMETER = 0.0125;
+    const double V2X_OBJECT_NON_STATION_BASE = 0.001;
+    const double OBJECT_MOVING_SPEED_GATE = 2.0;
+    const double OBJECT_STATION_SPEED_GATE = 0.0;
     const int PI_DEGREE = 180;
     const double MAJOR_AXIS = 6378137.0;
     const double MINOR_AXIS = 6356752.3142;
@@ -112,7 +116,7 @@ void V2xFusionAlgo::ProcessSpatInfo(uint8_t* buf, uint32_t len)
     }
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     memcpy(&v2xData.spatInfo, buf, len);
-    for(int i = 0; i<5;i++)
+    for(int i = 0; i<ADAS_SPAT_INFO_NUM;i++)
     {
     LOG(INFO) << "--------------------ProcessSpatInfo------------------- " 
     << "\n\t1 spatInfo["<< i<< "].timeStamp : " << v2xData.spatInfo[i].timeStamp
@@ -146,7 +150,7 @@ void V2xFusionAlgo::ProcessObjVehiInfo(uint8_t* buf, uint32_t len)
     CAN::HostVehiclePos& host = DataRepo::GetInstance().GetHostVehicle();
     if (!host.isHostPosValid)
     {
-        //return ;
+        return ;
     }
     V2X::V2xData& v2xData = DataRepo::GetInstance().GetV2xData();
     memcpy(&v2xData.objVehicle[0], buf, len);
@@ -352,7 +356,7 @@ void V2xFusionAlgo::TransV2xVehi2CddVehi(const V2X::AdasObjVehInfo& raw, const C
     dest.De_length_f32 = raw.size.length;
     dest.De_width_f32 = raw.size.width;
     dest.De_height_f32 = raw.size.height;
-    dest.De_Yaw_f32 = -raw.objectHeadingAngle * 0.0125 * PI / PI_DEGREE;
+    dest.De_Yaw_f32 = -raw.objectHeadingAngle * V2X_ANGLE_DIEMETER * PI / PI_DEGREE;
 
     vector<float>&& displacement = TransWgs84ToVcsCoordinate(host, raw.vehicelPos);
     dest.De_dx_f32 = displacement[0];
@@ -361,32 +365,32 @@ void V2xFusionAlgo::TransV2xVehi2CddVehi(const V2X::AdasObjVehInfo& raw, const C
     const double hostHeadRad  = -host.objectHeadingAngle * PI / PI_DEGREE;
     vector<float>&& velocity = TransObjVcsToHostVcs(raw.speed * V2X_VELOCITY_DIAMETER, 0, hostHeadRad, dest.De_Yaw_f32);
     dest.De_vx_f32 = velocity[0] - host.speed;
-    dest.De_vy_f32 = velocity[1] + 0.001;
+    dest.De_vy_f32 = velocity[1] + V2X_OBJECT_NON_STATION_BASE;
 
     vector<float>&& acceleration = TransObjVcsToHostVcs(raw.accelSet.longitude * V2X_ACCELERATION_DIAMETER, 
                                     raw.accelSet.latitude * V2X_ACCELERATION_DIAMETER, hostHeadRad, dest.De_Yaw_f32);
     dest.De_ax_f32 = acceleration[0] - host.acc_x;
     dest.De_ay_f32 = acceleration[1] - host.acc_y;
-    dest.De_source_u8 = 1;
+    dest.De_source_u8 = static_cast<uint8_t>(OBU_V2X_SOURCE);
     dest.De_life_time_u32 = 0xFFFF;
-    dest.De_ObjectType_u8 = 1;
+    dest.De_ObjectType_u8 = static_cast<uint8_t>(ObstacleType_VehicleFull);
 
     // Moving到Moving_Slowly：7.2km/h
     float obj_velocity = raw.speed * V2X_VELOCITY_DIAMETER;
-    if (obj_velocity >= 2.0)
+    if (obj_velocity >= OBJECT_MOVING_SPEED_GATE)
     {
         // moving
-        dest.De_ObjectMovingStatus_u8 = 2;
+        dest.De_ObjectMovingStatus_u8 = static_cast<uint8_t>(MS_MOVING);
     }
-    else if (obj_velocity > 0.0)
+    else if (obj_velocity > OBJECT_STATION_SPEED_GATE)
     {
         // moving slowly
-        dest.De_ObjectMovingStatus_u8 = 5;
+        dest.De_ObjectMovingStatus_u8 = static_cast<uint8_t>(MS_MOVING_SLOWLY);
     }
     else
     {
         // stationary
-        dest.De_ObjectMovingStatus_u8 = 3;
+        dest.De_ObjectMovingStatus_u8 = static_cast<uint8_t>(MS_STATIONARY);
     }
     dest.De_conf_f32 = 1.0;
     dest.De_dxVariance_f32 = 0;
@@ -523,7 +527,7 @@ vector<float> V2xFusionAlgo::TransWgs84ToVcsCoordinate(const CAN::HostVehiclePos
 
     std::vector<float> ansvec(ans.data(), ans.data() + ans.rows() * ans.cols());
 
-    return std::move(ansvec);
+    return ansvec;
 }
 
 vector<float> V2xFusionAlgo::TransObjVcsToHostVcs(const float objXVector, const float objYVector, const float hosthead, const float remotehead)
@@ -542,7 +546,7 @@ vector<float> V2xFusionAlgo::TransObjVcsToHostVcs(const float objXVector, const 
         }
         ans.push_back(tmpans);
     }
-    return std::move(ans);
+    return ans;
 }
 
 void V2xFusionAlgo::WirteBack(char* buf, uint16_t len)

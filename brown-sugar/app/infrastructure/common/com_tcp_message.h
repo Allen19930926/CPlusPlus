@@ -14,8 +14,8 @@ using time_stamp = std::chrono::time_point<std::chrono::system_clock,
 
 class ComTcpMessage {
 public:
-  static constexpr std::size_t HeaderLength = 20;
-  static constexpr std::size_t MaxBodyLength = 40000;
+  static constexpr int HeaderLength = 20;
+  static constexpr int MaxBodyLength = 40000;
   MsgType FrameType;
 
   ComTcpMessage() : bodyLength(0) {}

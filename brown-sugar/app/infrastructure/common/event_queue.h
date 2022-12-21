@@ -33,7 +33,7 @@ public:
         {
             T res = eventQueue.front();
             eventQueue.pop();
-            return std::move(res);
+            return res;
         }
         else
         {

@@ -4,6 +4,8 @@
 //#pragma pack(push, 4)
 
 #define MAX_OBSTACLE_NUM 50
+#define EV_CAMERA_LINES_MSG         static_cast<uint16_t>(3001)
+#define EV_CAMERA_OBSTACLE_MSG      static_cast<uint16_t>(3002)
 
 typedef unsigned int uint32;
 // typedef long long int64;

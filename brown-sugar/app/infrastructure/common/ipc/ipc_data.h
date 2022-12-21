@@ -61,13 +61,15 @@ typedef struct
 typedef struct
 {
   VAR(UInt32, TYPEDEF) De_Timestamp_u32;
-  VAR(UInt8, TYPEDEF) De_ID_u8;
-  VAR(Float32, TYPEDEF) De_conf_f32;
-  VAR(UInt8, TYPEDEF) De_measurement_status_u8;
   VAR(UInt32, TYPEDEF) De_life_time_u32;
+  VAR(UInt8, TYPEDEF) De_ID_u8;
+  VAR(UInt8, TYPEDEF) De_measurement_status_u8;
   VAR(UInt8, TYPEDEF) De_source_u8;
   VAR(UInt8, TYPEDEF) De_ObjectType_u8;
   VAR(UInt8, TYPEDEF) De_ObjectMovingStatus_u8;
+  VAR(UInt8, TYPEDEF) rsv1;
+  VAR(uint16, TYPEDEF) rsv2;
+  VAR(Float32, TYPEDEF) De_conf_f32;
   VAR(Float32, TYPEDEF) De_length_f32;
   VAR(Float32, TYPEDEF) De_width_f32;
   VAR(Float32, TYPEDEF) De_height_f32;

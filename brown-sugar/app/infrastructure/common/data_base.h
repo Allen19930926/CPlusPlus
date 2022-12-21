@@ -25,10 +25,10 @@ public:
     V2X::V2xData& GetV2xData() {return v2xData;}
     void Clear()
     {
-        memset(&host, 0, sizeof(host));
-        memset(&v2xData, 0, sizeof(v2xData));
-        memset(&cameraObstacles, 0, sizeof(cameraObstacles));
-        memset(&cddFusionData, 0, sizeof(cddFusionData));
+        memset(static_cast<void*>(&host), 0, sizeof(host));
+        memset(static_cast<void*>(&v2xData), 0, sizeof(v2xData));
+        memset(static_cast<void*>(&cameraObstacles), 0, sizeof(cameraObstacles));
+        memset(static_cast<void*>(&cddFusionData), 0, sizeof(cddFusionData));
     }
     CDDFusion::CddFusionRepo& GetCddFusionData() {return cddFusionData;}
     CAN::HostVehiclePos& GetHostVehicle() {return host;}

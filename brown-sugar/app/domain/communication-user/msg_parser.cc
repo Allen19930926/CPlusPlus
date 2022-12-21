@@ -131,14 +131,14 @@ static void ParseObstacles(const ObstacleProto::Obstacles *obstacles, gohigh::Ob
     obs->world_info.position_type = obstacle.world_info().position_type();
     obs->world_info.yaw_rate = obstacle.world_info().yaw_rate();
     obs->world_info.sigma_yaw = obstacle.world_info().sigma_yaw();
-    for (uint32_t j = 0; j < obstacle.world_info().sigma_vel_size(); j++)
+    for (int j = 0; j < obstacle.world_info().sigma_vel_size(); j++)
     {
       obs->world_info.sigma_vel[j] = obstacle.world_info().sigma_vel(j);
     }
     
     obs->world_info.sigma_width = obstacle.world_info().sigma_width();
     obs->world_info.sigma_height = obstacle.world_info().sigma_height();
-    for (uint32_t j = 0; j < obstacle.world_info().sigma_position_size(); j++)
+    for (int j = 0; j < obstacle.world_info().sigma_position_size(); j++)
     {
       obs->world_info.sigma_position[j] = obstacle.world_info().sigma_position(j);
     }
@@ -511,7 +511,7 @@ void ParseLineV2Msg(std::shared_ptr<google::protobuf::Message> message,
   }
   lifetime.clear();
   // LOG(INFO) << "Send lanes";
-  CDD_FUSION_EVENT_QUEUE.push({MsgType::CAMERA, reinterpret_cast<char*>(&out), static_cast<uint16_t>(sizeof(out))});
+  CDD_FUSION_EVENT_QUEUE.push({MsgType::CAMERA, reinterpret_cast<char*>(&out), static_cast<uint16_t>(sizeof(out)), EV_CAMERA_LINES_MSG});
 }
 
 // Obstacles Parsing
@@ -1254,7 +1254,7 @@ void ParsePedResultMsg(std::shared_ptr<google::protobuf::Message> message,
 
     gohigh::Obstacles result;
     ParseObstacles(ped_result, &result);
-    CDD_FUSION_EVENT_QUEUE.push({MsgType::CAMERA, reinterpret_cast<char*>(&result), static_cast<uint16_t>(sizeof(gohigh::Obstacles))});
+    CDD_FUSION_EVENT_QUEUE.push({MsgType::CAMERA, reinterpret_cast<char*>(&result), static_cast<uint16_t>(sizeof(gohigh::Obstacles)), EV_CAMERA_OBSTACLE_MSG});
 }
 
 void ParseROIMsg(std::shared_ptr<google::protobuf::Message> message,
@@ -1323,7 +1323,7 @@ void ParseVehicleresultMsg(std::shared_ptr<google::protobuf::Message> message,
 
     gohigh::Obstacles result;
     ParseObstacles(obstacles, &result);
-    CDD_FUSION_EVENT_QUEUE.push({MsgType::CAMERA, reinterpret_cast<char*>(&result), static_cast<uint16_t>(sizeof(gohigh::Obstacles))});
+    CDD_FUSION_EVENT_QUEUE.push({MsgType::CAMERA, reinterpret_cast<char*>(&result), static_cast<uint16_t>(sizeof(gohigh::Obstacles)), EV_CAMERA_OBSTACLE_MSG});
 }
 
 void ParseBoxes3drawMsg(std::shared_ptr<google::protobuf::Message> message,
