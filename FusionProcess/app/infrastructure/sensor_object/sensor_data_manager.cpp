@@ -65,6 +65,11 @@ void SensorDataManager::QueryLatestFrames(std::vector<SensorFrame>& frames)
 
     std::sort(frames.begin(), frames.end(), sensor_frame_compare);
 
+	for (auto& it : frames)
+	{
+		LOG(INFO) << it.time_stamp << " : " << it.sensor_type;
+	}
+
 }
 
 uint32_t SensorDataManager::GetCacheFrameNum(const SensorType sensor_type)

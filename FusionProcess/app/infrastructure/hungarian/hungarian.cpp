@@ -3,6 +3,7 @@
 #include <cfloat> // for DBL_MAX
 #include <cmath>  // for fabs()
 
+// LCOV_EXCL_START
 Hungarian::Hungarian(const Eigen::MatrixXd& xDistMatrix)
 {
     m_xDistMatrix = xDistMatrix;
@@ -306,3 +307,4 @@ void Hungarian::Step5()
     }
     Step3();
 }
+// LCOV_EXCL_STOP

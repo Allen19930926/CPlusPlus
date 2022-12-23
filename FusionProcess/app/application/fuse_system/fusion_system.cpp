@@ -2,7 +2,6 @@
 
 #include "infrastructure/common/ipc_data.h"
 #include "infrastructure/common/fusion_tools.h"
-#include "infrastructure/sensor_object/sensor_adapter.h"
 
 #include "fusion_system.h"
 

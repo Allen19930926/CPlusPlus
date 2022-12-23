@@ -24,6 +24,7 @@ struct TrackManagerTest : testing::Test
 
 ACCESS_PRIVATE_FUN(FusionTrackManager, void(const SensorType , std::vector<uint32_t>& , std::vector<uint32_t>& ),   GetIntegratableTracksBySensor);
 ACCESS_PRIVATE_FUN(FusionTrackManager, void(const uint32_t , const uint32_t , const SensorType), FuseOneSameTrack);
+ACCESS_PRIVATE_FUN(FusionTrackManager, void(const SensorType), FuseSameTracks);
 
 TEST_F(TrackManagerTest, create_new_track_test)
 {
@@ -118,6 +119,34 @@ TEST_F(TrackManagerTest, fuse_track_fail_with_error_idx_test)
 
     call_private_fun::FusionTrackManagerFuseOneSameTrack(track_manager, 5, 1, SensorType::FRONT_RADAR);
     call_private_fun::FusionTrackManagerFuseOneSameTrack(track_manager, 0, 5, SensorType::FRONT_RADAR);
+
+    ASSERT_EQ(track_manager.track_list[0].fusion_status, 1);
+    ASSERT_EQ(track_manager.track_list[1].fusion_status, 4);
+}
+
+TEST_F(TrackManagerTest, fuse_tracks_fail_with_large_distance_test)
+{
+    mocker.MockCreateTracks(1, SensorType::CAMERA);
+    mocker.MockCreateTracks(1, SensorType::FRONT_RADAR);
+
+    ASSERT_EQ(track_manager.track_list[0].fusion_status, 1);
+    ASSERT_EQ(track_manager.track_list[1].fusion_status, 4);
+
+    track_manager.track_list[0].position << 100,100;
+    track_manager.track_list[0].velocity << 0,0;
+    track_manager.track_list[0].acceleration << 0,0;
+    track_manager.track_list[0].pos_variance << 1, 0, 0, 1;
+    track_manager.track_list[0].vel_variance << 1, 0, 0, 1;
+    track_manager.track_list[0].acc_variance << 1, 0, 0, 1;
+    
+    track_manager.track_list[1].position << 20,20;
+    track_manager.track_list[1].velocity << 0,0;
+    track_manager.track_list[1].acceleration << 0,0;
+    track_manager.track_list[1].pos_variance << 1, 0, 0, 1;
+    track_manager.track_list[1].vel_variance << 1, 0, 0, 1;
+    track_manager.track_list[1].acc_variance << 1, 0, 0, 1;
+
+    call_private_fun::FusionTrackManagerFuseSameTracks(track_manager, SensorType::FRONT_RADAR);
 
     ASSERT_EQ(track_manager.track_list[0].fusion_status, 1);
     ASSERT_EQ(track_manager.track_list[1].fusion_status, 4);

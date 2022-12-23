@@ -10,7 +10,7 @@ mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
 rm fusion_unit_test
 cmake ${PROJECT_DIR}/unit_test  -DFT_TEST=2
-make -j2
+make -j8
 ./fusion_unit_test
 
 ################## for lcov ##################

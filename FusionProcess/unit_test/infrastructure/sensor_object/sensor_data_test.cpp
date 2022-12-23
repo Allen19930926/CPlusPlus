@@ -106,3 +106,23 @@ TEST_F(SensorDataTest, clear_frame_test)
 
     ASSERT_EQ(uint32_t(0), sensor->GetCachedFrameNum());
 }
+
+TEST_F(SensorDataTest, Add_camera_vehicle_and_pedestrain_frame_with_same_timestamp_test)
+{
+    SensorFrame frame;
+    frame.sensor_type = SensorType::CAMERA;
+    frame.time_stamp = 12468431;
+    SensorObject vehi;
+    vehi.id = 25;
+    frame.sensors.push_back(vehi);
+    sensor->AddFrame(frame);
+    ASSERT_EQ(uint32_t(1), sensor->GetCachedFrameNum());
+
+    frame.sensors.clear();
+    SensorObject pedes;
+    pedes.id = 20;
+    frame.sensors.push_back(pedes);
+    sensor->AddFrame(frame);
+
+    ASSERT_EQ(uint32_t(1), sensor->GetCachedFrameNum());
+}

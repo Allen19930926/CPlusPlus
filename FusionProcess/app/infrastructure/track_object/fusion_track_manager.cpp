@@ -27,7 +27,7 @@ std::vector<uint32_t> FusionTrackManager::GetFusionTracksOfSensor(const SensorTy
             sensor_index.emplace_back(i);
         }
     }
-    return std::move(sensor_index);
+    return sensor_index;
 }
 
 void FusionTrackManager::CreateNewTracks(const SensorFrame& sensor_list, const std::vector<uint32_t>& unassigned_objects_idx)
@@ -115,16 +115,10 @@ void FusionTrackManager::FuseSameTracks(const SensorType cur_type)
 
     Eigen::MatrixXd mal_dist = DistCalcInterface::GetTrackTrackMahalDistance(track_list, lack_object_track_index, single_object_track_index);
 
-    if (mal_dist.minCoeff() >= SAME_TRACK_JUDGE_GATE)
-    {
-        LOG(INFO) << "there is no tracks aims to same object!";
-        return;
-    }
-
     Eigen::MatrixXf::Index row;
     Eigen::MatrixXf::Index col;
     std::vector<uint32_t> erase_id;
-    while ( mal_dist.rows() > 0 && mal_dist.cols() > 0)
+    while ( mal_dist.size() > 0)
     {
         if (mal_dist.minCoeff(&row, &col) >= SAME_TRACK_JUDGE_GATE)
         {

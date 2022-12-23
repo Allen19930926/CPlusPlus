@@ -1,6 +1,8 @@
 #include "fusion_tools.h"
 #include <chrono>
 
+// LCOV_EXCL_START
+
 void FusionTool::RemoveSpecRowAndCol(Eigen::MatrixXd& matrix, uint32_t row, uint32_t col)
 {
     if (matrix.rows() == 0 || matrix.cols() == 0)
@@ -36,3 +38,4 @@ uint64_t FusionTool::GetCurrentTime()
 
     return currentTime;
 }
+// LCOV_EXCL_STOP
