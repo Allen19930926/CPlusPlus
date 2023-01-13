@@ -1,0 +1,37 @@
+syntax = "proto2";
+
+import "fusion_basic.proto";
+
+package Fusion;
+
+message RadarSensorObject
+{
+    required uint32 id = 1;
+    required uint32 object_type = 2;
+    required uint32 moving_status = 3;
+    required Size size = 4;
+    required EigenVector2f position = 5;
+    required EigenVector2f pos_variance = 6;
+    required EigenVector2f velocity = 7;
+    required EigenVector2f vel_variance = 8;
+    required EigenVector2f acceleration = 9;
+    required EigenVector2f acc_variance = 10;
+    required float rcs = 11;
+    required uint32 meas_state = 12;
+    required uint32 prob_of_exist = 13;
+    required float orientation_angle = 14;
+    required float orientation_variance = 15;
+}
+
+message RadarObjectHeader
+{
+    required uint32 number = 1;
+    required uint64 time_stamp = 2;
+    required uint32 radar_status = 3;
+}
+
+message RadarData
+{
+    required RadarObjectHeader header = 1;
+    repeated RadarSensorObject track = 2;
+}

@@ -1,0 +1,43 @@
+syntax = "proto2";
+
+import "fusion_basic.proto";
+
+package Fusion;
+
+message FusionTrack {
+    required uint32 time_stamp = 1;
+    required uint32 fusion_status = 2;
+    required uint32 is_dead = 3;
+    required uint32 track_duration = 4;
+    required uint32 object_type = 5;
+    required uint32 cipv = 6;
+    required float yaw = 7;
+    required float yaw_rate = 8;
+    required Size size = 9;
+    required EigenVector2f position = 10;
+    required EigenVector2f pos_variance = 11;
+    required EigenVector2f velocity = 12;
+    required EigenVector2f vel_variance = 13;
+    required EigenVector2f acceleration = 14;
+    required EigenVector2f acc_variance = 15;
+
+    message SensorTrajetory {
+        required uint32 snesor_id = 1;
+        required uint32 coasting_age = 2;
+    }
+
+    repeated SensorTrajetory sensor_trajetories = 16;
+}
+
+message FusionTrackHeader
+{
+    required uint32 time_stamp = 1;
+    repeated uint32 sensor_stamp = 2;
+}
+
+message FusionData
+{
+    required FusionTrackHeader header = 1;
+    repeated FusionTrack track = 2;
+}
+

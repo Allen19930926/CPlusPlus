@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package Fusion;
+
+message EigenVector2f {
+    required float x = 1;
+    required float y = 2;
+}
+
+
+message Size {
+    required float length = 1;
+    required float width = 2;
+    required float height = 3;
+}
+
